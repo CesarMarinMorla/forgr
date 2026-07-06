@@ -1,4 +1,35 @@
+# dependencies
 node_modules/
+
+# output
 *.pdf
 test/fixtures/*.pdf
+
+# env
+.env
+.env.*
+!.env.example
+
+# logs
+*.log
+npm-debug.log*
+
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+
+# editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# coverage / test output
+coverage/
+.nyc_output/
+
+# build output (for future TS migration)
+dist/
+out/
