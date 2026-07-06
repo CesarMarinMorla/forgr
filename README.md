@@ -16,7 +16,7 @@ npm install -g forgr
 
 This installs the forgr CLI and its dependencies, including Playwright. Chromium is not downloaded yet at this point.
 
-On your first `forgr` run, the tool detects that Chromium is missing and downloads it automatically (~130MB, one time) into `~/.forgr/browsers`. Subsequent runs skip this step entirely.
+On your first `forgr` run, the tool detects that Chromium is missing and downloads it automatically (~195MB, one time) into `~/.forgr/browsers`. Subsequent runs skip this step entirely.
 
 If you want to download Chromium upfront before the first run (e.g. in CI to separate the download from the render job):
 
@@ -28,7 +28,7 @@ npm run install-chromium # downloads Chromium explicitly
 
 ## Uninstall
 
-Free up the Chromium cache (~130MB) without removing the tool:
+Free up the Chromium cache (~195MB) without removing the tool:
 
 ```bash
 forgr uninstall
