@@ -31,7 +31,11 @@ export async function run(inputPath, options = {}) {
   const body = renderMarkdown(markdown);
 
   // Assemble full HTML via template
-  const html = await renderTemplate({ body, timestamp: new Date().toISOString() });
+  const html = await renderTemplate({
+    body,
+    label: `forgr / stock / ${path.basename(absInput)}`,
+    timestamp: new Date().toISOString(),
+  });
 
   // Render PDF
   await generatePdf(html, outputPath);
