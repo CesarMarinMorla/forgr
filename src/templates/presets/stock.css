@@ -1,0 +1,20 @@
+/* stock.css — "Systems Log" preset
+ * Full implementation pending font asset bundling.
+ * Design tokens and rules defined in AGENTS.md > Styling & Presets.
+ */
+
+:root {
+  --ink:          #1C2128;
+  --ink-soft:     #4A5262;
+  --graphite:     #6E7683;
+  --signal:       #2DD4BF;
+  --signal-dim:   #0F766E;
+  --signal-bg:    #ECFDFB;
+  --line:         #D8DCE2;
+  --line-soft:    #EAECEF;
+  --surface:      #F7F8FA;
+  --surface-code: #12161C;
+  --radius:       3px;
+}
+
+/* TODO: full stock CSS implementation — src/templates/presets/stock.css */

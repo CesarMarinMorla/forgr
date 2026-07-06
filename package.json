@@ -1,0 +1,32 @@
+{
+  "name": "forgr",
+  "version": "0.1.0",
+  "description": "Convert Markdown files into polished PDFs",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "forgr": "./bin/forgr"
+  },
+  "scripts": {
+    "postinstall": "playwright install chromium"
+  },
+  "dependencies": {
+    "commander": "12.1.0",
+    "fs-extra": "11.2.0",
+    "handlebars": "4.7.8",
+    "highlight.js": "11.10.0",
+    "markdown-it": "14.1.0",
+    "markdown-it-emoji": "3.0.0",
+    "markdown-it-highlightjs": "4.2.0",
+    "markdown-it-sub": "2.0.0",
+    "markdown-it-sup": "2.0.0",
+    "playwright": "1.61.1"
+  },
+  "devDependencies": {
+    "ink": "5.1.0",
+    "terminal-image": "2.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

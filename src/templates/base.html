@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {{#if hasFonts}}
+  <style>
+    @font-face {
+      font-family: 'IBM Plex Sans';
+      src: url('data:font/woff2;base64,{{plexSansB64}}') format('woff2');
+      font-weight: 100 700;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'IBM Plex Mono';
+      src: url('data:font/woff2;base64,{{plexMonoB64}}') format('woff2');
+      font-weight: 400 600;
+      font-style: normal;
+    }
+  </style>
+  {{/if}}
+  <style>
+    {{{css}}}
+  </style>
+</head>
+<body>
+  <header class="doc-meta">
+    <span class="doc-meta__dot"></span>
+    <span class="doc-meta__label">forgr / stock / systemslog</span>
+    <span class="doc-meta__timestamp">{{timestamp}}</span>
+  </header>
+  <main>
+    {{{body}}}
+  </main>
+</body>
+</html>
