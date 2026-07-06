@@ -1,6 +1,7 @@
 import { chromium } from 'playwright';
 import { execSync } from 'child_process';
 import { existsSync, readdirSync } from 'fs';
+import { rm } from 'fs/promises';
 import fs from 'fs-extra';
 import path from 'path';
 import { join } from 'path';
@@ -29,9 +30,23 @@ function getHeadlessShellPath() {
   }
 }
 
+async function removeFfmpeg() {
+  let entries;
+  try {
+    entries = readdirSync(BROWSERS_PATH);
+  } catch {
+    return;
+  }
+  for (const entry of entries) {
+    if (entry.startsWith('ffmpeg-')) {
+      await rm(join(BROWSERS_PATH, entry), { recursive: true, force: true });
+    }
+  }
+}
+
 let chromiumChecked = false;
 
-function ensureChromium() {
+async function ensureChromium() {
   if (chromiumChecked) return;
   chromiumChecked = true;
 
@@ -39,7 +54,7 @@ function ensureChromium() {
   if (execPath && existsSync(execPath)) return;
 
   console.log('');
-  console.log('  Downloading Chromium for PDF rendering (one-time, ~200MB)...');
+  console.log('  Downloading Chromium for PDF rendering (one-time, ~100MB)...');
   console.log('');
 
   try {
@@ -47,6 +62,9 @@ function ensureChromium() {
       stdio: 'inherit',
       env: { ...process.env, PLAYWRIGHT_BROWSERS_PATH: BROWSERS_PATH },
     });
+    // Playwright unconditionally downloads FFmpeg alongside any browser install.
+    // forgr never uses FFmpeg — remove it to keep the install footprint minimal.
+    await removeFfmpeg();
     console.log('');
     console.log('  ✓ Chromium downloaded successfully.');
     console.log('');
@@ -69,7 +87,7 @@ export async function generatePdf(html, outputPath) {
     process.exit(1);
   }
 
-  ensureChromium();
+  await ensureChromium();
 
   const executablePath = getHeadlessShellPath();
 

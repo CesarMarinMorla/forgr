@@ -1,27 +1,38 @@
-import { existsSync } from 'fs';
+import { existsSync, readdirSync } from 'fs';
+import { rm } from 'fs/promises';
 import { execSync } from 'child_process';
 import { homedir } from 'os';
 import { join } from 'path';
 
 const BROWSERS_PATH = join(homedir(), '.forgr', 'browsers');
 
+async function removeFfmpeg() {
+  let entries;
+  try {
+    entries = readdirSync(BROWSERS_PATH);
+  } catch {
+    return;
+  }
+  for (const entry of entries) {
+    if (entry.startsWith('ffmpeg-')) {
+      await rm(join(BROWSERS_PATH, entry), { recursive: true, force: true });
+    }
+  }
+}
+
 async function main() {
+  process.env.PLAYWRIGHT_BROWSERS_PATH = BROWSERS_PATH;
+
   let playwright;
   try {
     playwright = await import('playwright-core');
   } catch {
     console.error('');
-    console.error('  Error: playwright dependency is missing.');
+    console.error('  Error: playwright-core dependency is missing.');
     console.error('  Run: npm install');
     process.exit(1);
   }
 
-  // Check if headless shell already exists in our isolated directory
-  const env = { ...process.env, PLAYWRIGHT_BROWSERS_PATH: BROWSERS_PATH };
-  const execPath = playwright.chromium.executablePath();
-
-  // executablePath() reads PLAYWRIGHT_BROWSERS_PATH at call time — set it first
-  process.env.PLAYWRIGHT_BROWSERS_PATH = BROWSERS_PATH;
   const isolatedExecPath = playwright.chromium.executablePath();
 
   if (existsSync(isolatedExecPath)) {
@@ -32,15 +43,20 @@ async function main() {
   }
 
   console.log('');
-  console.log('  Downloading Chromium for PDF rendering (one-time, ~200MB)...');
+  console.log('  Downloading Chromium for PDF rendering (one-time, ~100MB)...');
   console.log(`  Installing to: ${BROWSERS_PATH}`);
   console.log('');
+
+  const env = { ...process.env, PLAYWRIGHT_BROWSERS_PATH: BROWSERS_PATH };
 
   try {
     execSync('npx playwright install chromium-headless-shell', {
       stdio: 'inherit',
       env,
     });
+    // Playwright unconditionally downloads FFmpeg alongside any browser install.
+    // forgr never uses FFmpeg — remove it to keep the install footprint minimal.
+    await removeFfmpeg();
     console.log('');
     console.log('  ✓ Chromium downloaded successfully.');
     console.log('');
