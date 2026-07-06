@@ -5,7 +5,12 @@ import fs from 'fs-extra';
 import path from 'path';
 import { BROWSERS_PATH } from './browsers-path.js';
 
+let chromiumChecked = false;
+
 function ensureChromium() {
+  if (chromiumChecked) return;
+  chromiumChecked = true;
+
   const execPath = chromium.executablePath();
   if (existsSync(execPath)) return;
 
