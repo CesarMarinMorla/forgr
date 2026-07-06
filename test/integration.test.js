@@ -1,4 +1,4 @@
-import { test, before, after } from 'node:test';
+import { test, before } from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -10,11 +10,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURE_MD = path.join(__dirname, 'fixtures', 'basic.md');
 const OUTPUT_PDF = path.join(__dirname, 'fixtures', 'basic.pdf');
 
+// PDFs are kept after the test run for visual review.
+// They are gitignored via test/fixtures/*.pdf.
 before(async () => {
-  await fs.remove(OUTPUT_PDF);
-});
-
-after(async () => {
   await fs.remove(OUTPUT_PDF);
 });
 
