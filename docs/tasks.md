@@ -104,3 +104,87 @@
 - Playwright version: pinned exactly at 1.61.1 (no ^ or ~)
 - Heading: all-mono IBM Plex Mono 400, section counter in teal (#1C756E)
 - Fail loudly on all errors — no silent degradation anywhere in the pipeline
+
+---
+
+## Architecture Assessment (post-Milestone 1)
+
+Assessed 2026-07-06. Overall structure is sound — module boundaries match the spec and pipeline separation is clean. No major restructuring needed. The issues below are real but non-blocking for Milestone 1; items 1 and 2 will cause friction when the TUI (Milestone 2) and watch mode (Milestone 5) are added on top of the same pipeline.
+
+### Issue 1 — process.exit() scattered across modules (priority: medium)
+
+`pdf.js`, `template.js`, `pipeline.js`, and `cli.js` all call `process.exit(1)` directly. This has two consequences:
+
+- Unit tests cannot test error paths without mocking `process.exit`.
+- The TUI (Milestone 2) and watch mode (Milestone 5) will both reuse the pipeline; a `process.exit` inside a library module kills the whole process instead of letting the caller handle the error gracefully.
+
+**Correct pattern:** modules throw typed errors; only `cli.js` (the entry point) catches them and exits. Example:
+
+```js
+// pdf.js — throw instead of exit
+throw new Error(`Output directory not writable: ${outputDir}`);
+
+// cli.js — single exit boundary
+try {
+  await run(input, options);
+} catch (err) {
+  console.error(`Error: ${err.message}`);
+  process.exit(1);
+}
+```
+
+Affects: `src/pdf.js`, `src/template.js`, `src/pipeline.js`.
+
+### Issue 2 — BROWSERS_PATH / FORGR_DIR defined in multiple places (priority: low)
+
+The path constants are defined independently in:
+- `src/browsers-path.js` (canonical)
+- `src/cli.js` (duplicate — `FORGR_DIR` and `BROWSERS_PATH` re-derived)
+- `scripts/postinstall.js` (duplicate — `BROWSERS_PATH` re-derived)
+
+`cli.js` should import from `browsers-path.js` instead of re-deriving. `postinstall.js` runs outside the src tree and cannot import from it, so its duplicate is acceptable — but it should have a comment acknowledging this.
+
+Affects: `src/cli.js`.
+
+### Issue 3 — markdown.js is doing two jobs (priority: low)
+
+`markdown.js` now handles both highlight.js initialisation (35+ imports and registrations, ~100 lines) and markdown-it configuration. These are separate concerns. As the language list grows the file will become hard to scan.
+
+Suggested split: extract hljs setup to `src/highlighter.js`, import the configured instance into `markdown.js`.
+
+Affects: `src/markdown.js`.
+
+### Issue 4 — Stub presets produce unstyled output (priority: low)
+
+`minimal.css`, `technical.css`, and `academic.css` are empty placeholder files (35 bytes each). They are listed in the CLI `--preset` help text and in the README as available options. Running `forgr file.md --preset minimal` currently produces a PDF with no styling at all — no error, no warning, just unstyled output.
+
+Options:
+- Add at least the CSS variable block to each stub so they inherit the base layout.
+- Remove them from the advertised preset list until they are real.
+- Add a warning to `template.js` when a preset file is under a size threshold.
+
+Affects: `src/templates/presets/minimal.css`, `technical.css`, `academic.css`, and `src/cli.js` help text.
+
+### Issue 5 — Silent font fallback violates the fail-loudly principle (priority: low)
+
+In `template.js`, all three font reads use `.catch(() => null)`. If a font file is missing, the template silently falls back to system fonts with no log output. The output looks wrong without any indication of why.
+
+Per the project-wide fail-loudly rule (AGENTS.md, CLI Behavior section), this should at minimum log a warning to stderr when a font file is not found.
+
+Affects: `src/template.js`.
+
+### Issue 6 — No error boundary in pipeline.js (priority: medium)
+
+`pipeline.js` calls `renderMarkdown`, `renderTemplate`, and `generatePdf` with no wrapping try/catch. If any of those throw an unhandled error (rather than calling `process.exit`), Node surfaces it as an unhandled promise rejection with a raw stack trace. A single try/catch at the pipeline level that re-throws a clean, user-facing error would fix this, and pairs well with Issue 1 (once modules throw instead of exiting, the pipeline is the right place to catch and re-format).
+
+Affects: `src/pipeline.js`.
+
+---
+
+## Refactoring tasks (derived from assessment above)
+
+- [ ] Refactor pdf.js, template.js, pipeline.js to throw errors instead of calling process.exit — add single exit boundary in cli.js (Issue 1, 6)
+- [ ] Import BROWSERS_PATH from browsers-path.js in cli.js instead of re-deriving (Issue 2)
+- [ ] Extract hljs setup to src/highlighter.js (Issue 3)
+- [ ] Fix stub presets: either populate with base variable block or remove from advertised list (Issue 4)
+- [ ] Log a warning in template.js when a font file is not found (Issue 5)
