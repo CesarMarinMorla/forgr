@@ -3,32 +3,50 @@ import assert from 'node:assert/strict';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs-extra';
-import { open } from 'node:fs/promises';
+import { open, readdir } from 'node:fs/promises';
 import { run } from '../src/pipeline.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const FIXTURE_MD = path.join(__dirname, 'fixtures', 'basic.md');
-const OUTPUT_PDF = path.join(__dirname, 'fixtures', 'basic.pdf');
+const FIXTURES_DIR = path.join(__dirname, 'fixtures');
 
 // PDFs are kept after the test run for visual review.
 // They are gitignored via test/fixtures/*.pdf.
+
+async function getFixtures() {
+  const entries = await readdir(FIXTURES_DIR);
+  return entries
+    .filter(f => f.endsWith('.md'))
+    .map(f => ({
+      name: f,
+      input: path.join(FIXTURES_DIR, f),
+      output: path.join(FIXTURES_DIR, f.replace(/\.md$/, '.pdf')),
+    }));
+}
+
 before(async () => {
-  await fs.remove(OUTPUT_PDF);
+  const fixtures = await getFixtures();
+  await Promise.all(fixtures.map(f => fs.remove(f.output)));
 });
 
-test('integration: converts basic.md to a PDF file', { timeout: 60000 }, async () => {
-  await run(FIXTURE_MD, { output: OUTPUT_PDF });
+async function assertValidPdf(outputPath, label) {
+  const exists = await fs.pathExists(outputPath);
+  assert.ok(exists, `${label}: PDF file was not created`);
 
-  const exists = await fs.pathExists(OUTPUT_PDF);
-  assert.ok(exists, 'PDF file was not created');
+  const stats = await fs.stat(outputPath);
+  assert.ok(stats.size > 1024, `${label}: PDF is suspiciously small (${stats.size} bytes)`);
 
-  const stats = await fs.stat(OUTPUT_PDF);
-  assert.ok(stats.size > 1024, `PDF is suspiciously small: ${stats.size} bytes`);
-
-  // Verify PDF magic bytes (%PDF-)
   const buf = Buffer.alloc(5);
-  const handle = await open(OUTPUT_PDF, 'r');
+  const handle = await open(outputPath, 'r');
   await handle.read(buf, 0, 5, 0);
   await handle.close();
-  assert.equal(buf.toString('ascii'), '%PDF-', 'Output does not start with PDF magic bytes');
-});
+  assert.equal(buf.toString('ascii'), '%PDF-', `${label}: output does not start with PDF magic bytes`);
+}
+
+const fixtures = await getFixtures();
+
+for (const fixture of fixtures) {
+  test(`integration: converts ${fixture.name} to a PDF file`, { timeout: 60000 }, async () => {
+    await run(fixture.input, { output: fixture.output });
+    await assertValidPdf(fixture.output, fixture.name);
+  });
+}
