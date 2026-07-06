@@ -1,4 +1,4 @@
-import { chromium } from 'playwright';
+import { chromium } from 'playwright-core';
 import { execSync } from 'child_process';
 import { existsSync, readdirSync } from 'fs';
 import { rm } from 'fs/promises';
@@ -58,7 +58,7 @@ async function ensureChromium() {
   console.log('');
 
   try {
-    execSync('npx playwright install chromium-headless-shell', {
+    execSync('npx playwright-core install chromium-headless-shell', {
       stdio: 'inherit',
       env: { ...process.env, PLAYWRIGHT_BROWSERS_PATH: BROWSERS_PATH },
     });

@@ -50,7 +50,7 @@ async function main() {
   const env = { ...process.env, PLAYWRIGHT_BROWSERS_PATH: BROWSERS_PATH };
 
   try {
-    execSync('npx playwright install chromium-headless-shell', {
+    execSync('npx playwright-core install chromium-headless-shell', {
       stdio: 'inherit',
       env,
     });
@@ -65,7 +65,7 @@ async function main() {
     console.error('  Failed to download Chromium.');
     console.error('');
     console.error('  Try running manually:');
-    console.error('    PLAYWRIGHT_BROWSERS_PATH=~/.forgr/browsers npx playwright install chromium-headless-shell');
+    console.error('    PLAYWRIGHT_BROWSERS_PATH=~/.forgr/browsers npx playwright-core install chromium-headless-shell');
     console.error('');
     process.exit(1);
   }
