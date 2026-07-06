@@ -14,21 +14,27 @@ Outputs `report.pdf` in the same directory.
 npm install -g forgr
 ```
 
-Chromium (~130MB) is downloaded automatically on your first run, stored in `~/.forgr/browsers`. Nothing else required.
+This installs the forgr CLI and its dependencies, including Playwright. Chromium is not downloaded yet at this point.
 
-To pre-download Chromium ahead of time (e.g. in CI):
+On your first `forgr` run, the tool detects that Chromium is missing and downloads it automatically (~130MB, one time) into `~/.forgr/browsers`. Subsequent runs skip this step entirely.
+
+If you want to download Chromium upfront before the first run (e.g. in CI to separate the download from the render job):
 
 ```bash
-npm run install-chromium
+npm install -g forgr
+forgr --version          # ensures the package is ready
+npm run install-chromium # downloads Chromium explicitly
 ```
 
 ## Uninstall
 
-Free up the Chromium cache without removing the tool:
+Free up the Chromium cache (~130MB) without removing the tool:
 
 ```bash
 forgr uninstall
 ```
+
+The next `forgr` run will re-download Chromium automatically.
 
 Full removal:
 
