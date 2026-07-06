@@ -8,7 +8,9 @@
     "forgr": "./bin/forgr"
   },
   "scripts": {
-    "postinstall": "playwright install chromium"
+    "postinstall": "playwright install chromium",
+    "test": "node --test test/**/*.test.js",
+    "test:unit": "node --test test/markdown.test.js test/pipeline.test.js"
   },
   "dependencies": {
     "commander": "12.1.0",

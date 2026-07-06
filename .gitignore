@@ -1,3 +1,4 @@
 node_modules/
 *.pdf
+test/fixtures/*.pdf
 .DS_Store

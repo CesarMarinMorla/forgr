@@ -1,6 +1,6 @@
 import MarkdownIt from 'markdown-it';
 import markdownItHighlightjs from 'markdown-it-highlightjs';
-import markdownItEmoji from 'markdown-it-emoji';
+import { full as markdownItEmoji } from 'markdown-it-emoji';
 import markdownItSub from 'markdown-it-sub';
 import markdownItSup from 'markdown-it-sup';
 
