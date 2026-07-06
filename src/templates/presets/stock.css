@@ -34,7 +34,7 @@ body {
   font-family: 'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
   color: var(--ink);
   background: #fff;
-  line-height: 1.7;
+  line-height: 1.6;
   max-width: 720px;
   margin: 0 auto;
   padding: 0;
@@ -84,36 +84,47 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-family: 'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
   color: var(--ink);
-  font-weight: 600;
-  line-height: 1.25;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 h1 {
-  font-size: 1.85rem;
+  font-size: 2.65rem;
   margin-bottom: 0.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid var(--line);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Lead paragraph immediately after h1 */
+h1 + p {
+  font-size: 1.15rem;
+  color: var(--ink-soft);
+  margin-bottom: 2rem;
+  line-height: 1.5;
 }
 
 h2 {
-  font-size: 1.2rem;
+  font-size: 1rem;
   margin-top: 2.5rem;
   margin-bottom: 0.75rem;
   padding-bottom: 0.4rem;
   border-bottom: 1px solid var(--line-soft);
   color: var(--ink);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 h3 {
-  font-size: 1rem;
+  font-size: 0.95rem;
   margin-top: 1.75rem;
   margin-bottom: 0.5rem;
-  color: var(--ink-soft);
+  color: var(--ink);
   font-weight: 600;
 }
 
 h4, h5, h6 {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   margin-top: 1.25rem;
   margin-bottom: 0.4rem;
   color: var(--graphite);
@@ -134,11 +145,12 @@ h2 {
 h2::before {
   content: counter(section, decimal-leading-zero) " ";
   font-family: 'IBM Plex Mono', 'JetBrains Mono', 'Consolas', monospace;
-  font-size: 0.75rem;
-  font-weight: 400;
-  color: var(--signal-dim);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--signal);
   margin-right: 0.5em;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---- Body text ---- */
@@ -189,8 +201,8 @@ code {
   font-family: 'IBM Plex Mono', 'JetBrains Mono', 'Consolas', monospace;
   font-size: 0.85em;
   color: var(--signal-dim);
-  background: var(--surface);
-  border: 1px solid var(--line);
+  background: var(--signal-bg);
+  border: 1px solid var(--signal);
   border-radius: var(--radius);
   padding: 0.1em 0.35em;
 }
@@ -272,13 +284,14 @@ thead {
 
 th {
   font-family: 'IBM Plex Mono', 'JetBrains Mono', 'Consolas', monospace;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   color: var(--graphite);
   text-align: left;
   padding: 0.5rem 0.75rem;
+  font-variant-numeric: tabular-nums;
 }
 
 td {
@@ -286,6 +299,7 @@ td {
   border-bottom: 1px solid var(--line-soft);
   color: var(--ink);
   vertical-align: top;
+  font-variant-numeric: tabular-nums;
 }
 
 tr:last-child td {

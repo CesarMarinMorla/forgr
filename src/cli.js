@@ -9,6 +9,7 @@ program
   .version('0.1.0')
   .argument('<input>', 'Markdown file to convert')
   .option('-o, --output <path>', 'Output PDF path (default: same directory as input)')
+  .option('-p, --preset <name>', 'Preset to use (stock, anthropic, minimal, technical, academic)', 'stock')
   .action(async (input, options) => {
     await run(input, options);
   });

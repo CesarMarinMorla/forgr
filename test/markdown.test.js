@@ -50,3 +50,19 @@ test('sub and sup plugins render correctly', () => {
   assert.match(renderMarkdown('H~2~O'), /<sub>2<\/sub>/);
   assert.match(renderMarkdown('x^2^'), /<sup>2<\/sup>/);
 });
+
+test('strips leading "N." number prefix from h2 headings', () => {
+  const html = renderMarkdown('## 4. Component Stylings');
+  assert.match(html, /<h2>Component Stylings<\/h2>/);
+  assert.doesNotMatch(html, /4\./);
+});
+
+test('strips leading "N)" number prefix from h2 headings', () => {
+  const html = renderMarkdown('## 2) Overview');
+  assert.match(html, /<h2>Overview<\/h2>/);
+});
+
+test('does not strip leading numbers from h3 headings', () => {
+  const html = renderMarkdown('### 4.1 Details');
+  assert.match(html, /4\.1 Details/);
+});
