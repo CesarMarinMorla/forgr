@@ -11,20 +11,16 @@ Outputs `report.pdf` in the same directory.
 ## Install
 
 ```bash
-npm install -g --allow-scripts=forgr forgr
+npm install -g forgr
 ```
 
-The `--allow-scripts=forgr` flag is required for npm to run the `postinstall` step that downloads Chromium (~130MB). This is a one-time download. Subsequent installs use the cached binary.
-
-If you installed without the flag and got no Chromium, run this once:
+The first time you run `forgr`, it will prompt you to install Chromium (~130MB) if it's not already present:
 
 ```bash
-playwright install chromium
+npx playwright install chromium
 ```
 
-### Why Chromium?
-
-Chromium is the only rendering engine forgr uses. There is no fallback. The download happens once and is stored in Playwright's own cache directory (`~/Library/Caches/ms-playwright` on macOS) — it does not touch your existing Chrome installation or modify system paths.
+This is a one-time step. The browser binary is stored in Playwright's cache directory (`~/Library/Caches/ms-playwright` on macOS) and does not touch your existing Chrome installation.
 
 ## Usage
 

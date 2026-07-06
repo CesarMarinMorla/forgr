@@ -17,7 +17,7 @@ export async function generatePdf(html, outputPath) {
     browser = await chromium.launch();
   } catch (err) {
     console.error(
-      `Error: failed to launch Chromium.\n${err.message}\n\nTry re-running: playwright install chromium`
+      `Chromium is not installed.\n\nRun this command to install it:\n\n  npx playwright install chromium\n\nThen re-run forgr.`
     );
     process.exit(1);
   }
