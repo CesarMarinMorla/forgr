@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs-extra';
+import { open } from 'node:fs/promises';
 import { run } from '../src/pipeline.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -28,8 +29,8 @@ test('integration: converts sample.md to a PDF file', { timeout: 60000 }, async 
 
   // Verify PDF magic bytes (%PDF-)
   const buf = Buffer.alloc(5);
-  const fd = await fs.open(OUTPUT_PDF, 'r');
-  await fd.read(buf, 0, 5, 0);
-  await fd.close();
+  const handle = await open(OUTPUT_PDF, 'r');
+  await handle.read(buf, 0, 5, 0);
+  await handle.close();
   assert.equal(buf.toString('ascii'), '%PDF-', 'Output does not start with PDF magic bytes');
 });
