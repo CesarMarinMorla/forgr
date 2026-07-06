@@ -4,14 +4,40 @@
   "description": "Convert Markdown files into polished PDFs",
   "license": "MIT",
   "type": "module",
+  "author": "Cesar Marin <cesarmarinmorla@gmail.com>",
+  "keywords": [
+    "markdown",
+    "pdf",
+    "document",
+    "report",
+    "cli"
+  ],
   "bin": {
     "forgr": "./bin/forgr"
   },
   "scripts": {
-    "postinstall": "playwright install chromium",
     "test": "node --test test/**/*.test.js",
-    "test:unit": "node --test test/markdown.test.js test/pipeline.test.js"
+    "test:unit": "node --test test/markdown.test.js test/pipeline.test.js",
+    "install-chromium": "node scripts/postinstall.js",
+    "preuninstall": "node scripts/preuninstall.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CesarMarinMorla/forgr.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CesarMarinMorla/forgr/issues"
+  },
+  "homepage": "https://github.com/CesarMarinMorla/forgr#readme",
+  "files": [
+    "bin/",
+    "src/",
+    "scripts/postinstall.js",
+    "scripts/preuninstall.js",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
   "dependencies": {
     "commander": "12.1.0",
     "fs-extra": "11.2.0",
