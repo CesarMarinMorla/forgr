@@ -7,8 +7,8 @@ import { open } from 'node:fs/promises';
 import { run } from '../src/pipeline.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const FIXTURE_MD = path.join(__dirname, 'fixtures', 'sample.md');
-const OUTPUT_PDF = path.join(__dirname, 'fixtures', 'sample.pdf');
+const FIXTURE_MD = path.join(__dirname, 'fixtures', 'basic.md');
+const OUTPUT_PDF = path.join(__dirname, 'fixtures', 'basic.pdf');
 
 before(async () => {
   await fs.remove(OUTPUT_PDF);
@@ -18,7 +18,7 @@ after(async () => {
   await fs.remove(OUTPUT_PDF);
 });
 
-test('integration: converts sample.md to a PDF file', { timeout: 60000 }, async () => {
+test('integration: converts basic.md to a PDF file', { timeout: 60000 }, async () => {
   await run(FIXTURE_MD, { output: OUTPUT_PDF });
 
   const exists = await fs.pathExists(OUTPUT_PDF);

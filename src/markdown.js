@@ -43,6 +43,13 @@ md.core.ruler.push('strip_h2_leading_number', (state) => {
   }
 });
 
+function wrapTableNumbers(html) {
+  return html.replace(/(<td[^>]*>)([\s\S]*?)(<\/td>)/g, (match, open, content, close) => {
+    const wrapped = content.replace(/(?<=^|[>\s])(-?\d+(?:\.\d+)?)(?=[\s,;<]|$)/g, '<span class="num">$1</span>');
+    return open + wrapped + close;
+  });
+}
+
 export function renderMarkdown(source) {
-  return md.render(source);
+  return wrapTableNumbers(md.render(source));
 }

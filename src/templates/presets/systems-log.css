@@ -206,12 +206,11 @@ tbody td {
   border-bottom: 1px solid var(--line-soft);
   color: var(--ink);
 }
+tbody td .num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
 tbody tr:hover { background: var(--surface); }
-
-/* Status-style cell coloring for anything reading as a percentage/metric —
-   ties table content back to the "systems status" concept without adding
-   decorative color that isn't meaningful */
-td:last-child { font-family: var(--font-mono); font-size: 0.95em; }
 
 img {
   max-width: 100%;

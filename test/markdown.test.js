@@ -43,7 +43,7 @@ test('renders a table', () => {
   const html = renderMarkdown(src);
   assert.match(html, /<table>/);
   assert.match(html, /<th>A<\/th>/);
-  assert.match(html, /<td>1<\/td>/);
+  assert.match(html, /<span class="num">1<\/span>/);
 });
 
 test('sub and sup plugins render correctly', () => {
