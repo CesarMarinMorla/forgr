@@ -11,15 +11,25 @@ Outputs `report.pdf` in the same directory.
 ## Install
 
 ```bash
-npm install -g forgr
+npm install -g --allow-scripts=forgr forgr
 ```
 
-The first install downloads Chromium (~130MB) automatically. This is a one-time step and takes longer than a typical package install. Subsequent installs use the cached binary.
+The `--allow-scripts=forgr` flag is required for npm to run the `postinstall` step that downloads Chromium (~130MB). This is a one-time download. Subsequent installs use the cached binary.
+
+If you installed without the flag and got no Chromium, run this once:
+
+```bash
+playwright install chromium
+```
+
+### Why Chromium?
+
+Chromium is the only rendering engine forgr uses. There is no fallback. The download happens once and is stored in Playwright's own cache directory (`~/Library/Caches/ms-playwright` on macOS) — it does not touch your existing Chrome installation or modify system paths.
 
 ## Usage
 
 ```bash
-# Basic
+# Basic — output goes to same directory as input
 forgr document.md
 
 # Custom output path
@@ -36,7 +46,7 @@ Output uses the "Systems Log" preset by default: IBM Plex Sans for headings, IBM
 
 ## Roadmap
 
-- Milestone 1 — barebones CLI, stock preset
+- Milestone 1 — barebones CLI, stock preset (done)
 - Milestone 2 — TUI preset picker
 - Milestone 3 — live PDF preview in TUI
 - Milestone 4 — Mermaid diagrams, image embedding
