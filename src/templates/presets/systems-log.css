@@ -1,0 +1,241 @@
+/* ===== Forgr — "Systems Log" Preset ===== */
+/* Design concept: technical infra reports should feel like they came from
+   the tooling itself — terminal output, status dashboards, structured logs —
+   not a generic corporate report template. Monospace-forward, graphite base,
+   single cold cyan accent used sparingly as a status/signal color. */
+
+:root {
+  --font-display: 'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', 'JetBrains Mono', 'Consolas', monospace;
+
+  --ink: #1C2128;
+  --ink-soft: #4A5262;
+  --graphite: #6E7683;
+
+  --signal: #2DD4BF;        /* cold cyan-teal — the one accent color */
+  --signal-dim: #0F766E;
+  --signal-bg: #ECFDFB;
+
+  --line: #D8DCE2;
+  --line-soft: #EAECEF;
+  --surface: #F7F8FA;
+  --surface-code: #12161C;  /* near-black, code blocks read as terminal panes */
+
+  --radius: 3px;             /* sharp, technical — not soft/rounded */
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: var(--font-display);
+  font-size: 10.5pt;
+  line-height: 1.6;
+  color: var(--ink);
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* ---- Signature element: a fixed "run header" strip, like a CI job header ---- */
+.doc-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'IBM Plex Mono', 'JetBrains Mono', 'Consolas', monospace;
+  font-size: 0.72rem;
+  color: var(--graphite);
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 10px;
+  margin-bottom: 2.5rem;
+  letter-spacing: 0.01em;
+}
+
+.doc-meta__dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--signal);
+  flex-shrink: 0;
+}
+
+.doc-meta__label {
+  flex: 1;
+  color: var(--ink-soft);
+}
+
+.doc-meta__timestamp {
+  color: var(--graphite);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+h1 {
+  font-size: 1.7em;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.3em 0;
+}
+
+/* Section headings get a monospace numeric-style prefix rendered via
+   counters — encodes real document structure, not decoration, since
+   these reports are read section-by-section during incident review. */
+body { counter-reset: section; }
+h2 {
+  font-size: 1.05em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin-top: 2.2em;
+  margin-bottom: 0.8em;
+  padding-bottom: 0.4em;
+  border-bottom: 1px solid var(--line);
+  counter-increment: section;
+}
+h2::before {
+  content: counter(section, decimal-leading-zero) "  ";
+  font-family: var(--font-mono);
+  color: var(--signal-dim);
+  font-weight: 500;
+}
+
+h3 {
+  font-size: 0.95em;
+  font-weight: 600;
+  color: var(--ink);
+  margin-top: 1.6em;
+  margin-bottom: 0.5em;
+}
+
+p { margin: 0.9em 0; color: var(--ink); }
+strong { color: var(--ink); font-weight: 600; }
+
+a {
+  color: var(--signal-dim);
+  text-decoration: none;
+  border-bottom: 1px solid var(--signal);
+}
+
+ul, ol { padding-left: 1.3em; margin: 0.8em 0; }
+li { margin-bottom: 0.35em; }
+li::marker { color: var(--graphite); font-family: var(--font-mono); }
+
+/* Blockquote reads as a "log annotation" — left rule only, mono label */
+blockquote {
+  margin: 1.3em 0;
+  padding: 0.1em 0 0.1em 1em;
+  border-left: 2px solid var(--signal);
+  color: var(--ink-soft);
+}
+blockquote::before {
+  content: "NOTE";
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.7em;
+  letter-spacing: 0.1em;
+  color: var(--signal-dim);
+  margin-bottom: 0.4em;
+}
+blockquote p { margin: 0; }
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 0.1em 0.35em;
+  border-radius: var(--radius);
+  color: var(--signal-dim);
+}
+
+/* Code blocks styled as terminal panes: dark surface, mono label tab */
+pre {
+  position: relative;
+  font-family: var(--font-mono);
+  background: var(--surface-code);
+  border-radius: var(--radius);
+  padding: 2em 1.2em 1.2em;
+  overflow-x: auto;
+  margin: 1.4em 0;
+  line-height: 1.55;
+}
+pre::before {
+  content: "";
+  position: absolute;
+  top: 0.8em;
+  left: 1.2em;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4A5262;
+  box-shadow: 14px 0 0 #4A5262, 28px 0 0 #4A5262;
+  opacity: 0.55;
+}
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.82em;
+  color: #E6EDF3;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.4em 0;
+  font-size: 0.88em;
+}
+thead th {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  color: var(--graphite);
+  text-align: left;
+  padding: 0.5em 0.8em;
+  border-bottom: 2px solid var(--ink);
+}
+tbody td {
+  padding: 0.55em 0.8em;
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--ink);
+}
+tbody tr:hover { background: var(--surface); }
+
+/* Status-style cell coloring for anything reading as a percentage/metric —
+   ties table content back to the "systems status" concept without adding
+   decorative color that isn't meaningful */
+td:last-child { font-family: var(--font-mono); font-size: 0.95em; }
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.6em auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 2.2em 0;
+}
+
+/* Syntax highlighting tinted to the signal color family only —
+   no rainbow, stays disciplined per the one-accent-color rule */
+.hljs-keyword, .hljs-selector-tag, .hljs-subst { color: var(--signal); font-weight: 500; }
+.hljs-string, .hljs-regexp, .hljs-addition { color: #7EE0C4; }
+.hljs-comment { color: #6E7681; font-style: italic; }
+.hljs-number, .hljs-literal { color: #D4A72C; }
+
+@media print {
+  body { padding: 0; }
+  pre { white-space: pre-wrap; word-break: break-word; }
+}

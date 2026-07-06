@@ -33,8 +33,8 @@ export async function run(inputPath, options = {}) {
   // Assemble full HTML via template
   const html = await renderTemplate({
     body,
-    preset: options.preset || 'stock',
-    label: `forgr / ${options.preset || 'stock'} / ${path.basename(absInput)}`,
+    preset: options.preset || 'systems-log',
+    label: `forgr / ${options.preset || 'systems-log'} / ${path.basename(absInput)}`,
     timestamp: new Date().toISOString(),
   });
 

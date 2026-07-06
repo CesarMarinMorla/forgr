@@ -23,6 +23,22 @@
       font-weight: 600;
       font-style: normal;
     }
+    {{#if jetbrainsMonoB64}}
+    @font-face {
+      font-family: 'JetBrains Mono';
+      src: url('data:font/woff2;base64,{{jetbrainsMonoB64}}') format('woff2');
+      font-weight: 400;
+      font-style: normal;
+    }
+    {{/if}}
+    {{#if urbanistB64}}
+    @font-face {
+      font-family: 'Urbanist';
+      src: url('data:font/woff2;base64,{{urbanistB64}}') format('woff2');
+      font-weight: 100 900;
+      font-style: normal;
+    }
+    {{/if}}
   </style>
   {{/if}}
   <style>
