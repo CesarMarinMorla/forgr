@@ -237,5 +237,15 @@ hr {
 
 @media print {
   body { padding: 0; }
+
+  /* Keep headings with their following content — no orphaned headers */
+  h1, h2, h3, h4, h5, h6 { break-after: avoid; }
+
+  /* Don't split large blocks across pages */
+  table, pre, blockquote { break-inside: avoid; }
+
+  /* Minimum paragraph lines at page breaks */
+  p { widows: 2; orphans: 2; }
+
   pre { white-space: pre-wrap; word-break: break-word; }
 }
