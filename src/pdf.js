@@ -1,6 +1,31 @@
 import { chromium } from 'playwright';
+import { execSync } from 'child_process';
+import { existsSync } from 'fs';
 import fs from 'fs-extra';
 import path from 'path';
+
+function ensureChromium() {
+  const execPath = chromium.executablePath();
+  if (existsSync(execPath)) return;
+
+  console.log('');
+  console.log('  Downloading Chromium for PDF rendering (one-time, ~130MB)...');
+  console.log('');
+
+  try {
+    execSync('npx playwright install chromium', { stdio: 'inherit' });
+    console.log('');
+    console.log('  ✓ Chromium downloaded successfully.');
+    console.log('');
+  } catch {
+    console.error('');
+    console.error('  Failed to download Chromium.');
+    console.error('');
+    console.error('  Try running: npm run install-chromium');
+    console.error('');
+    process.exit(1);
+  }
+}
 
 export async function generatePdf(html, outputPath) {
   // Verify output directory exists and is writable before launching the browser
@@ -12,13 +37,15 @@ export async function generatePdf(html, outputPath) {
     process.exit(1);
   }
 
+  ensureChromium();
+
   let browser;
   try {
     browser = await chromium.launch();
   } catch (err) {
-    console.error(
-      `Chromium is not installed.\n\nRun this command to install it:\n\n  npx playwright install chromium\n\nThen re-run forgr.`
-    );
+    console.error('');
+    console.error(`  Failed to launch Chromium: ${err.message}`);
+    console.error('');
     process.exit(1);
   }
 

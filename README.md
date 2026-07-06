@@ -14,13 +14,9 @@ Outputs `report.pdf` in the same directory.
 npm install -g forgr
 ```
 
-The first time you run `forgr`, it will prompt you to install Chromium (~130MB) if it's not already present:
+Chromium (~130MB) is downloaded automatically on your first `forgr` run into your user cache directory (`~/Library/Caches/ms-playwright` on macOS). No manual steps needed.
 
-```bash
-npx playwright install chromium
-```
-
-This is a one-time step. The browser binary is stored in Playwright's cache directory (`~/Library/Caches/ms-playwright` on macOS) and does not touch your existing Chrome installation.
+To pre-download Chromium ahead of time (e.g., in CI): `npm run install-chromium`
 
 ## Usage
 
@@ -30,6 +26,10 @@ forgr document.md
 
 # Custom output path
 forgr document.md --output /path/to/output.pdf
+
+# Choose a preset
+forgr document.md --preset systems-log
+forgr document.md --preset anthropic
 ```
 
 ## Requirements
@@ -38,7 +38,7 @@ forgr document.md --output /path/to/output.pdf
 
 ## Design
 
-Output uses the "Systems Log" preset by default: IBM Plex Sans for headings, IBM Plex Mono for code and labels, a graphite-and-teal palette, auto-numbered sections, and terminal-style code blocks.
+Output uses the **systems-log** preset by default: IBM Plex Sans body text, IBM Plex Mono for code/labels/markers, all-mono IBM Plex Mono for section headings, a graphite-and-cold-teal palette, auto-numbered sections, terminal-style code blocks, and numbered table data. Additional presets (anthropic, minimal, technical, academic) are available via `--preset`.
 
 ## Roadmap
 

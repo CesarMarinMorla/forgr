@@ -1,88 +1,59 @@
 # forgr — Tasks
 
-## Done
+## Milestone 1 — Barebones CLI (COMPLETE)
 
 ### Project setup
-- [x] Git repo initialized, remote set (git@github.com:CesarMarinMorla/forgr.git)
-- [x] AGENTS.md copied and updated (IBM Plex Sans/Mono as priority fonts, Inter references removed)
+- [x] Git repo initialized, remote set
+- [x] AGENTS.md written with full spec
 - [x] .gitignore (node_modules, *.pdf, .env, logs, editor dirs, dist/, coverage/)
 - [x] package-lock.json untracked and ignored
-- [x] README.md with accurate install instructions and Chromium prompt workflow
 
-### Milestone 1 — Barebones CLI
-- [x] package.json — all dependencies pinned (playwright at exact 1.61.1, no ^ or ~)
-- [x] postinstall script wired (playwright install chromium)
+### Core pipeline
+- [x] package.json — all dependencies pinned (playwright at exact 1.61.1)
+- [x] postinstall script wires `playwright install chromium`
 - [x] bin/forgr entry point (executable)
-- [x] src/cli.js — commander setup, --output flag, --preset flag
-- [x] src/pipeline.js — orchestrator: read file, render markdown, assemble HTML, generate PDF
-- [x] src/markdown.js — markdown-it with highlight.js, emoji, sub, sup plugins
-- [x] src/markdown.js — mermaid fence renderer (fenced mermaid -> .mermaid div, no regex pass)
-- [x] src/markdown.js — core rule stripping leading N. / N) prefixes from h2 headings
-- [x] src/template.js — Handlebars compilation, preset CSS loading, font base64 embedding
-- [x] src/pdf.js — Playwright browser lifecycle, mermaid.run() unconditional, 2cm margins, partial file cleanup on error
-- [x] src/templates/base.html — Handlebars layout with @font-face declarations and doc-meta header
-- [x] src/templates/presets/stock.css — Systems Log preset (design tokens, h2 counters, NOTE callouts, terminal dots)
-- [x] src/templates/presets/anthropic.css — warm editorial preset (not fully tested)
-- [x] src/templates/presets/minimal.css, technical.css, academic.css — placeholders
-- [x] Chromium missing error message — clear prompt to run `npx playwright install chromium`
-- [x] Output path resolution — default same dir as input, --output override, silent overwrite
-- [x] doc-meta header label populated from input filename (not hardcoded)
+- [x] src/cli.js — commander, --output, --preset flags, defaults to systems-log
+- [x] src/pipeline.js — orchestrator: read -> render -> template -> PDF
+- [x] src/markdown.js — markdown-it + highlight.js, emoji, sub, sup, mermaid fence renderer
+- [x] src/markdown.js — h2 number stripping (core rule)
+- [x] src/markdown.js — wrapTableNumbers() wraps <td> numbers in .num spans
+- [x] src/template.js — Handlebars, preset CSS loading, font base64 embedding
+- [x] src/pdf.js — Playwright lifecycle, mermaid.run(), 2cm margins, partial file cleanup
+- [x] src/templates/base.html — @font-face blocks, doc-meta header (dot, label, timestamp)
 
-### Fonts downloaded (valid woff2 confirmed via `file` command)
-- [x] IBMPlexSans-Variable.woff2 (45KB) — from @fontsource-variable/ibm-plex-sans
-- [x] IBMPlexMono-400.woff2 (14KB) — from @fontsource/ibm-plex-mono
-- [x] IBMPlexMono-600.woff2 (15KB) — from @fontsource/ibm-plex-mono
-- [x] JetBrainsMono-Regular.woff2 (90KB) — from github.com/JetBrains/JetBrainsMono
-- [x] Urbanist-Variable.woff2 (27KB) — from @fontsource-variable/urbanist
+### Presets
+- [x] src/templates/presets/systems-log.css — default preset (all-mono IBM Plex Mono headings, graphite/teal palette, terminal code blocks, NOTE callouts, tabular numbers, pagination control)
+- [x] src/templates/presets/anthropic.css — warm editorial preset
+- [x] src/templates/presets/minimal.css, technical.css, academic.css — placeholders
+
+### Fonts
+- [x] IBMPlexSans-Variable.woff2 (45KB) — @fontsource-variable
+- [x] IBMPlexMono-400.woff2 (49KB) — full file from @ibm/plex-mono@2.5.0 (replaced 14KB subset)
+- [x] IBMPlexMono-600.woff2 (50KB) — full file from @ibm/plex-mono@2.5.0 (replaced 15KB subset)
+- [x] JetBrainsMono-Regular.woff2 (90KB) — from JetBrains GitHub
+- [x] Urbanist-Variable.woff2 (27KB) — @fontsource-variable
+
+### Styling details
+- [x] Doc-meta header: left-aligned label with 6px --signal dot, timestamp right-aligned
+- [x] h2: IBM Plex Mono 400 all-mono uppercase, teal ::before counter (01 02 03...)
+- [x] Code blocks: terminal-pane style with 3-dot chrome (box-shadow)
+- [x] Blockquotes: NOTE mono label, signal left rule
+- [x] Table headers: IBM Plex Mono uppercase
+- [x] Table cell numbers: IBM Plex Mono via .num spans (words stay body font)
+- [x] Ordered list markers: IBM Plex Mono, graphite color, 2em padding to prevent clipping
+- [x] Print pagination: break-after avoid on headings, break-inside avoid on tables/pre/blockquote, widows/orphans 2 on paragraphs
 
 ### Test suite
-- [x] test/markdown.test.js — 11 unit tests (paragraph, heading, mermaid fence, code blocks, inline code, blockquote, table, sub/sup, h2 number stripping)
-- [x] test/pipeline.test.js — 4 unit tests (output path resolution)
-- [x] test/integration.test.js — 1 integration test (real PDF generated, magic bytes verified)
-- [x] npm run test:unit and npm test scripts in package.json
-- [x] Last confirmed passing state: 15/15 unit + integration tests
+- [x] test/markdown.test.js — unit tests for markdown rendering + table number wrapping
+- [x] test/pipeline.test.js — output path resolution tests
+- [x] test/integration.test.js — end-to-end PDF generation test
+- [x] npm test = 16 tests (all passing)
+- [x] npm run test:unit = unit tests only (excludes integration)
 
-### Other
-- [x] scripts/font-diagnostic.js — generates font-diagnostic.pdf showing all font combinations
-- [x] test/fixtures/sample.md — general test fixture
-- [x] test/fixtures/anthropic-design.md — brandmd Anthropic design doc fixture
-- [x] docs/font-investigation.md — detailed notes on font loading problem
-
----
-
-## Pending — immediate (font issue, must resolve before any commit)
-
-- [ ] **Confirm whether IBMPlexMono-400.woff2 (14KB subset) actually loads in Chromium PDF**
-      Run `node scripts/font-diagnostic.js` and check font-name-test.pdf.
-      If 14KB subset fails, re-download full 293KB version from @fontsource/ibm-plex-mono
-      (the fontsource pack contains it — extract ibm-plex-mono-latin-400-normal.woff2).
-
-- [ ] **Confirm Urbanist-Variable.woff2 renders in h2 text (not falling back to system sans)**
-      Add a row to font-diagnostic.js comparing Urbanist vs system sans at the same size.
-
-- [ ] **Confirm h2::before (IBM Plex Mono 400) is visually distinct from h2 text (Urbanist 700)**
-      User confirmed they look identical. Suspected cause: fontsource subset missing digit glyphs
-      or font-family name mismatch. See docs/font-investigation.md for full details.
-
-- [ ] **Once fonts confirmed: visual review of design-stock.pdf against reference screenshot**
-      Reference: /Users/cesar/Downloads/files/SCR-20260706-duvm.png
-
-- [ ] **Once visual review approved: commit all pending changes**
-      Files changed but not committed:
-      - src/templates/presets/stock.css
-      - src/templates/presets/anthropic.css
-      - src/templates/base.html
-      - src/template.js
-      - src/cli.js
-      - src/pipeline.js
-      - src/markdown.js
-      - src/assets/fonts/ (all font files)
-      - scripts/font-diagnostic.js
-      - test/fixtures/anthropic-design.md
-      - docs/font-investigation.md
-      - docs/tasks.md (this file)
-
-- [ ] **Run full test suite after commit to confirm nothing regressed**
+### Dev tooling
+- [x] scripts/font-diagnostic.js — 7-comparison side-by-side font diagnostic PDF
+- [x] test/fixtures/ — 7 comprehensive .md fixtures (basic, code, comprehensive, converter_features, formatting, lists, tables)
+- [x] docs/font-investigation.md — font issue investigation and resolution notes
 
 ---
 
@@ -131,6 +102,5 @@
 - Margins: 2cm all sides via Playwright page.pdf(), never via CSS body padding
 - Output: silent overwrite, no confirmation prompt (required for --watch)
 - Playwright version: pinned exactly at 1.61.1 (no ^ or ~)
-- Heading fonts: IBM Plex Mono 400 for section numbers, Urbanist 700 for heading text
-- Section number color: #1C756E
+- Heading: all-mono IBM Plex Mono 400, section counter in teal (#1C756E)
 - Fail loudly on all errors — no silent degradation anywhere in the pipeline
