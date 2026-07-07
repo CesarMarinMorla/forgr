@@ -1,37 +1,41 @@
 # forgr — Tasks
 
-## Milestone 1 — Barebones CLI (COMPLETE)
+## Milestone 1 — Published (v0.1.0)
 
 ### Project setup
 - [x] Git repo initialized, remote set
 - [x] AGENTS.md written with full spec
 - [x] .gitignore (node_modules, *.pdf, .env, logs, editor dirs, dist/, coverage/)
 - [x] package-lock.json untracked and ignored
+- [x] package.json — repository, bugs, homepage, author, keywords, files fields
+- [x] LICENSE (MIT)
 
 ### Core pipeline
-- [x] package.json — all dependencies pinned (playwright at exact 1.61.1)
-- [x] postinstall script wires `playwright install chromium`
+- [x] package.json — all dependencies pinned (playwright-core at exact 1.61.1)
+- [x] Chromium downloaded on first `forgr` run, not during install
+- [x] preuninstall script auto-removes Chromium cache
+- [x] `forgr uninstall` command removes cache without removing the tool
 - [x] bin/forgr entry point (executable)
-- [x] src/cli.js — commander, --output, --preset flags, defaults to systems-log
+- [x] src/cli.js — commander, --output, --preset, uninstall command, defaults to systems-log
+- [x] src/browsers-path.js — canonical BROWSERS_PATH (~/.forgr/browsers) with env var injection
 - [x] src/pipeline.js — orchestrator: read -> render -> template -> PDF
 - [x] src/markdown.js — markdown-it + highlight.js, emoji, sub, sup, mermaid fence renderer
 - [x] src/markdown.js — h2 number stripping (core rule)
 - [x] src/markdown.js — wrapTableNumbers() wraps <td> numbers in .num spans
 - [x] src/template.js — Handlebars, preset CSS loading, font base64 embedding
 - [x] src/pdf.js — Playwright lifecycle, mermaid.run(), 2cm margins, partial file cleanup
+- [x] src/pdf.js — ensureChromium() downloads headless shell on first run
 - [x] src/templates/base.html — @font-face blocks, doc-meta header (dot, label, timestamp)
 
 ### Presets
 - [x] src/templates/presets/systems-log.css — default preset (all-mono IBM Plex Mono headings, graphite/teal palette, terminal code blocks, NOTE callouts, tabular numbers, pagination control)
 - [x] src/templates/presets/anthropic.css — warm editorial preset
-- [x] src/templates/presets/minimal.css, technical.css, academic.css — placeholders
+- [x] src/templates/presets/minimal.css, technical.css, academic.css — populated with full CSS variable set and element rules
 
 ### Fonts
 - [x] IBMPlexSans-Variable.woff2 (45KB) — @fontsource-variable
 - [x] IBMPlexMono-400.woff2 (49KB) — full file from @ibm/plex-mono@2.5.0 (replaced 14KB subset)
 - [x] IBMPlexMono-600.woff2 (50KB) — full file from @ibm/plex-mono@2.5.0 (replaced 15KB subset)
-- [x] JetBrainsMono-Regular.woff2 (90KB) — from JetBrains GitHub
-- [x] Urbanist-Variable.woff2 (27KB) — @fontsource-variable
 
 ### Styling details
 - [x] Doc-meta header: left-aligned label with 6px --signal dot, timestamp right-aligned
@@ -47,13 +51,20 @@
 - [x] test/markdown.test.js — unit tests for markdown rendering + table number wrapping
 - [x] test/pipeline.test.js — output path resolution tests
 - [x] test/integration.test.js — end-to-end PDF generation test
-- [x] npm test = 16 tests (all passing)
+- [x] npm test = 22 tests (all passing)
 - [x] npm run test:unit = unit tests only (excludes integration)
 
 ### Dev tooling
 - [x] scripts/font-diagnostic.js — 7-comparison side-by-side font diagnostic PDF
-- [x] test/fixtures/ — 7 comprehensive .md fixtures (basic, code, comprehensive, converter_features, formatting, lists, tables)
+- [x] scripts/postinstall.js — manual Chromium install script
+- [x] scripts/preuninstall.js — Chromium cache cleanup on uninstall
+- [x] test/fixtures/ — 7 .md fixtures (basic, code, comprehensive, converter_features, formatting, lists, tables)
 - [x] docs/font-investigation.md — font issue investigation and resolution notes
+
+### Published
+- [x] npm pack — 21 files, 190KB unpacked, 159KB compressed
+- [x] npm publish — forgr@0.1.0 live on registry.npmjs.org
+- [x] Verified: install -> first run -> render -> uninstall (cleanup confirmed)
 
 ---
 
@@ -78,8 +89,6 @@
 
 ## Pending — Milestone 4 (Mermaid + Images)
 
-- [ ] Bundle mermaid.min.js into src/assets/
-- [ ] Wire mermaid.run() call in pdf.js (architecture already in place)
 - [ ] Image inlining: resolve local image paths to base64 data URIs during HTML generation
 
 ---
@@ -154,16 +163,9 @@ Suggested split: extract hljs setup to `src/highlighter.js`, import the configur
 
 Affects: `src/markdown.js`.
 
-### Issue 4 — Stub presets produce unstyled output (priority: low)
+### Issue 4 — Stub presets produce unstyled output (priority: resolved)
 
-`minimal.css`, `technical.css`, and `academic.css` are empty placeholder files (35 bytes each). They are listed in the CLI `--preset` help text and in the README as available options. Running `forgr file.md --preset minimal` currently produces a PDF with no styling at all — no error, no warning, just unstyled output.
-
-Options:
-- Add at least the CSS variable block to each stub so they inherit the base layout.
-- Remove them from the advertised preset list until they are real.
-- Add a warning to `template.js` when a preset file is under a size threshold.
-
-Affects: `src/templates/presets/minimal.css`, `technical.css`, `academic.css`, and `src/cli.js` help text.
+`minimal.css`, `technical.css`, and `academic.css` were empty placeholder files (35 bytes each). They have been populated with a complete CSS variable set and element rules. Each preset has its own palette (minimal/technical use graphite-teal, academic uses serif/brown).
 
 ### Issue 5 — Silent font fallback violates the fail-loudly principle (priority: low)
 
@@ -186,5 +188,4 @@ Affects: `src/pipeline.js`.
 - [ ] Refactor pdf.js, template.js, pipeline.js to throw errors instead of calling process.exit — add single exit boundary in cli.js (Issue 1, 6)
 - [ ] Import BROWSERS_PATH from browsers-path.js in cli.js instead of re-deriving (Issue 2)
 - [ ] Extract hljs setup to src/highlighter.js (Issue 3)
-- [ ] Fix stub presets: either populate with base variable block or remove from advertised list (Issue 4)
 - [ ] Log a warning in template.js when a font file is not found (Issue 5)

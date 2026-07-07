@@ -13,7 +13,7 @@
     "cli"
   ],
   "bin": {
-    "forgr": "./bin/forgr"
+    "forgr": "bin/forgr"
   },
   "scripts": {
     "test": "node --test test/**/*.test.js",
