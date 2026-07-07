@@ -68,18 +68,17 @@
 
 ---
 
-## HIGH PRIORITY — Presets (all 4 non-stock need full redesign)
+## HIGH PRIORITY — Presets (3 non-stock need full redesign)
 
-### anthropic.css — complete redesign
-- [ ] Strip existing warm editorial theme entirely
-- [ ] Define new design direction for anthropic preset (different from systems-log)
-- [ ] Write full CSS: distinct palette, typography, code styling, tables, blockquotes
-- [ ] Test with all fixture files — verify no broken or unstyled elements
-
-### minimal.css — from functional stub to intentional design
-- [ ] Define minimal's design identity (maximum whitespace, fewer borders, sparse)
-- [ ] Write full CSS with distinct palette, lighter visual weight
-- [ ] Test with all fixture files
+### minimal.css — black-on-white from source template
+- [x] Adapt MarkForge minimal.css: system sans, one gray (#666), hairline rules, no accent
+- [x] Remove @page margin/size (forgr handles via pdf.js)
+- [x] Add @page background for full-page white
+- [x] Style .doc-meta: restrained (no dot, mono timestamp, thin rule)
+- [x] Add hljs token overrides (black/gray only, no accent color)
+- [x] Add @media print break controls
+- [x] Add h1:first-of-type page-break-before: avoid
+- [x] Test with all fixture files
 
 ### technical.css — from functional stub to intentional design
 - [ ] Define technical's design identity (dense, monospace-heavy, grid-like tables)
