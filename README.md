@@ -45,7 +45,7 @@ forgr document.md
 forgr document.md --output /path/to/output.pdf
 
 # Choose a preset
-forgr document.md --preset systems-log
+forgr document.md --preset terminal
 ```
 
 
@@ -55,7 +55,7 @@ forgr document.md --preset systems-log
 
 ## Design
 
-The default **systems-log** preset uses IBM Plex Sans for body text, IBM Plex Mono for code, labels, and section markers, a graphite-and-cold-teal palette, auto-numbered sections, and terminal-style code blocks. Additional presets (minimal, technical, academic) are available via `--preset`.
+The default **terminal** preset uses IBM Plex Sans for body text, IBM Plex Mono for code, labels, and section markers, a graphite-and-cold-teal palette, auto-numbered sections, and terminal-style code blocks. Additional presets (minimal, technical, academic) are available via `--preset`.
 
 ## Roadmap
 

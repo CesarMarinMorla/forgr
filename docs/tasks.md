@@ -16,7 +16,7 @@
 - [x] preuninstall script auto-removes Chromium cache
 - [x] `forgr uninstall` command removes cache without removing the tool
 - [x] bin/forgr entry point (executable)
-- [x] src/cli.js — commander, --output, --preset, uninstall command, defaults to systems-log
+- [x] src/cli.js — commander, --output, --preset, uninstall command, defaults to terminal
 - [x] src/browsers-path.js — canonical BROWSERS_PATH (~/.forgr/browsers) with env var injection
 - [x] src/pipeline.js — orchestrator: read -> render -> template -> PDF
 - [x] src/markdown.js — markdown-it + highlight.js, emoji, sub, sup, mermaid fence renderer
@@ -28,7 +28,7 @@
 - [x] src/templates/base.html — @font-face blocks, doc-meta header (dot, label, timestamp)
 
 ### Presets
-- [x] src/templates/presets/systems-log.css — default preset (all-mono IBM Plex Mono headings, graphite/teal palette, terminal code blocks, NOTE callouts, tabular numbers, pagination control)
+- [x] src/templates/presets/terminal.css — default preset (all-mono IBM Plex Mono headings, graphite/teal palette, terminal code blocks, NOTE callouts, tabular numbers, pagination control)
 - [x] src/templates/presets/anthropic.css — warm editorial preset
 - [x] src/templates/presets/minimal.css, technical.css, academic.css — populated with full CSS variable set and element rules
 

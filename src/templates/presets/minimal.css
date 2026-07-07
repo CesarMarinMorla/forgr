@@ -146,17 +146,25 @@ img {
 .toc__item {
   margin: 0;
   line-height: 1.7;
+  display: flex;
 }
 .toc__item a {
   color: var(--color-ink);
   text-decoration: none;
+  flex: 1;
 }
-.toc__item--h1 { margin-left: 0; }
+.toc__page {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-mid);
+  margin-left: auto;
+}
+.toc__item--h1 { margin-left: 0; font-weight: 600; }
 .toc__item--h2 { margin-left: 1.2em; }
-.toc__item--h3 { margin-left: 2.4em; }
-.toc__item--h4 { margin-left: 3.6em; }
-.toc__item--h5 { margin-left: 4.8em; }
-.toc__item--h6 { margin-left: 6em; }
+.toc__item--h3 { margin-left: 2.4em; font-weight: 400; color: var(--color-mid); }
+.toc__item--h4 { margin-left: 3.6em; font-weight: 400; font-size: 0.9em; }
+.toc__item--h5 { margin-left: 4.8em; font-weight: 400; font-size: 0.85em; }
+.toc__item--h6 { margin-left: 6em; font-weight: 400; font-size: 0.8em; }
 
 .hljs-keyword, .hljs-selector-tag, .hljs-subst { color: var(--color-ink); font-weight: 600; }
 .hljs-string, .hljs-regexp, .hljs-addition { color: var(--color-mid); }

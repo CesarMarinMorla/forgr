@@ -15,8 +15,8 @@ function wordCount(str) {
 function templateContext(body, options, absInput) {
   return {
     body,
-    preset: options.preset || 'systems-log',
-    label: `forgr / ${options.preset || 'systems-log'} / ${path.basename(absInput)}`,
+    preset: options.preset || 'terminal',
+    label: `forgr / ${options.preset || 'terminal'} / ${path.basename(absInput)}`,
     timestamp: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long' }),
   };
 }
@@ -47,13 +47,16 @@ export async function run(inputPath, options = {}) {
     toc = wordCount(markdown) >= LONG_DOC_WORDS;
   }
 
-  const { body, tocHtml } = renderMarkdown(markdown, { toc });
-  const html = await renderTemplate(templateContext(tocHtml + body, options, absInput));
-  const pages = await generatePdf(html, outputPath);
+  // First render: without TOC, always capture heading pages for later use
+  const { body, tocHtml } = renderMarkdown(markdown, { toc: false });
+  const html = await renderTemplate(templateContext(body, options, absInput));
+  const { pageCount, headingPages } = await generatePdf(html, outputPath, { captureHeadings: true });
 
-  // Auto-mode: if first pass guessed no-TOC but doc runs 3+ pages, re-render with TOC
-  if (toc === false && options.toc === undefined && pages >= MIN_PAGES_FOR_TOC) {
-    const { body: body2, tocHtml: tocHtml2 } = renderMarkdown(markdown, { toc: true });
+  // Decide if TOC should be included
+  const needsToc = toc === true || (toc === false && options.toc === undefined && pageCount >= MIN_PAGES_FOR_TOC);
+
+  if (needsToc) {
+    const { body: body2, tocHtml: tocHtml2 } = renderMarkdown(markdown, { toc: true, headingPages });
     const html2 = await renderTemplate(templateContext(tocHtml2 + body2, options, absInput));
     await generatePdf(html2, outputPath);
   }

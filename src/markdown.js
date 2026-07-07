@@ -190,7 +190,7 @@ function wrapTableNumbers(html) {
   });
 }
 
-function buildTocHtml(tokens) {
+function buildTocHtml(tokens, headingPages) {
   const headings = [];
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i];
@@ -216,7 +216,11 @@ function buildTocHtml(tokens) {
   html += '  <ul class="toc__list">\n';
   for (const h of headings) {
     const escaped = h.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    html += `    <li class="toc__item toc__item--h${h.level}"><a href="#${h.id}">${escaped}</a></li>\n`;
+    const pageInfo = headingPages?.find(p => p.id === h.id);
+    const pageStr = pageInfo
+      ? ` <span class="toc__page">${pageInfo.page}</span>`
+      : '';
+    html += `    <li class="toc__item toc__item--h${h.level}"><a href="#${h.id}">${escaped}</a>${pageStr}</li>\n`;
   }
   html += '  </ul>\n';
   html += '</nav>\n';
@@ -224,12 +228,12 @@ function buildTocHtml(tokens) {
   return html;
 }
 
-export function renderMarkdown(source, { toc } = {}) {
+export function renderMarkdown(source, { toc, headingPages } = {}) {
   const tokens = md.parse(source, {});
 
   let tocHtml = '';
   if (toc) {
-    tocHtml = buildTocHtml(tokens);
+    tocHtml = buildTocHtml(tokens, headingPages);
   }
 
   const body = wrapTableNumbers(md.renderer.render(tokens, md.options, {}));

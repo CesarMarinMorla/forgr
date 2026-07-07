@@ -12,14 +12,14 @@ const PLEX_MONO_400_PATH = path.join(__dirname, 'assets', 'fonts', 'IBMPlexMono-
 const PLEX_MONO_600_PATH = path.join(__dirname, 'assets', 'fonts', 'IBMPlexMono-600.woff2');
 
 export async function renderTemplate(context = {}) {
-  const preset = context.preset || 'systems-log';
+  const preset = context.preset || 'terminal';
   const presetPath = path.join(PRESETS_DIR, `${preset}.css`);
 
   let presetCss;
   try {
     presetCss = await readFile(presetPath, 'utf8');
   } catch {
-    console.error(`Error: preset "${preset}" not found. Available: systems-log, minimal, technical, academic`);
+    console.error(`Error: preset "${preset}" not found. Available: terminal, minimal, technical, academic`);
     process.exit(1);
   }
 

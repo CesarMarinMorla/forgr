@@ -59,14 +59,15 @@ hr { border: none; border-top: 1px solid var(--line); margin: 2.2em 0; }
 .toc { margin-bottom: 2.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--line); }
 .toc__title { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--graphite); margin: 0 0 0.8em 0; }
 .toc__list { list-style: none; padding: 0; margin: 0; }
-.toc__item { margin: 0; line-height: 1.7; }
-.toc__item a { color: var(--ink-soft); border-bottom: none; }
-.toc__item--h1 { margin-left: 0; }
+.toc__item { margin: 0; line-height: 1.7; display: flex; }
+.toc__item a { color: var(--ink-soft); text-decoration: none; flex: 1; }
+.toc__page { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--graphite); margin-left: auto; }
+.toc__item--h1 { margin-left: 0; font-weight: 600; }
 .toc__item--h2 { margin-left: 1.2em; }
-.toc__item--h3 { margin-left: 2.4em; }
-.toc__item--h4 { margin-left: 3.6em; }
-.toc__item--h5 { margin-left: 4.8em; }
-.toc__item--h6 { margin-left: 6em; }
+.toc__item--h3 { margin-left: 2.4em; font-weight: 350; color: var(--ink-soft); }
+.toc__item--h4 { margin-left: 3.6em; font-weight: 350; font-size: 0.9em; }
+.toc__item--h5 { margin-left: 4.8em; font-weight: 350; font-size: 0.85em; }
+.toc__item--h6 { margin-left: 6em; font-weight: 350; font-size: 0.8em; }
 
 @media print {
   body { padding: 0; }

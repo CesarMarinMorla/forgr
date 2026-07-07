@@ -84,7 +84,11 @@ function countPdfPages(buffer) {
   return matches ? matches.length : 0;
 }
 
-export async function generatePdf(html, outputPath) {
+// The content height of an A4 page with 2cm margins, in CSS pixels at 96dpi:
+// 297mm - 40mm = 257mm, at 96/25.4 px/mm ≈ 971px
+const A4_CONTENT_HEIGHT = 971;
+
+export async function generatePdf(html, outputPath, { captureHeadings } = {}) {
   const outputDir = path.dirname(outputPath);
   try {
     await fs.access(outputDir, fs.constants.W_OK);
@@ -112,6 +116,12 @@ export async function generatePdf(html, outputPath) {
   const page = await browser.newPage();
 
   try {
+    if (captureHeadings) {
+      // Match the body max-width used by presets so on-screen and print
+      // layouts align closely for heading-position calculations
+      await page.setViewportSize({ width: 720, height: 720 });
+    }
+
     await page.setContent(html, { waitUntil: 'domcontentloaded' });
 
     // Run mermaid unconditionally — resolves immediately when no .mermaid divs are present
@@ -128,6 +138,24 @@ export async function generatePdf(html, outputPath) {
 
     await page.evaluate(() => document.fonts.ready);
 
+    // Capture heading positions before generating PDF so we can determine
+    // which page each heading lands on for the table of contents
+    let headingPages = [];
+    if (captureHeadings) {
+      headingPages = await page.evaluate((pageHeight) => {
+        const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6[id]');
+        const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
+        return Array.from(headings).map(h => {
+          const rect = h.getBoundingClientRect();
+          const y = rect.top + scrollTop;
+          return {
+            id: h.id,
+            page: Math.floor(y / pageHeight) + 1,
+          };
+        });
+      }, A4_CONTENT_HEIGHT);
+    }
+
     const pdfBuffer = await page.pdf({
       format: 'A4',
       printBackground: true,
@@ -139,7 +167,7 @@ export async function generatePdf(html, outputPath) {
 
     const pageCount = countPdfPages(pdfBuffer);
     await fs.writeFile(outputPath, pdfBuffer);
-    return pageCount;
+    return { pageCount, headingPages };
   } catch (err) {
     await fs.remove(outputPath).catch(() => {});
     console.error(`Error generating PDF: ${err.message}`);
