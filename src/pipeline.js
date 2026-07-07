@@ -36,7 +36,7 @@ export async function run(inputPath, options = {}) {
     body,
     preset: options.preset || 'systems-log',
     label: `forgr / ${options.preset || 'systems-log'} / ${path.basename(absInput)}`,
-    timestamp: new Date().toISOString(),
+    timestamp: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long' }),
   });
 
   // Render PDF
