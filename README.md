@@ -8,6 +8,12 @@ forgr report.md
 
 Outputs `report.pdf` in the same directory.
 
+## About
+
+forgr takes a single Markdown file and produces a publication-ready PDF with no configuration, no templates to write, and no CSS to debug. It bakes in a complete design system — intentional typography, a restrained palette, and structural conventions that make technical documents read like they came from the tooling itself, not a word processor.
+
+Under the hood it uses Playwright (Chromium) for print-accurate rendering, markdown-it for parsing, and Handlebars for composable templates. Fonts are embedded as base64 — zero network calls at render time. Presets swap the entire visual identity with a single `--preset` flag, and the whole thing ships in a 160KB npm package.
+
 ## Install
 
 ```bash
