@@ -60,8 +60,12 @@ program
   .argument('<input>', 'Markdown file to convert')
   .option('-o, --output <path>', 'Output PDF path (default: same directory as input)')
   .option('-p, --preset <name>', 'Preset to use (systems-log, minimal, technical, academic)', 'systems-log')
+  .option('--toc', 'Force generate table of contents')
+  .option('--no-toc', 'Skip table of contents')
   .action(async (input, options) => {
-    await run(input, options);
+    // Normalize toc: --toc sets true, --no-toc sets false, neither sets undefined
+    const toc = options.toc === true ? true : options.toc === false ? false : undefined;
+    await run(input, { ...options, toc });
   });
 
 program.parseAsync(process.argv).catch((err) => {

@@ -1,0 +1,39 @@
+# Basic Styling Elements
+
+- [x] Paragraphs (`<p>`)
+- [x] Headings (`<h1>` through `<h6>`)
+- [x] Horizontal rules (`<hr>`)
+- [x] Bold / strong (`<strong>`)
+- [x] Italic / emphasis (`<em>`)
+- [x] Bold italic (compound `<strong><em>`)
+- [x] Strikethrough (`<s>` / `<del>`)
+- [x] Links (`<a>`)
+- [x] Images (`<img>`)
+- [x] Inline code (`<code>`)
+- [x] Fenced code blocks (`<pre><code>`)
+- [x] Syntax highlighting (`.hljs-*` tokens, 37 languages)
+- [x] Blockquotes (`<blockquote>`)
+- [x] Unordered lists (`<ul><li>`)
+- [x] Ordered lists (`<ol><li>`)
+- [x] Nested lists (`<ul><ul>`, `<ol><ol>`)
+- [x] Table headers (`<thead><th>`)
+- [x] Table cells (`<tbody><td>`)
+- [x] Table empty cell rendering (dash)
+- [x] Table numeric cell spans (`.num`)
+- [x] Emoji shortcodes (`:smile:`)
+- [x] Subscript (`<sub>`, via `H~2~O`)
+- [x] Superscript (`<sup>`, via `x^2^`)
+- [x] Mermaid diagrams (in-browser render)
+- [x] Raw HTML passthrough
+- [x] Auto-linking bare URLs
+- [x] Doc-meta header (label + timestamp)
+- [x] Page number footers (`pageNumber` / `totalPages`)
+
+- [x] Table of Contents (auto-generated from headings, opt-in/opt-out flags, 3000-char threshold)
+- [ ] Section numbering (CSS counters, per-preset opt-in)
+- [ ] Cover / title page
+- [ ] Running page headers (section name)
+- [ ] Footnotes (markdown-it-footnote)
+- [ ] Task / checklist lists (`- [ ]` / `- [x]`)
+- [ ] Definition lists
+- [ ] Local image inlining (resolve to base64 data URIs)

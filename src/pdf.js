@@ -78,6 +78,12 @@ async function ensureChromium() {
   }
 }
 
+function countPdfPages(buffer) {
+  const text = buffer.toString();
+  const matches = text.match(/\/Type\s*\/Page\b/g);
+  return matches ? matches.length : 0;
+}
+
 export async function generatePdf(html, outputPath) {
   const outputDir = path.dirname(outputPath);
   try {
@@ -122,8 +128,7 @@ export async function generatePdf(html, outputPath) {
 
     await page.evaluate(() => document.fonts.ready);
 
-    await page.pdf({
-      path: outputPath,
+    const pdfBuffer = await page.pdf({
       format: 'A4',
       printBackground: true,
       margin: { top: '2cm', bottom: '2cm', left: '2cm', right: '2cm' },
@@ -131,6 +136,10 @@ export async function generatePdf(html, outputPath) {
       headerTemplate: '<div></div>',
       footerTemplate: '<div style="width:100%; font-family:Menlo,monospace; font-size:7px; color:#666; text-align:center; padding:0 2cm;"><span class="pageNumber"></span> / <span class="totalPages"></span></div>',
     });
+
+    const pageCount = countPdfPages(pdfBuffer);
+    await fs.writeFile(outputPath, pdfBuffer);
+    return pageCount;
   } catch (err) {
     await fs.remove(outputPath).catch(() => {});
     console.error(`Error generating PDF: ${err.message}`);

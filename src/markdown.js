@@ -1,4 +1,5 @@
 import MarkdownIt from 'markdown-it';
+import markdownItAnchor from 'markdown-it-anchor';
 import markdownItHighlightjs from 'markdown-it-highlightjs';
 import { full as markdownItEmoji } from 'markdown-it-emoji';
 import markdownItSub from 'markdown-it-sub';
@@ -129,12 +130,25 @@ hljs.registerLanguage('proto', protobuf);
 // 2. Register it: hljs.registerLanguage('foo', foo);
 // Full language list: https://github.com/highlightjs/highlight.js/tree/main/src/languages
 
+
+
+function slugify(str) {
+  return str
+    .trim()
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 const md = new MarkdownIt({ html: true, linkify: true, typographer: false });
 
 md.use(markdownItHighlightjs, { auto: false, code: true, hljs });
 md.use(markdownItEmoji);
 md.use(markdownItSub);
 md.use(markdownItSup);
+md.use(markdownItAnchor, { slugify });
 
 // Render fenced mermaid blocks as <div class="mermaid"> for in-browser rendering.
 // This replaces the default fence renderer only for the "mermaid" language token —
@@ -153,7 +167,8 @@ md.renderer.rules.fence = (tokens, idx, options, env, self) => {
 // don't double-number headings that already include their own numbering
 // (e.g. "## 4. Component Stylings" -> "## Component Stylings").
 // Only h2 is affected — h3+ intentionally left alone.
-md.core.ruler.push('strip_h2_leading_number', (state) => {
+// Must run BEFORE the anchor plugin so slugify gets cleaned text.
+md.core.ruler.before('anchor', 'strip_h2_leading_number', (state) => {
   for (let i = 0; i < state.tokens.length; i++) {
     const token = state.tokens[i];
     if (token.type !== 'heading_open' || token.tag !== 'h2') continue;
@@ -175,6 +190,48 @@ function wrapTableNumbers(html) {
   });
 }
 
-export function renderMarkdown(source) {
-  return wrapTableNumbers(md.render(source));
+function buildTocHtml(tokens) {
+  const headings = [];
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i];
+    if (token.type !== 'heading_open') continue;
+    const level = parseInt(token.tag[1]);
+    const id = token.attrs?.find(a => a[0] === 'id')?.[1];
+    if (!id) continue;
+    const inlineToken = tokens[i + 1];
+    let text = '';
+    if (inlineToken && inlineToken.type === 'inline') {
+      text = inlineToken.children
+        .filter(c => c.type === 'text' || c.type === 'code_inline')
+        .map(c => c.content)
+        .join('');
+    }
+    headings.push({ level, id, text });
+  }
+
+  if (headings.length === 0) return '';
+
+  let html = '<nav class="toc" role="navigation">\n';
+  html += '  <div class="toc__title">Contents</div>\n';
+  html += '  <ul class="toc__list">\n';
+  for (const h of headings) {
+    const escaped = h.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    html += `    <li class="toc__item toc__item--h${h.level}"><a href="#${h.id}">${escaped}</a></li>\n`;
+  }
+  html += '  </ul>\n';
+  html += '</nav>\n';
+
+  return html;
+}
+
+export function renderMarkdown(source, { toc } = {}) {
+  const tokens = md.parse(source, {});
+
+  let tocHtml = '';
+  if (toc) {
+    tocHtml = buildTocHtml(tokens);
+  }
+
+  const body = wrapTableNumbers(md.renderer.render(tokens, md.options, {}));
+  return { body, tocHtml };
 }
