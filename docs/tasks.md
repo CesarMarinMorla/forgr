@@ -106,6 +106,15 @@
 
 ---
 
+## Publishing workflow
+
+- `npm publish` is manual: run `npm publish` from the project root
+- Authentication: `npm login` (passkey/browser) before publish
+- Version bumps: update `version` in package.json, commit, tag (`v0.2.0`), then publish
+- CI auto-publish: future option — wire up GitHub Actions to publish on `v*` tag push
+
+---
+
 ## Design decisions locked in (do not revisit without owner sign-off)
 
 - Margins: 2cm all sides via Playwright page.pdf(), never via CSS body padding
