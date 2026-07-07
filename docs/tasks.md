@@ -117,14 +117,31 @@
 
 ---
 
-## Pending — Milestone 5 (Config, Watch, Cover, TOC)
+## TOC — Done (implemented outside Milestone 5)
+
+TOC is implemented without template partials — it runs at the markdown-render level and injects HTML into the body.
+
+- [x] markdown-it-anchor plugin — headings get id slugs
+- [x] TOC HTML generation — nested nav with level-based indentation classes
+- [x] CLI --toc / --no-toc flags
+- [x] Two-pass page count decision (word count >= 8000 OR pages >= 3 triggers TOC; 2nd render only when first guess was wrong)
+- [x] TOC styling in all 4 presets (.toc, .toc__title, .toc__list, .toc__item--hN)
+- [x] Input: docs/elements.md — checklist of all basic styling elements
+
+### Hardcoded constants (configurable later via .forgrrc)
+
+| Constant | Location | Value |
+|---|---|---|
+| `LONG_DOC_WORDS` | `src/pipeline.js` | `8000` |
+| `MIN_PAGES_FOR_TOC` | `src/pipeline.js` | `3` |
+
+## Pending — Milestone 5 (Config, Watch, Cover)
 
 - [ ] .forgrrc config file support
 - [ ] Frontmatter support in Markdown files
 - [ ] Watch mode (--watch flag, re-render on file change)
 - [ ] Plugin system for custom Markdown transformations
 - [ ] Implement cover_page preset feature flag (cover.html partial)
-- [ ] Implement toc preset feature flag (toc.html partial)
 - [ ] Implement section_numbering preset feature flag
 - [ ] Populate templates/partials/ directory
 
