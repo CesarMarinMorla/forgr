@@ -68,6 +68,31 @@
 
 ---
 
+## HIGH PRIORITY — Presets (all 4 non-stock need full redesign)
+
+### anthropic.css — complete redesign
+- [ ] Strip existing warm editorial theme entirely
+- [ ] Define new design direction for anthropic preset (different from systems-log)
+- [ ] Write full CSS: distinct palette, typography, code styling, tables, blockquotes
+- [ ] Test with all fixture files — verify no broken or unstyled elements
+
+### minimal.css — from functional stub to intentional design
+- [ ] Define minimal's design identity (maximum whitespace, fewer borders, sparse)
+- [ ] Write full CSS with distinct palette, lighter visual weight
+- [ ] Test with all fixture files
+
+### technical.css — from functional stub to intentional design
+- [ ] Define technical's design identity (dense, monospace-heavy, grid-like tables)
+- [ ] Write full CSS with distinct palette, infra/ops tooling feel
+- [ ] Test with all fixture files
+
+### academic.css — from functional stub to intentional design
+- [ ] Define academic's design identity (serif body, footnote annotations, citation-friendly)
+- [ ] Write full CSS with distinct palette, scholarly typography
+- [ ] Test with all fixture files
+
+---
+
 ## Pending — Milestone 2 (TUI Preset Picker)
 
 - [ ] `--interactive` flag on CLI
