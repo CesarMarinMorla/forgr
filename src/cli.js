@@ -59,7 +59,7 @@ program
   .description('Convert a Markdown file to PDF')
   .argument('<input>', 'Markdown file to convert')
   .option('-o, --output <path>', 'Output PDF path (default: same directory as input)')
-  .option('-p, --preset <name>', 'Preset to use (systems-log, anthropic, minimal, technical, academic)', 'systems-log')
+  .option('-p, --preset <name>', 'Preset to use (systems-log, minimal, technical, academic)', 'systems-log')
   .action(async (input, options) => {
     await run(input, options);
   });

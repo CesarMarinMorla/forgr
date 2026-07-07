@@ -19,7 +19,7 @@ export async function renderTemplate(context = {}) {
   try {
     presetCss = await readFile(presetPath, 'utf8');
   } catch {
-    console.error(`Error: preset "${preset}" not found. Available: systems-log, anthropic, minimal, technical, academic`);
+    console.error(`Error: preset "${preset}" not found. Available: systems-log, minimal, technical, academic`);
     process.exit(1);
   }
 
