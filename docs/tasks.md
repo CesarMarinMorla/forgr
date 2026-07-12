@@ -95,13 +95,42 @@
 
 ---
 
-## Pending — Milestone 2 (Mermaid Rendering)
+## Pending — Milestone 2 (Mermaid Rendering & Image Embedding)
 
+Done so far:
 - [x] Mermaid fence renderer emits `<div class="mermaid">` with raw source (src/markdown.js)
 - [x] Mermaid fixtures added: test/fixtures/mermaid.md (flowchart/sequence/state/class) + diagrams in comprehensive.md (sections 6.3, 6.4)
-- [ ] Wire mermaid runtime into base.html (load the library) so diagrams actually render; pdf.js already calls mermaid.run() when the global is present
-- [ ] Image inlining: resolve local image paths (and mermaid PNG output) to base64 data URIs during HTML generation — required so rendered diagrams embed without a base URL
-- [ ] Verify mermaid diagrams render across all four presets via the integration suite
+- [x] `pdf.js` already calls `mermaid.run()` when a `mermaid` global exists
+
+Current gap: no mermaid library is loaded into the Playwright page (base.html has no script), so diagrams render as raw source. Local images are emitted as plain `<img src>` and are not inlined, so they do not resolve under `page.setContent()` (no base URL). Both need the same "embed without a base URL" capability.
+
+### Approach
+Render mermaid to SVG inside the existing Playwright page (reuse `pdf.js`'s page). Inline local images to base64 data URIs on the Node side during markdown rendering, using the input file's directory as the resolution root. Keep the single exit-boundary / throw-on-error discipline from the refactor (Issues 1, 6); no `process.exit` in library modules.
+
+### Mermaid rendering
+- [ ] Add `mermaid` to `package.json` pinned at an EXACT version (no `^`/`~`); record the version in the Architecture Assessment.
+- [ ] Load the library into the page in `pdf.js`: before `mermaid.run()`, inject the dist once per page via `page.addScriptTag({ path: <mermaid dist> })` resolved from `node_modules` (cache the handle so it is added a single time).
+- [ ] Configure per preset: `mermaid.initialize({ startOnLoad: false, theme: 'base', themeVariables: { primary, lineColor, textColor, ... } })` keyed by the active preset, derived from the preset's `--signal` / `--ink` so diagrams match each preset's accent (4 distinct diagram palettes).
+- [ ] Render with `mermaid.run({ nodes: [...document.querySelectorAll('.mermaid')] })` and reuse the existing `mermaidReady` flag + `waitForFunction` until every `.mermaid` has an `<svg>`.
+- [ ] Fail loudly: if a diagram throws during render, collect the error and `throw new Error(\`mermaid: failed to render diagram ${i}: ${message}\`)` — no silent drop, no raw-source leak.
+- [ ] Style `.mermaid` (and its `<svg>`) in base.html: centered, `max-width: 100%`, vertical margin, light surface; per-preset accent comes from `themeVariables`, not from CSS overrides.
+
+### Image embedding
+- [ ] Pass the input file's directory into `renderMarkdown(source, { baseDir })` from `pipeline.js` (resolved input dir).
+- [ ] Add a custom `md.renderer.rules.image` in `markdown.js` that, for a local `src` (not `http(s):` and not `data:`), resolves against `baseDir`, reads the file with `readFileSync`, detects mime by extension (.png/.jpg/.jpeg/.gif/.webp/.svg), and emits `<img src="data:<mime>;base64,…">`. Remote URLs and existing `data:` URIs pass through unchanged.
+- [ ] Fail loudly: if a local image path does not exist, `throw new Error(\`image not found: ${path}\`)`.
+- [ ] Unit-test in `markdown.test.js`: a relatively-referenced fixture image is inlined to a `data:` URI; an `http(s)` URL is left untouched; a missing local path throws.
+
+### Shared: SVG/PNG serialization
+- [ ] Add a helper that serializes a rendered mermaid `<svg>` to PNG (`svg → XML → Image → canvas → toDataURL`). Used by Milestone 3 (live preview) and as a fallback when SVG-in-PDF is undesirable. Reuses the same base64 path as image embedding.
+
+### Preset theming
+- [ ] Map each preset's tokens to mermaid `themeVariables` — terminal: teal, minimal: graphite, technical: amber, academic: rubric blue — so diagrams stay visually consistent with their preset.
+
+### Testing
+- [ ] Add `test/mermaid.test.js` (integration): render `test/fixtures/mermaid.md` for each preset in a Playwright page, assert every `.mermaid` div is replaced by an `<svg>` and no raw `<div class="mermaid">` remains, and that diagrams use the preset accent.
+- [ ] Extend the per-preset integration run (`FORGR_PRESET`) to cover `mermaid.md`.
+- [ ] Add a local-image fixture (e.g. `test/fixtures/assets/sample.png`) referenced from a markdown; assert it inlines and renders in the PDF.
 
 ---
 
