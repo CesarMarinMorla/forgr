@@ -5,8 +5,55 @@ import { rm } from 'fs/promises';
 import fs from 'fs-extra';
 import path from 'path';
 import { join } from 'path';
+import { fileURLToPath } from 'url';
 import { platform } from 'os';
 import { BROWSERS_PATH } from './browsers-path.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const MERMAID_DIST = path.resolve(__dirname, '..', 'node_modules', 'mermaid', 'dist', 'mermaid.min.js');
+
+const PRESET_MERMAID_THEMES = {
+  terminal: {
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#2DD4BF',
+      lineColor: '#0F766E',
+      textColor: '#1C2128',
+      mainBkg: '#ECFDFB',
+      nodeBorder: '#0F766E',
+    },
+  },
+  minimal: {
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#666666',
+      lineColor: '#111111',
+      textColor: '#111111',
+      mainBkg: '#FAFAFA',
+      nodeBorder: '#111111',
+    },
+  },
+  technical: {
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#C2410C',
+      lineColor: '#7C2D12',
+      textColor: '#1F1B16',
+      mainBkg: '#FFF7ED',
+      nodeBorder: '#7C2D12',
+    },
+  },
+  academic: {
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#2E4F6B',
+      lineColor: '#1B3349',
+      textColor: '#1A1714',
+      mainBkg: '#FFFFFF',
+      nodeBorder: '#2E4F6B',
+    },
+  },
+};
 
 function getHeadlessShellPath() {
   let entries;
@@ -83,7 +130,7 @@ function countPdfPages(buffer) {
 // 297mm - 40mm = 257mm, at 96/25.4 px/mm ≈ 971px
 const A4_CONTENT_HEIGHT = 971;
 
-export async function generatePdf(html, outputPath, { captureHeadings } = {}) {
+export async function generatePdf(html, outputPath, { captureHeadings, preset } = {}) {
   const outputDir = path.dirname(outputPath);
   try {
     await fs.access(outputDir, fs.constants.W_OK);
@@ -113,16 +160,32 @@ export async function generatePdf(html, outputPath, { captureHeadings } = {}) {
 
     await page.setContent(html, { waitUntil: 'domcontentloaded' });
 
-    // Run mermaid unconditionally — resolves immediately when no .mermaid divs are present
-    await page.evaluate(async () => {
-      if (typeof mermaid === 'undefined') return;
-      window.mermaidReady = false;
-      await mermaid.run({ querySelector: '.mermaid' });
-      window.mermaidReady = true;
-    });
+    const hasMermaid = await page.evaluate(() => document.querySelector('.mermaid') !== null);
+    if (hasMermaid) {
+      await page.addScriptTag({ path: MERMAID_DIST });
 
-    if (await page.evaluate(() => typeof mermaid !== 'undefined')) {
-      await page.waitForFunction(() => window.mermaidReady === true, { timeout: 15000 });
+      const mermaidConfig = PRESET_MERMAID_THEMES[preset] || PRESET_MERMAID_THEMES.terminal;
+      await page.evaluate((config) => {
+        mermaid.initialize(config);
+      }, mermaidConfig);
+
+      const errors = await page.evaluate(async () => {
+        const errorMessages = [];
+        const els = document.querySelectorAll('.mermaid');
+        for (const el of els) {
+          try {
+            const { svg } = await mermaid.render('mermaid_' + Math.random().toString(36).slice(2, 8), el.textContent.trim());
+            el.innerHTML = svg;
+          } catch (e) {
+            errorMessages.push(e.message || String(e));
+          }
+        }
+        return errorMessages;
+      });
+
+      if (errors.length > 0) {
+        throw new Error(`mermaid: ${errors.length} diagram(s) failed to render: ${errors.join('; ')}`);
+      }
     }
 
     await page.evaluate(() => document.fonts.ready);

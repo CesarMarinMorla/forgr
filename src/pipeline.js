@@ -22,9 +22,10 @@ function templateContext(body, options, absInput) {
 }
 
 async function renderStage(markdown, options, absInput, outputPath, withToc, headingPages) {
-  const { body, tocHtml } = renderMarkdown(markdown, { toc: withToc, headingPages });
+  const baseDir = path.dirname(absInput);
+  const { body, tocHtml } = renderMarkdown(markdown, { toc: withToc, headingPages, baseDir });
   const html = await renderTemplate(templateContext(tocHtml + body, options, absInput));
-  return generatePdf(html, outputPath, { captureHeadings: !withToc });
+  return generatePdf(html, outputPath, { captureHeadings: !withToc, preset: options.preset || 'terminal' });
 }
 
 export async function run(inputPath, options = {}) {

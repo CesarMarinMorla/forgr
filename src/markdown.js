@@ -1,3 +1,5 @@
+import { readFileSync, existsSync } from 'fs';
+import path from 'path';
 import MarkdownIt from 'markdown-it';
 import markdownItAnchor from 'markdown-it-anchor';
 import markdownItHighlightjs from 'markdown-it-highlightjs';
@@ -24,6 +26,46 @@ md.use(markdownItEmoji);
 md.use(markdownItSub);
 md.use(markdownItSup);
 md.use(markdownItAnchor, { slugify });
+
+const IMAGE_MIME = {
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.webp': 'image/webp',
+  '.svg': 'image/svg+xml',
+};
+
+md.renderer.rules.image = (tokens, idx, options, env, self) => {
+  const token = tokens[idx];
+  const srcIndex = token.attrIndex('src');
+  if (srcIndex < 0) return self.renderToken(tokens, idx, options);
+
+  const src = token.attrs[srcIndex][1];
+  if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('data:')) {
+    return self.renderToken(tokens, idx, options);
+  }
+
+  const baseDir = env.baseDir;
+  if (!baseDir) {
+    throw new Error('image inlining requires baseDir in render env');
+  }
+
+  const resolvedPath = path.resolve(baseDir, src);
+  if (!existsSync(resolvedPath)) {
+    throw new Error(`image not found: ${resolvedPath}`);
+  }
+
+  const ext = path.extname(src).toLowerCase();
+  const mime = IMAGE_MIME[ext];
+  if (!mime) {
+    throw new Error(`unsupported image format: ${ext} (${resolvedPath})`);
+  }
+
+  const data = readFileSync(resolvedPath);
+  token.attrs[srcIndex][1] = `data:${mime};base64,${data.toString('base64')}`;
+  return self.renderToken(tokens, idx, options);
+};
 
 // Render fenced mermaid blocks as <div class="mermaid"> for in-browser rendering.
 // This replaces the default fence renderer only for the "mermaid" language token —
@@ -103,7 +145,7 @@ function buildTocHtml(tokens, headingPages) {
   return html;
 }
 
-export function renderMarkdown(source, { toc, headingPages } = {}) {
+export function renderMarkdown(source, { toc, headingPages, baseDir } = {}) {
   const tokens = md.parse(source, {});
 
   let tocHtml = '';
@@ -111,6 +153,6 @@ export function renderMarkdown(source, { toc, headingPages } = {}) {
     tocHtml = buildTocHtml(tokens, headingPages);
   }
 
-  const body = wrapTableNumbers(md.renderer.render(tokens, md.options, {}));
+  const body = wrapTableNumbers(md.renderer.render(tokens, md.options, { baseDir }));
   return { body, tocHtml };
 }
