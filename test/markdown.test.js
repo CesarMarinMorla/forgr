@@ -111,3 +111,50 @@ test('h2 number stripping runs before slug generation', () => {
   const html = body('## 4. Component Stylings');
   assert.match(html, /<h2 id="component-stylings"/);
 });
+
+test('inlines local PNG image as base64 data URI', () => {
+  const src = '![sample](test/fixtures/assets/sample.png)';
+  const html = body(src, { baseDir: process.cwd() });
+  assert.match(html, /<img[^>]*src="data:image\/png;base64,[^"]+"/);
+  assert.doesNotMatch(html, /src="test\/fixtures\/assets\/sample\.png"/);
+});
+
+test('passes through remote http image URL unchanged', () => {
+  const src = '![alt](http://example.com/img.png)';
+  const html = body(src, { baseDir: process.cwd() });
+  assert.match(html, /src="http:\/\/example\.com\/img\.png"/);
+});
+
+test('passes through remote https image URL unchanged', () => {
+  const src = '![alt](https://example.com/img.png)';
+  const html = body(src, { baseDir: process.cwd() });
+  assert.match(html, /src="https:\/\/example\.com\/img\.png"/);
+});
+
+test('passes through data URI unchanged', () => {
+  const src = '![alt](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAA)';
+  const html = body(src, { baseDir: process.cwd() });
+  assert.match(html, /src="data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAA"/);
+});
+
+test('inlines local SVG as base64 data URI', () => {
+  const src = '![icon](test/fixtures/assets/icon.svg)';
+  const html = body(src, { baseDir: process.cwd() });
+  assert.match(html, /src="data:image\/svg\+xml;base64,[^"]+"/);
+});
+
+test('inlines local JPEG as base64 data URI', () => {
+  const src = '![small](test/fixtures/assets/small.jpg)';
+  const html = body(src, { baseDir: process.cwd() });
+  assert.match(html, /src="data:image\/jpeg;base64,[^"]+"/);
+});
+
+test('throws on missing local image', () => {
+  const src = '![missing](test/fixtures/assets/does-not-exist.png)';
+  assert.throws(() => body(src, { baseDir: process.cwd() }), /image not found/);
+});
+
+test('throws when baseDir is not provided for local image', () => {
+  const src = '![img](test/fixtures/assets/sample.png)';
+  assert.throws(() => body(src), /baseDir/);
+});
