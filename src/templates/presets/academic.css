@@ -37,7 +37,7 @@ body {
   background: var(--paper);
   font-family: var(--font-body);
   font-size: 10.5pt;
-  line-height: 1.7;
+  line-height: 1.45;
   color: var(--ink);
   max-width: 660px;
   margin: 0 auto;
@@ -101,8 +101,8 @@ h2 {
   font-weight: 600;
   line-height: 1.25;
   color: var(--ink);
-  margin-top: 2.4em;
-  margin-bottom: 0.6em;
+  margin-top: 2em;
+  margin-bottom: 0.5em;
   position: relative;
   counter-increment: section;
 }
@@ -141,7 +141,7 @@ h4 { font-size: 0.95em; }
 h5 { font-size: 0.9em; font-style: italic; }
 h6 { font-size: 0.85em; font-style: italic; }
 
-p { margin: 0 0 0.7em 0; color: var(--ink); }
+p { margin: 0 0 0.35em 0; color: var(--ink); }
 strong { color: var(--ink); font-weight: 700; }
 em { color: var(--ink); }
 
@@ -160,7 +160,7 @@ li::marker { color: var(--signal); }
 
 /* Blockquote: italic serif, left border, clean */
 blockquote {
-  margin: 1.4em 0;
+  margin: 1.2em 0;
   padding: 0.2em 0 0.2em 1.2em;
   border-left: 2px solid var(--signal);
   color: var(--ink-soft);
@@ -185,7 +185,7 @@ pre {
   background: var(--surface);
   border-left: 2px solid var(--signal);
   padding: 1em 1.2em;
-  margin: 1.2em 0;
+  margin: 1em 0;
   overflow-x: auto;
   color: var(--ink);
 }
@@ -254,7 +254,7 @@ hr {
 .toc__list { list-style: none; padding: 0; margin: 0; }
 .toc__item {
   margin: 0;
-  line-height: 1.7;
+  line-height: 1.45;
   display: flex;
   align-items: baseline;
 }
