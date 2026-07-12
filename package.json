@@ -33,7 +33,6 @@
     "bin/",
     "src/",
     "scripts/postinstall.js",
-    "scripts/preuninstall.js",
     "package.json",
     "README.md",
     "LICENSE"
