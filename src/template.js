@@ -19,8 +19,7 @@ export async function renderTemplate(context = {}) {
   try {
     presetCss = await readFile(presetPath, 'utf8');
   } catch {
-    console.error(`Error: preset "${preset}" not found. Available: terminal, minimal, technical, academic`);
-    process.exit(1);
+    throw new Error(`preset "${preset}" not found. Available: terminal, minimal, technical, academic`);
   }
 
   const [templateSrc, plexSansRaw, plexMono400Raw, plexMono600Raw] = await Promise.all([
@@ -29,6 +28,10 @@ export async function renderTemplate(context = {}) {
     readFile(PLEX_MONO_400_PATH).catch(() => null),
     readFile(PLEX_MONO_600_PATH).catch(() => null),
   ]);
+
+  if (!plexSansRaw) console.warn(`Warning: font not found: ${PLEX_SANS_PATH} (falling back to system fonts)`);
+  if (!plexMono400Raw) console.warn(`Warning: font not found: ${PLEX_MONO_400_PATH} (falling back to system fonts)`);
+  if (!plexMono600Raw) console.warn(`Warning: font not found: ${PLEX_MONO_600_PATH} (falling back to system fonts)`);
 
   const plexSansB64 = plexSansRaw ? plexSansRaw.toString('base64') : null;
   const plexMono400B64 = plexMono400Raw ? plexMono400Raw.toString('base64') : null;

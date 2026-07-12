@@ -1,11 +1,10 @@
 import { Command } from 'commander';
 import { existsSync, rmSync } from 'fs';
-import { homedir } from 'os';
-import { join } from 'path';
+import { dirname } from 'path';
 import { run } from './pipeline.js';
+import { BROWSERS_PATH } from './browsers-path.js';
 
-const FORGR_DIR = join(homedir(), '.forgr');
-const BROWSERS_PATH = join(FORGR_DIR, 'browsers');
+const FORGR_DIR = dirname(BROWSERS_PATH);
 
 const program = new Command();
 
@@ -65,7 +64,8 @@ program
   .action(async (input, options) => {
     // Normalize toc: --toc sets true, --no-toc sets false, neither sets undefined
     const toc = options.toc === true ? true : options.toc === false ? false : undefined;
-    await run(input, { ...options, toc });
+    const outputPath = await run(input, { ...options, toc });
+    console.log(`Written: ${outputPath}`);
   });
 
 program.parseAsync(process.argv).catch((err) => {

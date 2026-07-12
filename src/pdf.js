@@ -68,13 +68,8 @@ async function ensureChromium() {
     console.log('');
     console.log('  ✓ Chromium downloaded successfully.');
     console.log('');
-  } catch {
-    console.error('');
-    console.error('  Failed to download Chromium.');
-    console.error('');
-    console.error('  Try running: npm run install-chromium');
-    console.error('');
-    process.exit(1);
+   } catch {
+    throw new Error('failed to download Chromium. Try running: npm run install-chromium');
   }
 }
 
@@ -93,8 +88,7 @@ export async function generatePdf(html, outputPath, { captureHeadings } = {}) {
   try {
     await fs.access(outputDir, fs.constants.W_OK);
   } catch {
-    console.error(`Error: output directory is not writable: ${outputDir}`);
-    process.exit(1);
+    throw new Error(`output directory is not writable: ${outputDir}`);
   }
 
   await ensureChromium();
@@ -105,12 +99,7 @@ export async function generatePdf(html, outputPath, { captureHeadings } = {}) {
   try {
     browser = await chromium.launch({ executablePath });
   } catch (err) {
-    console.error('');
-    console.error(`  Failed to launch Chromium: ${err.message}`);
-    console.error('');
-    console.error('  Try running: npm run install-chromium');
-    console.error('');
-    process.exit(1);
+    throw new Error(`failed to launch Chromium: ${err.message}. Try running: npm run install-chromium`);
   }
 
   const page = await browser.newPage();
@@ -170,8 +159,7 @@ export async function generatePdf(html, outputPath, { captureHeadings } = {}) {
     return { pageCount, headingPages };
   } catch (err) {
     await fs.remove(outputPath).catch(() => {});
-    console.error(`Error generating PDF: ${err.message}`);
-    process.exit(1);
+    throw new Error(`failed to generate PDF: ${err.message}`);
   } finally {
     await browser.close();
   }

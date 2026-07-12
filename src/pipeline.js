@@ -21,12 +21,17 @@ function templateContext(body, options, absInput) {
   };
 }
 
+async function renderStage(markdown, options, absInput, outputPath, withToc, headingPages) {
+  const { body, tocHtml } = renderMarkdown(markdown, { toc: withToc, headingPages });
+  const html = await renderTemplate(templateContext(tocHtml + body, options, absInput));
+  return generatePdf(html, outputPath, { captureHeadings: !withToc });
+}
+
 export async function run(inputPath, options = {}) {
   const absInput = path.resolve(inputPath);
 
   if (!await fs.pathExists(absInput)) {
-    console.error(`Error: file not found: ${absInput}`);
-    process.exit(1);
+    throw new Error(`file not found: ${absInput}`);
   }
 
   const outputPath = options.output
@@ -37,8 +42,7 @@ export async function run(inputPath, options = {}) {
   try {
     markdown = await fs.readFile(absInput, 'utf8');
   } catch (err) {
-    console.error(`Error reading ${absInput}: ${err.message}`);
-    process.exit(1);
+    throw new Error(`could not read ${absInput}: ${err.message}`);
   }
 
   // TOC decision: --toc / --no-toc win; otherwise auto-detect
@@ -47,19 +51,25 @@ export async function run(inputPath, options = {}) {
     toc = wordCount(markdown) >= LONG_DOC_WORDS;
   }
 
-  // First render: without TOC, always capture heading pages for later use
-  const { body, tocHtml } = renderMarkdown(markdown, { toc: false });
-  const html = await renderTemplate(templateContext(body, options, absInput));
-  const { pageCount, headingPages } = await generatePdf(html, outputPath, { captureHeadings: true });
+  let result;
+  try {
+    result = await renderStage(markdown, options, absInput, outputPath, false);
+  } catch (err) {
+    throw new Error(`render failed: ${err.message}`);
+  }
+
+  const { pageCount, headingPages } = result;
 
   // Decide if TOC should be included
   const needsToc = toc === true || (toc === false && options.toc === undefined && pageCount >= MIN_PAGES_FOR_TOC);
 
   if (needsToc) {
-    const { body: body2, tocHtml: tocHtml2 } = renderMarkdown(markdown, { toc: true, headingPages });
-    const html2 = await renderTemplate(templateContext(tocHtml2 + body2, options, absInput));
-    await generatePdf(html2, outputPath);
+    try {
+      await renderStage(markdown, options, absInput, outputPath, true, headingPages);
+    } catch (err) {
+      throw new Error(`render failed: ${err.message}`);
+    }
   }
 
-  console.log(`Written: ${outputPath}`);
+  return outputPath;
 }
