@@ -29,8 +29,8 @@
 
 ### Presets
 - [x] src/templates/presets/terminal.css — default preset (all-mono IBM Plex Mono headings, graphite/teal palette, terminal code blocks, NOTE callouts, tabular numbers, pagination control)
-- [x] src/templates/presets/anthropic.css — warm editorial preset
-- [x] src/templates/presets/minimal.css, technical.css, academic.css — populated with full CSS variable set and element rules
+- [ ] src/templates/presets/anthropic.css — created in Milestone 1, then removed (no replacement planned; see Known Issues in project AGENTS.md)
+- [x] src/templates/presets/minimal.css, technical.css, academic.css — built from the ground up with four distinct identities (see HIGH PRIORITY section below)
 
 ### Fonts
 - [x] IBMPlexSans-Variable.woff2 (45KB) — @fontsource-variable
@@ -81,14 +81,14 @@
 - [x] Test with all fixture files
 
 ### technical.css — from functional stub to intentional design
-- [ ] Define technical's design identity (dense, monospace-heavy, grid-like tables)
-- [ ] Write full CSS with distinct palette, infra/ops tooling feel
-- [ ] Test with all fixture files
+- [x] Define technical's design identity (dense, monospace-heavy, grid-like tables)
+- [x] Write full CSS with distinct palette, infra/ops tooling feel (full monospace, amber accent, full-grid tables, tinted code panels, bracket section markers)
+- [x] Test with all fixture files
 
 ### academic.css — from functional stub to intentional design
-- [ ] Define academic's design identity (serif body, footnote annotations, citation-friendly)
-- [ ] Write full CSS with distinct palette, scholarly typography
-- [ ] Test with all fixture files
+- [x] Define academic's design identity (serif body, footnote annotations, citation-friendly)
+- [x] Write full CSS with distinct palette, scholarly typography (serif + justified, sepia accent, roman-numeral sections, superscript citation links, ruled tables)
+- [x] Test with all fixture files
 
 ---
 
@@ -170,7 +170,7 @@ TOC is implemented without template partials — it runs at the markdown-render 
 
 Assessed 2026-07-06. Overall structure is sound — module boundaries match the spec and pipeline separation is clean. No major restructuring needed. The issues below are real but non-blocking for Milestone 1; items 1 and 2 will cause friction when the TUI (Milestone 2) and watch mode (Milestone 5) are added on top of the same pipeline.
 
-### Issue 1 — process.exit() scattered across modules (priority: medium)
+### Issue 1 — process.exit() scattered across modules (priority: resolved)
 
 `pdf.js`, `template.js`, `pipeline.js`, and `cli.js` all call `process.exit(1)` directly. This has two consequences:
 
@@ -194,7 +194,7 @@ try {
 
 Affects: `src/pdf.js`, `src/template.js`, `src/pipeline.js`.
 
-### Issue 2 — BROWSERS_PATH / FORGR_DIR defined in multiple places (priority: low)
+### Issue 2 — BROWSERS_PATH / FORGR_DIR defined in multiple places (priority: resolved)
 
 The path constants are defined independently in:
 - `src/browsers-path.js` (canonical)
@@ -205,7 +205,7 @@ The path constants are defined independently in:
 
 Affects: `src/cli.js`.
 
-### Issue 3 — markdown.js is doing two jobs (priority: low)
+### Issue 3 — markdown.js is doing two jobs (priority: resolved)
 
 `markdown.js` now handles both highlight.js initialisation (35+ imports and registrations, ~100 lines) and markdown-it configuration. These are separate concerns. As the language list grows the file will become hard to scan.
 
@@ -217,7 +217,7 @@ Affects: `src/markdown.js`.
 
 `minimal.css`, `technical.css`, and `academic.css` were empty placeholder files (35 bytes each). They have been populated with a complete CSS variable set and element rules. Each preset has its own palette (minimal/technical use graphite-teal, academic uses serif/brown).
 
-### Issue 5 — Silent font fallback violates the fail-loudly principle (priority: low)
+### Issue 5 — Silent font fallback violates the fail-loudly principle (priority: resolved)
 
 In `template.js`, all three font reads use `.catch(() => null)`. If a font file is missing, the template silently falls back to system fonts with no log output. The output looks wrong without any indication of why.
 
@@ -225,7 +225,7 @@ Per the project-wide fail-loudly rule (AGENTS.md, CLI Behavior section), this sh
 
 Affects: `src/template.js`.
 
-### Issue 6 — No error boundary in pipeline.js (priority: medium)
+### Issue 6 — No error boundary in pipeline.js (priority: resolved)
 
 `pipeline.js` calls `renderMarkdown`, `renderTemplate`, and `generatePdf` with no wrapping try/catch. If any of those throw an unhandled error (rather than calling `process.exit`), Node surfaces it as an unhandled promise rejection with a raw stack trace. A single try/catch at the pipeline level that re-throws a clean, user-facing error would fix this, and pairs well with Issue 1 (once modules throw instead of exiting, the pipeline is the right place to catch and re-format).
 
@@ -235,7 +235,7 @@ Affects: `src/pipeline.js`.
 
 ## Refactoring tasks (derived from assessment above)
 
-- [ ] Refactor pdf.js, template.js, pipeline.js to throw errors instead of calling process.exit — add single exit boundary in cli.js (Issue 1, 6)
-- [ ] Import BROWSERS_PATH from browsers-path.js in cli.js instead of re-deriving (Issue 2)
-- [ ] Extract hljs setup to src/highlighter.js (Issue 3)
-- [ ] Log a warning in template.js when a font file is not found (Issue 5)
+- [x] Refactor pdf.js, template.js, pipeline.js to throw errors instead of calling process.exit — add single exit boundary in cli.js (Issue 1, 6)
+- [x] Import BROWSERS_PATH from browsers-path.js in cli.js instead of re-deriving (Issue 2)
+- [x] Extract hljs setup to src/highlighter.js (Issue 3)
+- [x] Log a warning in template.js when a font file is not found (Issue 5)
