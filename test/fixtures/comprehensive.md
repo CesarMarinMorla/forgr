@@ -203,6 +203,39 @@ Key metrics to observe:
 
 > The spot instance (node-03) should not run stateful workloads. Use pod anti-affinity to prefer scheduling on persistent nodes.
 
+### 6.3 Request Flow
+
+A high-level view of how an inbound request moves through the layers:
+
+```mermaid
+flowchart LR
+  A[Client] --> B{Auth Gateway}
+  B -->|valid| C[API Server]
+  B -->|rejected| Z[401 Response]
+  C --> D[Domain Service]
+  D --> E[(PostgreSQL)]
+  D --> F[Cache]
+  C --> G[Response]
+```
+
+### 6.4 Authentication Sequence
+
+The handshake between client, gateway, and identity provider:
+
+```mermaid
+sequenceDiagram
+  participant C as Client
+  participant G as Auth Gateway
+  participant I as IdP
+  participant S as API Server
+  C->>G: POST /login (credentials)
+  G->>I: verify(credentials)
+  I-->>G: token
+  G-->>C: set-cookie(session)
+  C->>S: GET /resource (session)
+  S-->>C: 200 OK (payload)
+```
+
 ----
 
 ## 7. Edge Cases

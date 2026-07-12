@@ -9,6 +9,16 @@ import { run } from '../src/pipeline.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES_DIR = path.join(__dirname, 'fixtures');
 
+// Run against a single preset at a time. Override with the FORGR_PRESET env var:
+//   FORGR_PRESET=technical npm test
+//   FORGR_PRESET=academic  npm test
+// Defaults to "terminal" when unset.
+const PRESET = process.env.FORGR_PRESET || 'terminal';
+const VALID_PRESETS = ['terminal', 'minimal', 'technical', 'academic'];
+if (!VALID_PRESETS.includes(PRESET)) {
+  throw new Error(`FORGR_PRESET must be one of: ${VALID_PRESETS.join(', ')} (got "${PRESET}")`);
+}
+
 // PDFs are kept after the test run for visual review.
 // They are gitignored via test/fixtures/*.pdf.
 
@@ -45,8 +55,8 @@ async function assertValidPdf(outputPath, label) {
 const fixtures = await getFixtures();
 
 for (const fixture of fixtures) {
-  test(`integration: converts ${fixture.name} to a PDF file`, { timeout: 60000 }, async () => {
-    await run(fixture.input, { output: fixture.output });
+  test(`integration [${PRESET}]: converts ${fixture.name} to a PDF file`, { timeout: 60000 }, async () => {
+    await run(fixture.input, { output: fixture.output, preset: PRESET });
     await assertValidPdf(fixture.output, fixture.name);
   });
 }
