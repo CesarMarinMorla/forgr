@@ -62,11 +62,12 @@ The default **terminal** preset uses IBM Plex Sans for body text, IBM Plex Mono 
 Pick a design with `--preset <name>`. Each preset is a standalone CSS theme built from the ground up, so the four are visually distinct rather than reskins of one template.
 
 | Preset | Identity | Best for |
-|---|---|---|
+|---|---|---|---|
 | `terminal` | All-mono headings, graphite/cold-teal palette, dark terminal-pane code blocks, `01 02 03` section counters | Infra reports, status dashboards, incident reviews |
 | `minimal` | System sans, single gray, hairline rules, no accent | Clean, neutral documents |
 | `technical` | Fully monospace, amber accent, full-grid tables, tinted code panels, `[NN]` bracket section markers | Runbooks, config specs, ops notes |
 | `academic` | Serif body, justified text, sepia accent, roman-numeral sections, superscript citation links | Papers, theses, scholarly write-ups |
+| `newsletter` | Warm off-white paper, serif headings, sans-serif body, terra-cotta coral accent, generous measure | Product changelogs, editorial round-ups, org announcements |
 
 ```bash
 forgr document.md --preset technical
