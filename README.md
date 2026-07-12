@@ -75,7 +75,7 @@ forgr document.md --preset technical
 ## Roadmap
 
 - Milestone 1 - barebones CLI, stock preset (done)
-- Milestone 2 - TUI preset picker
-- Milestone 3 - live PDF preview in TUI
-- Milestone 4 - Mermaid diagrams, image embedding
-- Milestone 5 - config files, watch mode, cover page, TOC
+- Milestone 2 - Mermaid rendering, image embedding
+- Milestone 3 - TUI preset picker
+- Milestone 4 - live PDF preview in TUI
+- Milestone 5 - config files, watch mode, cover page

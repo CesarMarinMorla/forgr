@@ -29,7 +29,6 @@
 
 ### Presets
 - [x] src/templates/presets/terminal.css — default preset (all-mono IBM Plex Mono headings, graphite/teal palette, terminal code blocks, NOTE callouts, tabular numbers, pagination control)
-- [ ] src/templates/presets/anthropic.css — created in Milestone 1, then removed (no replacement planned; see Known Issues in project AGENTS.md)
 - [x] src/templates/presets/minimal.css, technical.css, academic.css — built from the ground up with four distinct identities (see HIGH PRIORITY section below)
 
 ### Fonts
@@ -50,15 +49,19 @@
 ### Test suite
 - [x] test/markdown.test.js — unit tests for markdown rendering + table number wrapping
 - [x] test/pipeline.test.js — output path resolution tests
-- [x] test/integration.test.js — end-to-end PDF generation test
-- [x] npm test = 22 tests (all passing)
-- [x] npm run test:unit = unit tests only (excludes integration)
+- [x] test/integration.test.js — end-to-end PDF generation test (globs all fixtures)
+- [x] npm test = 29 tests (21 unit + 8 integration), all passing
+- [x] npm run test:unit = unit tests only (21 tests, excludes integration)
+- [x] integration test accepts `FORGR_PRESET` env var (terminal|minimal|technical|academic, default terminal) to validate one preset at a time; rejects unknown values
+- [x] Rendered fixture PDFs stay in test/fixtures/ (gitignored) for visual review — do not delete them after a run
 
 ### Dev tooling
 - [x] scripts/font-diagnostic.js — 7-comparison side-by-side font diagnostic PDF
 - [x] scripts/postinstall.js — manual Chromium install script
 - [x] scripts/preuninstall.js — Chromium cache cleanup on uninstall
-- [x] test/fixtures/ — 7 .md fixtures (basic, code, comprehensive, converter_features, formatting, lists, tables)
+- [x] test/fixtures/ — 8 .md fixtures (basic, code, comprehensive, converter_features, formatting, lists, tables, mermaid)
+- [x] test/fixtures/mermaid.md — flowchart, sequence, state, and class diagrams exercising the mermaid fence renderer
+- [x] test/fixtures/comprehensive.md — two mermaid diagrams added as sections 6.3 (request flow) and 6.4 (auth sequence)
 - [x] docs/font-investigation.md — font issue investigation and resolution notes
 
 ### Published
@@ -86,34 +89,38 @@
 - [x] Test with all fixture files
 
 ### academic.css — from functional stub to intentional design
-- [x] Define academic's design identity (serif body, footnote annotations, citation-friendly)
-- [x] Write full CSS with distinct palette, scholarly typography (serif + justified, sepia accent, roman-numeral sections, superscript citation links, ruled tables)
+- [x] Define academic's design identity (typeset-journal: serif body, marginal section folios, citation-friendly)
+- [x] Write full CSS with distinct palette, scholarly typography (serif + justified, rubric-blue accent, left margin rail with roman-numeral section folios, superscript citation links, ruled tables, QED halmos on blockquotes, TOC dot leaders, opening drop cap)
 - [x] Test with all fixture files
 
 ---
 
-## Pending — Milestone 2 (TUI Preset Picker)
+## Pending — Milestone 2 (Mermaid Rendering)
+
+- [x] Mermaid fence renderer emits `<div class="mermaid">` with raw source (src/markdown.js)
+- [x] Mermaid fixtures added: test/fixtures/mermaid.md (flowchart/sequence/state/class) + diagrams in comprehensive.md (sections 6.3, 6.4)
+- [ ] Wire mermaid runtime into base.html (load the library) so diagrams actually render; pdf.js already calls mermaid.run() when the global is present
+- [ ] Image inlining: resolve local image paths (and mermaid PNG output) to base64 data URIs during HTML generation — required so rendered diagrams embed without a base URL
+- [ ] Verify mermaid diagrams render across all four presets via the integration suite
+
+---
+
+## Pending — Milestone 3 (TUI Preset Picker)
 
 - [ ] `--interactive` flag on CLI
 - [ ] Scan ~/.config/forgr/presets/*.json for user presets
 - [ ] Ink-based TUI — display preset names and descriptions
 - [ ] Arrow key navigation, Enter to select and render
-- [ ] No PDF preview (that is Milestone 3)
+- [ ] No PDF preview (that is Milestone 4)
 
 ---
 
-## Pending — Milestone 3 (TUI with Live PDF Preview)
+## Pending — Milestone 4 (TUI with Live PDF Preview)
 
 - [ ] After preset selection, render first page as PNG via Playwright screenshot
 - [ ] Display PNG in terminal via terminal-image
 - [ ] Cache by content_hash + preset_hash (~200ms warm target)
 - [ ] Fallback to text mode if terminal lacks image support
-
----
-
-## Pending — Milestone 4 (Mermaid + Images)
-
-- [ ] Image inlining: resolve local image paths to base64 data URIs during HTML generation
 
 ---
 
@@ -161,7 +168,7 @@ TOC is implemented without template partials — it runs at the markdown-render 
 - Margins: 2cm all sides via Playwright page.pdf(), never via CSS body padding
 - Output: silent overwrite, no confirmation prompt (required for --watch)
 - Playwright version: pinned exactly at 1.61.1 (no ^ or ~)
-- Heading: all-mono IBM Plex Mono 400, section counter in teal (#1C756E)
+- Heading (terminal preset): all-mono IBM Plex Mono 400, section counter in teal (#1C756E). Other presets define their own heading treatments (see Presets section).
 - Fail loudly on all errors — no silent degradation anywhere in the pipeline
 
 ---
