@@ -6,15 +6,15 @@
 - [x] Git repo initialized, remote set
 - [x] AGENTS.md written with full spec
 - [x] .gitignore (node_modules, *.pdf, .env, logs, editor dirs, dist/, coverage/)
-- [x] package-lock.json untracked and ignored
+- [x] package-lock.json committed for CI reproducibility (`npm ci` in release workflow)
 - [x] package.json — repository, bugs, homepage, author, keywords, files fields
 - [x] LICENSE (MIT)
 
 ### Core pipeline
 - [x] package.json — all dependencies pinned (playwright-core at exact 1.61.1)
 - [x] Chromium downloaded on first `forgr` run, not during install
-- [x] preuninstall script auto-removes Chromium cache
-- [x] `forgr uninstall` command removes cache without removing the tool
+- [x] `forgr uninstall` command removes Chromium cache without removing the tool (primary path)
+- [x] `preuninstall` npm script exists in package.json but its script file is NOT published (`scripts/preuninstall.js` excluded from `"files"`), so npm uninstall does not auto-clean the cache
 - [x] bin/forgr entry point (executable)
 - [x] src/cli.js — commander, --output, --preset, uninstall command, defaults to terminal
 - [x] src/browsers-path.js — canonical BROWSERS_PATH (~/.forgr/browsers) with env var injection
@@ -51,7 +51,7 @@
 - [x] test/pipeline.test.js — output path resolution tests
 - [x] test/integration.test.js — end-to-end PDF generation test (globs all fixtures)
 - [x] npm test = 38 tests (30 unit + 8 integration), all passing
-- [x] npm run test:unit = unit tests only (21 tests, excludes integration)
+- [x] npm run test:unit = unit tests only (30 tests, excludes integration)
 - [x] integration test accepts `FORGR_PRESET` env var (terminal|minimal|technical|academic|newsletter, default terminal) to validate one preset at a time; rejects unknown values
 - [x] Rendered fixture PDFs stay in test/fixtures/ (gitignored) for visual review — do not delete them after a run
 
