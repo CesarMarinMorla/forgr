@@ -252,8 +252,9 @@ hr {
   display: flex;
 }
 .toc__item a {
-  color: var(--ink-soft);
+  color: var(--ink);
   text-decoration: none;
+  border-bottom: 1px solid var(--line);
   flex: 1;
 }
 .toc__page {

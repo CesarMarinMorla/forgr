@@ -1,77 +1,303 @@
+/* ===== Forgr — "Typeset Journal" Preset ===== */
+/* Design concept: a contribution to a typeset journal or thesis. Body set in
+   a humanist book serif with a justified measure; a hairline rail runs down
+   the left of the column and each section's roman numeral is set in the
+   gutter beside it, the way journal comps number sections in the margin.
+   The single accent is a manuscript rubric blue, used for rules, folios and
+   citation marks. Blockquotes close with a QED halmos. No terminal chrome,
+   no cream paper, no terracotta. */
+
 :root {
-  --font-display: 'IBM Plex Serif', Georgia, 'Times New Roman', serif;
-  --font-mono: 'IBM Plex Mono', 'Consolas', monospace;
-  --ink: #1A1A1A;
-  --ink-soft: #4A4A4A;
-  --graphite: #6E6E6E;
-  --signal: #8B4513;
-  --signal-dim: #5C2E0A;
-  --line: #D0CEC8;
-  --line-soft: #E6E4DE;
-  --surface: #F5F4F0;
-  --surface-code: #1E1E1E;
-  --radius: 2px;
+  --font-serif: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, 'Times New Roman', serif;
+  --font-mono: 'Courier New', Courier, monospace;
+
+  --paper: #FFFFFF;
+  --ink: #1B1714;
+  --ink-soft: #56504A;
+  --graphite: #8C8377;
+
+  --signal: #2E4F6B;        /* Prussian / rubric blue — the one accent */
+  --signal-dim: #1B3349;
+  --signal-bg: #F2F5F8;
+
+  --line: #DAD4C9;
+  --line-soft: #EAE5DB;
+  --surface: #F4F1EA;
+
+  --radius: 0px;
 }
 
 * { box-sizing: border-box; }
 
 body {
-  font-family: var(--font-display);
+  font-family: var(--font-serif);
   font-size: 11pt;
-  line-height: 1.7;
+  line-height: 1.72;
   color: var(--ink);
-  max-width: 720px;
+  max-width: 680px;
   margin: 0 auto;
+  text-align: justify;
+  hyphens: auto;
 }
 
-.doc-meta { display: flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: 0.7rem; color: var(--graphite); border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 2.5rem; }
-.doc-meta__dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--signal); flex-shrink: 0; }
-.doc-meta__label { flex: 1; color: var(--ink-soft); }
-.doc-meta__timestamp { color: var(--graphite); }
+/* The column carries a hairline rail; section folios sit in the gutter to its
+   left. Padding holds the numerals clear of the text without spilling into
+   the physical page margin. */
+main {
+  border-left: 1px solid var(--line);
+  padding-left: 2.2em;
+  position: relative;
+}
 
-h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); font-weight: 600; color: var(--ink); line-height: 1.3; }
-h1 { font-size: 1.8em; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 0.3em 0; }
-h2 { font-size: 1.2em; font-weight: 600; margin-top: 2em; margin-bottom: 0.6em; padding-bottom: 0.3em; border-bottom: 1px solid var(--line); }
-h3 { font-size: 1em; font-weight: 600; margin-top: 1.6em; margin-bottom: 0.4em; }
+/* Running head: small-caps byline under a double rule */
+.doc-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-family: var(--font-serif);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--graphite);
+  border-bottom: 1px solid var(--line);
+  border-top: 3px double var(--signal);
+  padding: 8px 0;
+  margin-bottom: 2.8rem;
+}
+.doc-meta__dot { display: none; }
+.doc-meta__label { flex: 1; font-variant: small-caps; letter-spacing: 0.16em; color: var(--ink-soft); }
+.doc-meta__timestamp { font-variant: small-caps; }
 
-p { margin: 0.9em 0; color: var(--ink); text-align: justify; }
-strong { color: var(--ink); font-weight: 600; }
-a { color: var(--signal-dim); text-decoration: none; border-bottom: 1px solid var(--signal); }
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  color: var(--ink);
+  line-height: 1.25;
+}
 
-ul { padding-left: 1.5em; margin: 0.8em 0; }
-ol { padding-left: 2em; margin: 0.8em 0; }
-li { margin-bottom: 0.35em; }
+/* Title: left-set, large, closed by a single rule */
+h1 {
+  font-size: 1.85em;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  margin: 0 0 0.4em 0;
+  padding-bottom: 0.35em;
+  border-bottom: 1px solid var(--signal);
+}
 
-blockquote { margin: 1.3em 0; padding: 0.2em 0 0.2em 1.2em; border-left: 2px solid var(--signal); color: var(--ink-soft); font-style: italic; }
+/* Sections: small-caps labels; the roman numeral is set in the margin gutter
+   against the rail (the signature). */
+body { counter-reset: section; }
+h2 {
+  position: relative;
+  font-size: 1.1em;
+  font-weight: 600;
+  font-variant: small-caps;
+  letter-spacing: 0.09em;
+  color: var(--ink);
+  margin-top: 2.6em;
+  margin-bottom: 0.8em;
+  padding-bottom: 0.25em;
+  border-bottom: 1px solid var(--line);
+  counter-increment: section;
+}
+h2::before {
+  content: counter(section, upper-roman);
+  position: absolute;
+  left: -2.35em;
+  top: 0.12em;
+  width: 1.8em;
+  text-align: right;
+  color: var(--signal);
+  font-weight: 600;
+  font-size: 1.05em;
+  font-variant: normal;
+}
+
+h3 {
+  font-size: 1em;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--ink-soft);
+  margin-top: 1.7em;
+  margin-bottom: 0.4em;
+}
+h4, h5, h6 {
+  font-size: 0.95em;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--ink-soft);
+  margin-top: 1.3em;
+  margin-bottom: 0.3em;
+}
+
+p { margin: 0.7em 0; color: var(--ink); }
+strong { color: var(--ink); font-weight: 700; }
+em { color: var(--ink); }
+
+/* Links read as superscript citations: small, rubric blue, unobtrusive */
+a {
+  color: var(--signal);
+  text-decoration: none;
+  vertical-align: super;
+  font-size: 0.7em;
+  font-weight: 600;
+}
+
+ul { padding-left: 1.6em; margin: 0.8em 0; }
+ol { padding-left: 1.8em; margin: 0.8em 0; }
+li { margin-bottom: 0.3em; }
+li::marker { color: var(--signal); }
+
+/* Blockquote as a proof/remark: indented, italic, rubric rule, closed by a
+   quiet QED halmos — the scholarly "end of proof" mark. */
+blockquote {
+  margin: 1.4em 0 1.4em 1.6em;
+  padding: 0.1em 0 0.1em 1.1em;
+  border-left: 2px solid var(--signal);
+  color: var(--ink-soft);
+  font-style: italic;
+  font-size: 0.98em;
+  text-align: left;
+}
 blockquote p { margin: 0; }
+blockquote::after {
+  content: "\25A0";
+  display: block;
+  text-align: right;
+  color: var(--graphite);
+  font-size: 0.7em;
+  margin-top: 0.4em;
+}
 
-code { font-family: var(--font-mono); font-size: 0.85em; background: var(--surface); border: 1px solid var(--line); padding: 0.1em 0.35em; border-radius: var(--radius); color: var(--signal-dim); }
-pre { font-family: var(--font-mono); background: var(--surface-code); border-radius: var(--radius); padding: 1.2em; overflow-x: auto; margin: 1.4em 0; line-height: 1.55; }
-pre code { background: none; border: none; padding: 0; font-size: 0.82em; color: #E6EDF3; }
+code {
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 0.08em 0.3em;
+  color: var(--signal-dim);
+}
 
-table { width: 100%; border-collapse: collapse; margin: 1.4em 0; font-size: 0.88em; }
-thead th { font-family: var(--font-mono); font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; color: var(--graphite); text-align: left; padding: 0.5em 0.8em; border-bottom: 2px solid var(--ink); }
-tbody td { padding: 0.55em 0.8em; border-bottom: 1px solid var(--line-soft); color: var(--ink); }
+pre {
+  font-family: var(--font-mono);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--signal);
+  padding: 1em 1.2em;
+  overflow-x: auto;
+  margin: 1.4em 0;
+  line-height: 1.5;
+  text-align: left;
+}
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.82em;
+  color: var(--ink);
+}
 
-img { max-width: 100%; height: auto; display: block; margin: 1.6em auto; border-radius: var(--radius); border: 1px solid var(--line); }
-hr { border: none; border-top: 1px solid var(--line); margin: 2.2em 0; }
+/* Tables: ruled, serif, small-caps headers, no grid */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+  font-size: 0.9em;
+}
+thead th {
+  font-family: var(--font-serif);
+  font-size: 0.8em;
+  font-variant: small-caps;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  color: var(--signal-dim);
+  text-align: left;
+  padding: 0.45em 0.7em;
+  border-bottom: 1.5px solid var(--signal);
+}
+tbody td {
+  padding: 0.45em 0.7em;
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--ink);
+  vertical-align: top;
+}
+tbody td .num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--signal-dim);
+}
+tbody tr:last-child td { border-bottom: 1px solid var(--line); }
 
-.toc { margin-bottom: 2.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--line); }
-.toc__title { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--graphite); margin: 0 0 0.8em 0; }
+img {
+  max-width: 90%;
+  height: auto;
+  display: block;
+  margin: 1.8em auto;
+  border: 1px solid var(--line);
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 2.4em 0;
+}
+
+/* Table of contents with dot leaders between entry and page number */
+.toc {
+  margin-bottom: 2.8rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+.toc__title {
+  font-family: var(--font-serif);
+  font-size: 0.72rem;
+  font-variant: small-caps;
+  letter-spacing: 0.18em;
+  text-transform: lowercase;
+  color: var(--signal);
+  margin: 0 0 0.8em 0;
+}
 .toc__list { list-style: none; padding: 0; margin: 0; }
-.toc__item { margin: 0; line-height: 1.7; display: flex; }
-.toc__item a { color: var(--ink-soft); text-decoration: none; flex: 1; }
-.toc__page { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--graphite); margin-left: auto; }
-.toc__item--h1 { margin-left: 0; font-weight: 600; }
-.toc__item--h2 { margin-left: 1.2em; }
-.toc__item--h3 { margin-left: 2.4em; font-style: italic; color: var(--ink-soft); }
-.toc__item--h4 { margin-left: 3.6em; font-style: italic; font-size: 0.9em; }
-.toc__item--h5 { margin-left: 4.8em; font-style: italic; font-size: 0.85em; }
-.toc__item--h6 { margin-left: 6em; font-style: italic; font-size: 0.8em; }
+.toc__item {
+  margin: 0;
+  line-height: 1.7;
+  display: flex;
+  align-items: baseline;
+}
+.toc__item a {
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--line);
+  vertical-align: baseline;
+  font-size: 1em;
+  font-weight: 400;
+  flex: 1 1 auto;
+}
+.toc__page {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--graphite);
+  margin-left: auto;
+  padding-left: 0.5em;
+  background: var(--paper);
+}
+.toc__item--h1 { margin-left: 0; font-weight: 600; font-variant: small-caps; }
+.toc__item--h2 { margin-left: 1.4em; }
+.toc__item--h3 { margin-left: 2.8em; font-style: italic; color: var(--ink-soft); }
+.toc__item--h4 { margin-left: 4.2em; font-style: italic; font-size: 0.9em; }
+.toc__item--h5 { margin-left: 5.6em; font-style: italic; font-size: 0.85em; }
+.toc__item--h6 { margin-left: 7em; font-style: italic; font-size: 0.8em; }
+
+/* Restrained rubric tint for code tokens only */
+.hljs-keyword, .hljs-selector-tag, .hljs-subst { color: var(--signal-dim); font-weight: 600; }
+.hljs-string, .hljs-regexp, .hljs-addition { color: var(--ink-soft); font-style: italic; }
+.hljs-comment { color: var(--graphite); font-style: italic; }
+.hljs-number, .hljs-literal { color: var(--signal); }
 
 @media print {
   body { padding: 0; }
   h1, h2, h3, h4, h5, h6 { break-after: avoid; }
   table, pre, blockquote { break-inside: avoid; }
   p { widows: 2; orphans: 2; }
+  pre { white-space: pre-wrap; word-break: break-word; }
 }
