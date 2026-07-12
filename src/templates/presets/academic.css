@@ -188,6 +188,8 @@ pre {
   margin: 1em 0;
   overflow-x: auto;
   color: var(--ink);
+  text-align: left;
+  word-spacing: 0;
 }
 pre code {
   background: none;
