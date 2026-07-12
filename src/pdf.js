@@ -12,7 +12,7 @@ import { BROWSERS_PATH } from './browsers-path.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MERMAID_DIST = path.resolve(__dirname, '..', 'node_modules', 'mermaid', 'dist', 'mermaid.min.js');
 
-const PRESET_MERMAID_THEMES = {
+export const PRESET_MERMAID_THEMES = {
   newsletter: {
     theme: 'base',
     themeVariables: {
@@ -31,6 +31,12 @@ const PRESET_MERMAID_THEMES = {
       textColor: '#1C2128',
       mainBkg: '#ECFDFB',
       nodeBorder: '#0F766E',
+      pieSectionTextColor: '#1C2128',
+      pie1: '#2DD4BF',
+      pie2: '#FDE68A',
+      pie3: '#F9A8D4',
+      pie4: '#C4B5FD',
+      pie5: '#BEF264',
     },
   },
   minimal: {
