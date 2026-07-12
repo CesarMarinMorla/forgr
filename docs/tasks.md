@@ -1,5 +1,16 @@
 # forgr — Tasks
 
+## Status
+
+| Milestone | Scope | State |
+|---|---|---|
+| 1 | Published CLI (v0.1.0) | Done |
+| 2 | Mermaid rendering & image embedding | Done |
+| 2.5 | Preset expansion & polish (newsletter preset, academic revamp, spacing, mermaid colors) | Done |
+| 3 | TUI preset picker | Pending |
+| 4 | TUI with live PDF preview | Pending |
+| 5 | Config, watch mode, cover page | Pending |
+
 ## Milestone 1 — Published (v0.1.0)
 
 ### Project setup
@@ -124,7 +135,7 @@
 
 ---
 
-## Pending — Milestone 3 (TUI Preset Picker)
+## Milestone 3 — TUI Preset Picker (Pending)
 
 - [ ] `--interactive` flag on CLI
 - [ ] Scan ~/.config/forgr/presets/*.json for user presets
@@ -134,7 +145,7 @@
 
 ---
 
-## Pending — Milestone 4 (TUI with Live PDF Preview)
+## Milestone 4 — TUI with Live PDF Preview (Pending)
 
 - [ ] After preset selection, render first page as PNG via Playwright screenshot
 - [ ] Display PNG in terminal via terminal-image
@@ -161,7 +172,7 @@ TOC is implemented without template partials — it runs at the markdown-render 
 | `LONG_DOC_WORDS` | `src/pipeline.js` | `8000` |
 | `MIN_PAGES_FOR_TOC` | `src/pipeline.js` | `3` |
 
-## Pending — Milestone 5 (Config, Watch, Cover)
+## Milestone 5 — Config, Watch, Cover (Pending)
 
 - [ ] .forgrrc config file support
 - [ ] Frontmatter support in Markdown files
