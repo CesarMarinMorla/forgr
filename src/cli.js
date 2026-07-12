@@ -58,7 +58,7 @@ program
   .description('Convert a Markdown file to PDF')
   .argument('<input>', 'Markdown file to convert')
   .option('-o, --output <path>', 'Output PDF path (default: same directory as input)')
-  .option('-p, --preset <name>', 'Preset to use (terminal, minimal, technical, academic)', 'terminal')
+  .option('-p, --preset <name>', 'Preset to use (terminal, minimal, technical, academic, newsletter)', 'terminal')
   .option('--toc', 'Force generate table of contents')
   .option('--no-toc', 'Skip table of contents')
   .action(async (input, options) => {

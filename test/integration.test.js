@@ -14,7 +14,7 @@ const FIXTURES_DIR = path.join(__dirname, 'fixtures');
 //   FORGR_PRESET=academic  npm test
 // Defaults to "terminal" when unset.
 const PRESET = process.env.FORGR_PRESET || 'terminal';
-const VALID_PRESETS = ['terminal', 'minimal', 'technical', 'academic'];
+const VALID_PRESETS = ['terminal', 'minimal', 'technical', 'academic', 'newsletter'];
 if (!VALID_PRESETS.includes(PRESET)) {
   throw new Error(`FORGR_PRESET must be one of: ${VALID_PRESETS.join(', ')} (got "${PRESET}")`);
 }

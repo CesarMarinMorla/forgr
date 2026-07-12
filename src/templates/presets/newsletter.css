@@ -1,0 +1,237 @@
+/* ===== Forgr — "Newsletter" Preset ===== */
+/* Design concept: a warm editorial newsletter or product changelog. Body set in
+   a clean sans-serif at a generous measure; headings in a serif stack for a
+   warm, curated feel. The single accent is a terra-cotta coral used for rules,
+   section markers, and emphasis. Blockquotes read as pull quotes; tables are
+   minimal and borderless. No terminal chrome, no monospace body, no cold gray. */
+
+:root {
+  --font-body: 'IBM Plex Sans', -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: Georgia, 'Times New Roman', 'Iowan Old Style', Palatino, serif;
+  --font-mono: 'IBM Plex Mono', Menlo, 'SF Mono', Consolas, monospace;
+
+  --paper: #FAF8F5;
+  --ink: #2D2A24;
+  --ink-soft: #6B6560;
+  --graphite: #9B938B;
+
+  --signal: #C85A48;        /* warm terra-cotta coral — the one accent */
+  --signal-dim: #8C3D2F;
+  --signal-bg: #FDF1EE;
+
+  --line: #E6E0D8;
+  --line-soft: #F0EBE4;
+
+  --surface: #F5F2EC;
+  --surface-code: #F0ECE5;
+}
+
+* { box-sizing: border-box; }
+
+@page { background: var(--paper); }
+
+html { background: var(--paper); }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 10.5pt;
+  line-height: 1.7;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.doc-meta {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--graphite);
+  text-align: left;
+  border-bottom: 1px solid var(--line-soft);
+  padding-bottom: 10px;
+  margin-bottom: 2.5rem;
+}
+.doc-meta__dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--signal);
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.doc-meta__label { text-transform: uppercase; letter-spacing: 0.08em; }
+.doc-meta__timestamp { margin-left: 0.6em; }
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+h1 {
+  font-size: 22pt;
+  font-weight: 700;
+  margin: 0 0 0.5em 0;
+  line-height: 1.25;
+  border-bottom: 2px solid var(--signal);
+  padding-bottom: 0.25em;
+  page-break-before: always;
+}
+h1:first-of-type { page-break-before: avoid; }
+
+h2 {
+  font-size: 15pt;
+  margin: 1.2em 0 0.4em 0;
+  padding-bottom: 0.2em;
+  border-bottom: 1px solid var(--line);
+}
+h3 { font-size: 12pt; margin: 1em 0 0.3em 0; color: var(--ink-soft); }
+h4, h5, h6 { font-size: 10.5pt; margin: 0.6em 0 0.2em 0; }
+
+p { margin: 0 0 0.6em 0; }
+strong { font-weight: 700; }
+a { color: var(--signal); text-decoration: underline; }
+
+ul { padding-left: 1.3em; margin: 0.8em 0; }
+ol { padding-left: 2em; margin: 0.8em 0; }
+li { margin-bottom: 0.3em; }
+
+hr {
+  border: none;
+  text-align: center;
+  margin: 1.4em 0;
+  font-size: 0.9em;
+  color: var(--graphite);
+}
+hr::after { content: "\00B7  \00B7  \00B7"; letter-spacing: 0.3em; }
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--surface);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  color: var(--ink);
+}
+
+pre {
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  line-height: 1.55;
+  background: var(--surface-code);
+  border-left: 3px solid var(--signal);
+  padding: 1em 1.2em;
+  margin: 1em 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-x: auto;
+  border-radius: 0 4px 4px 0;
+}
+pre code { background: none; padding: 0; border-radius: 0; }
+
+blockquote {
+  margin: 1.2em 0;
+  padding: 0.6em 1em;
+  background: var(--surface);
+  border-left: 3px solid var(--signal);
+  font-size: 1.1em;
+  line-height: 1.65;
+  font-style: italic;
+  color: var(--ink-soft);
+  border-radius: 0 4px 4px 0;
+}
+blockquote p { margin: 0; }
+blockquote p + p { margin-top: 0.4em; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+  font-size: 0.88em;
+}
+thead th {
+  text-align: left;
+  font-weight: 600;
+  padding: 0.5em 0.6em;
+  border-bottom: 2px solid var(--signal);
+  color: var(--ink);
+}
+tbody td {
+  padding: 0.4em 0.6em;
+  border-bottom: 1px solid var(--line-soft);
+  vertical-align: top;
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody td:empty::after { content: "\2014"; color: var(--line); }
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.6em auto;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.page-break { page-break-before: always; }
+.avoid-break { page-break-inside: avoid; }
+
+.toc {
+  margin-bottom: 2.5rem;
+  padding: 1.2em 1.4em;
+  background: var(--surface);
+  border-radius: 6px;
+}
+.toc__title {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--signal);
+  margin: 0 0 0.8em 0;
+  font-weight: 700;
+}
+.toc__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.toc__item {
+  margin: 0;
+  line-height: 1.8;
+  display: flex;
+}
+.toc__item a {
+  color: var(--ink);
+  text-decoration: none;
+  flex: 1;
+}
+.toc__item a:hover { color: var(--signal); }
+.toc__page {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--graphite);
+  font-size: 0.85em;
+  margin-left: auto;
+}
+.toc__item--h1 { margin-left: 0; font-weight: 700; }
+.toc__item--h2 { margin-left: 1.2em; }
+.toc__item--h3 { margin-left: 2.4em; font-weight: 400; color: var(--ink-soft); }
+.toc__item--h4 { margin-left: 3.6em; font-weight: 400; font-size: 0.9em; }
+.toc__item--h5 { margin-left: 4.8em; font-weight: 400; font-size: 0.85em; }
+.toc__item--h6 { margin-left: 6em; font-weight: 400; font-size: 0.8em; }
+
+.hljs-keyword, .hljs-selector-tag, .hljs-subst { color: var(--ink); font-weight: 600; }
+.hljs-string, .hljs-regexp, .hljs-addition { color: var(--signal-dim); }
+.hljs-comment { color: var(--graphite); font-style: italic; }
+.hljs-number, .hljs-literal { color: var(--signal); }
+
+@media print {
+  html { background: var(--paper); }
+  body { padding: 0; }
+
+  h1, h2, h3, h4, h5, h6 { break-after: avoid; }
+  table, pre, blockquote { break-inside: avoid; }
+  p { widows: 2; orphans: 2; }
+}

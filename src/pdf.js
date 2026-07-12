@@ -13,6 +13,16 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MERMAID_DIST = path.resolve(__dirname, '..', 'node_modules', 'mermaid', 'dist', 'mermaid.min.js');
 
 const PRESET_MERMAID_THEMES = {
+  newsletter: {
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#C85A48',
+      lineColor: '#8C3D2F',
+      textColor: '#2D2A24',
+      mainBkg: '#FDF1EE',
+      nodeBorder: '#C85A48',
+    },
+  },
   terminal: {
     theme: 'base',
     themeVariables: {

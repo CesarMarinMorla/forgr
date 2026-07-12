@@ -19,7 +19,7 @@ export async function renderTemplate(context = {}) {
   try {
     presetCss = await readFile(presetPath, 'utf8');
   } catch {
-    throw new Error(`preset "${preset}" not found. Available: terminal, minimal, technical, academic`);
+    throw new Error(`preset "${preset}" not found. Available: terminal, minimal, technical, academic, newsletter`);
   }
 
   const [templateSrc, plexSansRaw, plexMono400Raw, plexMono600Raw] = await Promise.all([
