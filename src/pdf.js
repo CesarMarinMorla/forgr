@@ -57,10 +57,14 @@ const PRESET_MERMAID_THEMES = {
     theme: 'base',
     themeVariables: {
       primaryColor: '#3D6B55',
-      lineColor: '#244233',
+      primaryBorderColor: '#2D5A45',
+      lineColor: '#1B4A36',
       textColor: '#1A1A1A',
       mainBkg: '#EEF3F0',
       nodeBorder: '#3D6B55',
+      secondaryColor: '#5A8A72',
+      secondaryBorderColor: '#3D6B55',
+      edgeLabelBackground: '#F0F5F2',
     },
   },
 };
