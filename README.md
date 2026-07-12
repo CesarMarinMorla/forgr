@@ -66,7 +66,7 @@ Pick a design with `--preset <name>`. Each preset is a standalone CSS theme buil
 | `terminal` | All-mono headings, graphite/cold-teal palette, dark terminal-pane code blocks, `01 02 03` section counters | Infra reports, status dashboards, incident reviews |
 | `minimal` | System sans, single gray, hairline rules, no accent | Clean, neutral documents |
 | `technical` | Fully monospace, amber accent, full-grid tables, tinted code panels, `[NN]` bracket section markers | Runbooks, config specs, ops notes |
-| `academic` | Serif body, justified text, sepia accent, roman-numeral sections, superscript citation links | Papers, theses, scholarly write-ups |
+| `academic` | Serif body, clean sans headings, pine-green accent, arabic marginal section numbers against a hairline vertical rule | Papers, theses, scholarly write-ups |
 | `newsletter` | Warm off-white paper, serif headings, sans-serif body, terra-cotta coral accent, generous measure | Product changelogs, editorial round-ups, org announcements |
 
 ```bash

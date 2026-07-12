@@ -56,11 +56,11 @@ const PRESET_MERMAID_THEMES = {
   academic: {
     theme: 'base',
     themeVariables: {
-      primaryColor: '#2E4F6B',
-      lineColor: '#1B3349',
-      textColor: '#1A1714',
-      mainBkg: '#FFFFFF',
-      nodeBorder: '#2E4F6B',
+      primaryColor: '#3D6B55',
+      lineColor: '#244233',
+      textColor: '#1A1A1A',
+      mainBkg: '#EEF3F0',
+      nodeBorder: '#3D6B55',
     },
   },
 };
