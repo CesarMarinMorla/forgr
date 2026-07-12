@@ -7,7 +7,7 @@
 | 1 | Published CLI (v0.1.0) | Done |
 | 2 | Mermaid rendering & image embedding | Done |
 | 2.5 | Preset expansion & polish (newsletter preset, academic revamp, spacing, mermaid colors) | Done |
-| 3 | TUI preset picker | Pending |
+| 3 | TUI preset picker | In Progress |
 | 4 | TUI with live PDF preview | Pending |
 | 5 | Config, watch mode, cover page | Pending |
 
@@ -135,12 +135,19 @@
 
 ---
 
-## Milestone 3 — TUI Preset Picker (Pending)
+## Milestone 3 — TUI Preset Picker (In Progress)
 
-- [ ] `--interactive` flag on CLI
-- [ ] Scan ~/.config/forgr/presets/*.json for user presets
-- [ ] Ink-based TUI — display preset names and descriptions
-- [ ] Arrow key navigation, Enter to select and render
+Launched via the `forgr-tui` command (separate bin), not an `--interactive` flag.
+
+- [x] `src/presets.js` — central preset registry (`BUILTIN_PRESETS`, `scanUserPresets`, `listPresets`)
+- [x] Move `ink` (5.1.0) and add `react` (18.3.1, ink peer) to runtime `dependencies`
+- [x] `src/tui.js` — Ink-based picker: list presets + descriptions, arrow-key navigation, Enter to select, `q`/`esc` to quit
+- [x] `bin/forgr-tui` — new bin; parses input/output/toc, launches TUI, renders with chosen built-in preset
+- [x] Scan `~/.config/forgr/presets/*.json` for user presets and display them (tagged `(user)`)
+- [x] Non-TTY guard: `launchTui` throws a clear error when stdin is not a TTY
+- [x] `test/presets.test.js` — registry + user-preset scan (valid, malformed, incomplete)
+- [x] `test/tui.test.js` — TUI non-TTY guard
+- [ ] User-preset *rendering* deferred to Milestone 5 (config); selecting a user preset prints an informative message
 - [ ] No PDF preview (that is Milestone 4)
 
 ---

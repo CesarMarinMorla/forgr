@@ -107,6 +107,18 @@ forgr short-note.md --no-toc
 | `--toc` / `--no-toc` | Force the table of contents on or off. Without either, it is decided automatically. |
 | `uninstall` | Remove the Chromium cache (~195MB) without removing the tool. |
 
+### Interactive preset picker
+
+`forgr-tui` launches a terminal UI that lists every preset (built-in plus any you
+define in `~/.config/forgr/presets/*.json`) and renders the PDF with the one you
+pick. User presets are shown for discovery; rendering custom presets lands with
+config support in a later milestone.
+
+```bash
+forgr-tui report.md
+forgr-tui report.md -o out.pdf --no-toc
+```
+
 ---
 
 ## Uninstall

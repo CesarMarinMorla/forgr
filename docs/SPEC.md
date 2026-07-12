@@ -378,7 +378,7 @@ Success criteria: One command, zero config, output looks designed.
 
 ### Milestone 2 — TUI Preset Picker (text-only)
 
-Goal: `forgr file.md --interactive` shows preset list, user picks one, renders.
+Goal: `forgr-tui file.md` shows preset list, user picks one, renders.
 TUI: Built with Ink (React in terminal) or blessed. Displays preset names and text descriptions; no PDF preview.
 Preset system: Reads JSON preset files; user can drop custom CSS/JSON into `~/.config/forgr/presets/`.
 
