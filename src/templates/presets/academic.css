@@ -4,15 +4,15 @@
    the left of the column and each section's roman numeral is set in the
    gutter beside it, the way journal comps number sections in the margin.
    The single accent is a manuscript rubric blue, used for rules, folios and
-   citation marks. Blockquotes close with a QED halmos. No terminal chrome,
-   no cream paper, no terracotta. */
+   citation marks. The opening paragraph carries a drop cap; blockquotes
+   close with a QED halmos. No terminal chrome, no cream paper, no terracotta. */
 
 :root {
   --font-serif: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, 'Times New Roman', serif;
   --font-mono: 'Courier New', Courier, monospace;
 
   --paper: #FFFFFF;
-  --ink: #1B1714;
+  --ink: #1A1714;
   --ink-soft: #56504A;
   --graphite: #8C8377;
 
@@ -32,7 +32,7 @@
 body {
   font-family: var(--font-serif);
   font-size: 11pt;
-  line-height: 1.72;
+  line-height: 1.74;
   color: var(--ink);
   max-width: 680px;
   margin: 0 auto;
@@ -45,8 +45,20 @@ body {
    the physical page margin. */
 main {
   border-left: 1px solid var(--line);
-  padding-left: 2.2em;
+  padding-left: 2.4em;
   position: relative;
+}
+
+/* Drop cap on the opening paragraph — a quiet, traditional lead-in. */
+main > p:first-of-type::first-letter {
+  float: left;
+  font-family: var(--font-serif);
+  font-size: 3.2em;
+  line-height: 0.72;
+  padding: 0.06em 0.12em 0 0;
+  margin-top: 0.04em;
+  color: var(--ink);
+  font-weight: 600;
 }
 
 /* Running head: small-caps byline under a double rule */
@@ -76,7 +88,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Title: left-set, large, closed by a single rule */
 h1 {
-  font-size: 1.85em;
+  font-size: 1.9em;
   font-weight: 600;
   letter-spacing: 0.01em;
   margin: 0 0 0.4em 0;
@@ -94,7 +106,7 @@ h2 {
   font-variant: small-caps;
   letter-spacing: 0.09em;
   color: var(--ink);
-  margin-top: 2.6em;
+  margin-top: 2.8em;
   margin-bottom: 0.8em;
   padding-bottom: 0.25em;
   border-bottom: 1px solid var(--line);
@@ -104,13 +116,14 @@ h2::before {
   content: counter(section, upper-roman);
   position: absolute;
   left: -2.35em;
-  top: 0.12em;
-  width: 1.8em;
+  top: 0.16em;
+  width: 2em;
   text-align: right;
   color: var(--signal);
-  font-weight: 600;
-  font-size: 1.05em;
+  font-weight: 500;
+  font-size: 0.92em;
   font-variant: normal;
+  letter-spacing: 0.03em;
 }
 
 h3 {
