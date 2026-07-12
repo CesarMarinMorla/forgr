@@ -50,9 +50,9 @@
 - [x] test/markdown.test.js — unit tests for markdown rendering + table number wrapping
 - [x] test/pipeline.test.js — output path resolution tests
 - [x] test/integration.test.js — end-to-end PDF generation test (globs all fixtures)
-- [x] npm test = 29 tests (21 unit + 8 integration), all passing
+- [x] npm test = 38 tests (30 unit + 8 integration), all passing
 - [x] npm run test:unit = unit tests only (21 tests, excludes integration)
-- [x] integration test accepts `FORGR_PRESET` env var (terminal|minimal|technical|academic, default terminal) to validate one preset at a time; rejects unknown values
+- [x] integration test accepts `FORGR_PRESET` env var (terminal|minimal|technical|academic|newsletter, default terminal) to validate one preset at a time; rejects unknown values
 - [x] Rendered fixture PDFs stay in test/fixtures/ (gitignored) for visual review — do not delete them after a run
 
 ### Dev tooling
@@ -71,7 +71,7 @@
 
 ---
 
-## HIGH PRIORITY — Presets (3 non-stock need full redesign)
+## Presets — all 5 complete (terminal, minimal, technical, academic, newsletter)
 
 ### minimal.css — black-on-white from source template
 - [x] Adapt MarkForge minimal.css: system sans, one gray (#666), hairline rules, no accent
@@ -89,48 +89,38 @@
 - [x] Test with all fixture files
 
 ### academic.css — from functional stub to intentional design
-- [x] Define academic's design identity (typeset-journal: serif body, marginal section folios, citation-friendly)
-- [x] Write full CSS with distinct palette, scholarly typography (serif + justified, rubric-blue accent, left margin rail with roman-numeral section folios, superscript citation links, ruled tables, QED halmos on blockquotes, TOC dot leaders, opening drop cap)
-- [x] Test with all fixture files
+- [x] Initial release: typeset-journal (rubric blue, roman numerals, superscript citations, QED, drop cap)
+- [x] **Revamp (Modern Scholarly)**: pine green accent, Georgia serif body + IBM Plex Sans headings → later switched to pure serif, marginal arabic counters against hairline rule, clean restrained typography
+- [x] Line spacing tightened from 1.7 → 1.45 (book standard Butterick range)
+- [x] Paragraph spacing, heading spacing, blockquote/pre margins tightened to match
+- [x] Fixed ASCII art alignment bug (text-align: justify bleeding into pre blocks)
+- [x] Fixed mermaid edge label colors (lineColor: brownish #244233 → true dark #1B4A36)
+- [x] Added secondaryColor for diamond nodes, edgeLabelBackground, primaryBorderColor
+- [x] Test with all fixture files (38 tests pass)
+
+### newsletter.css — new preset (warm editorial)
+- [x] Warm off-white paper (#FAF8F5), dark warm gray ink (#2D2A24), terra-cotta coral accent (#C85A48)
+- [x] Serif display headings (Georgia), IBM Plex Sans body, spacious 700px measure
+- [x] Coral left-border code blocks, italic pull-quotes, dot section dividers, card-style TOC
+- [x] Registered in cli.js, template.js, pdf.js, integration test
+- [x] Published as part of v0.2.0
 
 ---
 
-## Pending — Milestone 2 (Mermaid Rendering & Image Embedding)
+## Milestone 2 — Mermaid Rendering & Image Embedding (Done)
 
-Done so far:
-- [x] Mermaid fence renderer emits `<div class="mermaid">` with raw source (src/markdown.js)
-- [x] Mermaid fixtures added: test/fixtures/mermaid.md (flowchart/sequence/state/class) + diagrams in comprehensive.md (sections 6.3, 6.4)
-- [x] `pdf.js` already calls `mermaid.run()` when a `mermaid` global exists
-
-Current gap: no mermaid library is loaded into the Playwright page (base.html has no script), so diagrams render as raw source. Local images are emitted as plain `<img src>` and are not inlined, so they do not resolve under `page.setContent()` (no base URL). Both need the same "embed without a base URL" capability.
-
-### Approach
-Render mermaid to SVG inside the existing Playwright page (reuse `pdf.js`'s page). Inline local images to base64 data URIs on the Node side during markdown rendering, using the input file's directory as the resolution root. Keep the single exit-boundary / throw-on-error discipline from the refactor (Issues 1, 6); no `process.exit` in library modules.
-
-### Mermaid rendering
-- [ ] Add `mermaid` to `package.json` pinned at an EXACT version (no `^`/`~`); record the version in the Architecture Assessment.
-- [ ] Load the library into the page in `pdf.js`: before `mermaid.run()`, inject the dist once per page via `page.addScriptTag({ path: <mermaid dist> })` resolved from `node_modules` (cache the handle so it is added a single time).
-- [ ] Configure per preset: `mermaid.initialize({ startOnLoad: false, theme: 'base', themeVariables: { primary, lineColor, textColor, ... } })` keyed by the active preset, derived from the preset's `--signal` / `--ink` so diagrams match each preset's accent (4 distinct diagram palettes).
-- [ ] Render with `mermaid.run({ nodes: [...document.querySelectorAll('.mermaid')] })` and reuse the existing `mermaidReady` flag + `waitForFunction` until every `.mermaid` has an `<svg>`.
-- [ ] Fail loudly: if a diagram throws during render, collect the error and `throw new Error(\`mermaid: failed to render diagram ${i}: ${message}\`)` — no silent drop, no raw-source leak.
-- [ ] Style `.mermaid` (and its `<svg>`) in base.html: centered, `max-width: 100%`, vertical margin, light surface; per-preset accent comes from `themeVariables`, not from CSS overrides.
-
-### Image embedding
-- [ ] Pass the input file's directory into `renderMarkdown(source, { baseDir })` from `pipeline.js` (resolved input dir).
-- [ ] Add a custom `md.renderer.rules.image` in `markdown.js` that, for a local `src` (not `http(s):` and not `data:`), resolves against `baseDir`, reads the file with `readFileSync`, detects mime by extension (.png/.jpg/.jpeg/.gif/.webp/.svg), and emits `<img src="data:<mime>;base64,…">`. Remote URLs and existing `data:` URIs pass through unchanged.
-- [ ] Fail loudly: if a local image path does not exist, `throw new Error(\`image not found: ${path}\`)`.
-- [ ] Unit-test in `markdown.test.js`: a relatively-referenced fixture image is inlined to a `data:` URI; an `http(s)` URL is left untouched; a missing local path throws.
-
-### Shared: SVG/PNG serialization
-- [ ] Add a helper that serializes a rendered mermaid `<svg>` to PNG (`svg → XML → Image → canvas → toDataURL`). Used by Milestone 3 (live preview) and as a fallback when SVG-in-PDF is undesirable. Reuses the same base64 path as image embedding.
-
-### Preset theming
-- [ ] Map each preset's tokens to mermaid `themeVariables` — terminal: teal, minimal: graphite, technical: amber, academic: rubric blue — so diagrams stay visually consistent with their preset.
-
-### Testing
-- [ ] Add `test/mermaid.test.js` (integration): render `test/fixtures/mermaid.md` for each preset in a Playwright page, assert every `.mermaid` div is replaced by an `<svg>` and no raw `<div class="mermaid">` remains, and that diagrams use the preset accent.
-- [ ] Extend the per-preset integration run (`FORGR_PRESET`) to cover `mermaid.md`.
-- [ ] Add a local-image fixture (e.g. `test/fixtures/assets/sample.png`) referenced from a markdown; assert it inlines and renders in the PDF.
+- [x] Add `mermaid` 11.16.0 to `package.json` (exact pin)
+- [x] Load mermaid dist into Playwright page via `page.addScriptTag`
+- [x] Per-preset mermaid theme config in `pdf.js` (5 presets: terminal, minimal, technical, academic, newsletter)
+- [x] Render each `.mermaid` div individually with `mermaid.render()` — error collection, fail loud
+- [x] Inline local images to base64 data URIs in `markdown.js` (PNG/JPEG/GIF/WebP/SVG)
+- [x] Pass `baseDir` from `pipeline.js` for image resolution
+- [x] Remote URLs and data URIs pass through unchanged
+- [x] Missing local image throws
+- [x] Test fixtures: `test/fixtures/mermaid.md` (4 diagrams), 7 images in `test/fixtures/assets/`
+- [x] `test/mermaid.test.js` — Playwright integration test asserting `.mermaid` → `<svg>`
+- [x] 8 image embedding unit tests
+- [x] `.mermaid` CSS in `base.html`: `break-inside: avoid; break-before: avoid;` — headings stay with their diagrams
 
 ---
 
@@ -161,7 +151,7 @@ TOC is implemented without template partials — it runs at the markdown-render 
 - [x] TOC HTML generation — nested nav with level-based indentation classes
 - [x] CLI --toc / --no-toc flags
 - [x] Two-pass page count decision (word count >= 8000 OR pages >= 3 triggers TOC; 2nd render only when first guess was wrong)
-- [x] TOC styling in all 4 presets (.toc, .toc__title, .toc__list, .toc__item--hN)
+- [x] TOC styling in all 5 presets (.toc, .toc__title, .toc__list, .toc__item--hN)
 - [x] Input: docs/elements.md — checklist of all basic styling elements
 
 ### Hardcoded constants (configurable later via .forgrrc)
@@ -185,10 +175,18 @@ TOC is implemented without template partials — it runs at the markdown-render 
 
 ## Publishing workflow
 
-- `npm publish` is manual: run `npm publish` from the project root
-- Authentication: `npm login` (passkey/browser) before publish
-- Version bumps: update `version` in package.json, commit, tag (`v0.2.0`), then publish
-- CI auto-publish: future option — wire up GitHub Actions to publish on `v*` tag push
+- **Automatic**: semantic-release on push to `main`. Conventional commits drive version bumps.
+- [x] `.releaserc` configured (branches: main, default plugins)
+- [x] `.github/workflows/release.yml` — push-to-main trigger, OIDC trusted publisher
+- [x] OIDC configured on npmjs.com (org: CesarMarinMorla, workflow: release.yml)
+- [x] `package-lock.json` committed for CI reproducibility
+- [x] `feat:` → minor bump, `fix:` → patch, `BREAKING CHANGE` → major
+- [x] `docs:` / `chore:` commits do NOT trigger a release
+
+## npm v12 compatibility
+
+- [x] `.npmrc` with `allow-scripts=false` to prevent postinstall warnings
+- [x] `preuninstall.js` removed from published `"files"` array in package.json
 
 ---
 
@@ -199,6 +197,8 @@ TOC is implemented without template partials — it runs at the markdown-render 
 - Playwright version: pinned exactly at 1.61.1 (no ^ or ~)
 - Heading (terminal preset): all-mono IBM Plex Mono 400, section counter in teal (#1C756E). Other presets define their own heading treatments (see Presets section).
 - Fail loudly on all errors — no silent degradation anywhere in the pipeline
+- `.mermaid { break-inside: avoid; break-before: avoid; }` — prevents diagrams from splitting across pages away from their heading
+- Academic preset: justified body text must be overridden to `text-align: left` on `<pre>` blocks to preserve ASCII art alignment
 
 ---
 
