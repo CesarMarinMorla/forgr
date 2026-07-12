@@ -1,15 +1,14 @@
 /* ===== Forgr — "Modern Scholarly" Preset ===== */
 /* Design concept: a contemporary academic typesetting preset influenced by
-   modern university press interiors and European journal design. Body set in
-   Georgia (serif) for long-form readability; headings in IBM Plex Sans for a
-   clean modern contrast. The single accent is a pine green used for rules,
+    modern university press interiors and European journal design. Body and
+   headings use a book serif for cohesive long-form readability. The single
+   accent is a pine green used for rules,
    marginal section numerals, and table header borders. The signature element
    is the arabic section counter set in the left gutter against a hairline
    vertical rule. No drop caps, no QED halmos, no superscript links. */
 
 :root {
-  --font-body: Georgia, Palatino, 'Palatino Linotype', 'Book Antiqua', 'Times New Roman', serif;
-  --font-heading: 'IBM Plex Sans', -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Iowan Old Style', 'Book Antiqua', Palatino, Georgia, 'Times New Roman', serif;
   --font-mono: 'IBM Plex Mono', Menlo, 'SF Mono', Consolas, monospace;
 
   --paper: #FEFEFC;
@@ -56,7 +55,7 @@ main {
 
 /* Doc-meta: a single hairline rule, clean, no decoration */
 .doc-meta {
-  font-family: var(--font-heading);
+  font-family: var(--font-body);
   font-size: 0.55rem;
   font-weight: 500;
   color: var(--graphite);
@@ -97,7 +96,7 @@ h1 {
    The ::before sits in the gap between the left hairline and the text. */
 body { counter-reset: section; }
 h2 {
-  font-family: var(--font-heading);
+  font-family: var(--font-body);
   font-size: 1.1em;
   font-weight: 600;
   line-height: 1.25;
@@ -114,15 +113,15 @@ h2::before {
   top: 0.1em;
   width: 1.8em;
   text-align: right;
-  font-family: var(--font-heading);
+  font-family: var(--font-body);
   font-weight: 500;
-  font-size: 0.85em;
+  font-size: 1em;
   color: var(--signal);
   font-variant-numeric: tabular-nums;
 }
 
 h3 {
-  font-family: var(--font-heading);
+  font-family: var(--font-body);
   font-size: 1em;
   font-weight: 600;
   color: var(--ink-soft);
@@ -131,7 +130,7 @@ h3 {
   line-height: 1.3;
 }
 h4, h5, h6 {
-  font-family: var(--font-heading);
+  font-family: var(--font-body);
   font-weight: 600;
   color: var(--ink-soft);
   margin-top: 1.2em;
@@ -204,7 +203,7 @@ table {
   font-size: 0.88em;
 }
 thead th {
-  font-family: var(--font-heading);
+  font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.8em;
   text-transform: uppercase;
@@ -244,7 +243,7 @@ hr {
   border-bottom: 1px solid var(--line);
 }
 .toc__title {
-  font-family: var(--font-heading);
+  font-family: var(--font-body);
   font-size: 0.65rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -269,7 +268,7 @@ hr {
   flex: 1;
 }
 .toc__page {
-  font-family: var(--font-heading);
+  font-family: var(--font-body);
   font-variant-numeric: tabular-nums;
   font-size: 0.85em;
   color: var(--graphite);
