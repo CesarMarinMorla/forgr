@@ -368,3 +368,19 @@ Affects: `src/pipeline.js`.
 - [x] Import BROWSERS_PATH from browsers-path.js in cli.js instead of re-deriving (Issue 2)
 - [x] Extract hljs setup to src/highlighter.js (Issue 3)
 - [x] Log a warning in template.js when a font file is not found (Issue 5)
+
+---
+
+## Future — Deno Desktop port (deferred)
+
+*Not started. Evaluate once `BrowserWindow.printToPdf()` stabilises in Deno 2.10+.
+This would replace Playwright + Chromium (~300MB dependency) with the OS-native WebView.*
+
+- [ ] Evaluate `Deno.BrowserWindow` API — `printToPdf()`, `visible: false` headless mode, `executeJs()` for mermaid
+- [ ] Port markdown pipeline (markdown-it, highlight.js, Handlebars) to Deno runtime (pure JS, should be trivial)
+- [ ] Implement mermaid rendering via hidden WebView: inject mermaid.js → `executeJs()` → extract SVGs
+- [ ] Port PDF generation: replace Playwright's `page.pdf()` with `BrowserWindow.printToPdf()`
+- [ ] Port image inlining, font embedding, CSS preset loading (all pure JS — no Playwright dependency)
+- [ ] Drop `playwright-core`, `node_modules/.browsers` (~300MB), simplify install
+- [ ] Single-binary distribution: `deno compile` for CLI, `deno desktop` for optional native GUI
+- [ ] Evaluate whether forgr-tui becomes a native desktop window (instead of Ink terminal rendering)
