@@ -89,24 +89,10 @@ classDiagram
 
 ```mermaid
 erDiagram
-  AUTHOR ||--o{ MANUSCRIPT : writes
-  MANUSCRIPT ||--|| JOURNAL : submitted to
-  MANUSCRIPT ||--o{ REVIEW : receives
-  REVIEW ||--|| REVIEWER : written by
-  MANUSCRIPT {
-    int id PK
-    string doi UK
-    string title
-    date submittedAt
-    string status
-  }
-  REVIEW {
-    int id PK
-    int manuscriptId FK
-    int reviewerId FK
-    int score
-    text comments
-  }
+  AUTHOR ||--|{ MANUSCRIPT : writes
+  MANUSCRIPT ||--|| JOURNAL : submitted_to
+  REVIEW ||--|| MANUSCRIPT : reviews
+  REVIEWER ||--|{ REVIEW : writes
 ```
 
 ## Gantt

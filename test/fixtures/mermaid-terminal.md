@@ -69,18 +69,8 @@ classDiagram
 ```mermaid
 erDiagram
   PROJECT ||--|{ JOB : contains
-  JOB ||--|| WORKER : assigned to
-  JOB ||--o{ LOG : produces
-  JOB {
-    int id PK
-    string status
-    date startedAt
-  }
-  WORKER {
-    int id PK
-    string name
-    string version
-  }
+  JOB ||--|| WORKER : assigned
+  LOG ||--|| JOB : belongs_to
 ```
 
 ## Gantt
