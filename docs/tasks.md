@@ -129,9 +129,20 @@
 - [x] Remote URLs and data URIs pass through unchanged
 - [x] Missing local image throws
 - [x] Test fixtures: `test/fixtures/mermaid.md` (4 diagrams), 7 images in `test/fixtures/assets/`
-- [x] `test/mermaid.test.js` — Playwright integration test asserting `.mermaid` → `<svg>`
+- [x] `test/mermaid/render.test.js` — Playwright integration test asserting `.mermaid` → `<svg>`
 - [x] 8 image embedding unit tests
 - [x] `.mermaid` CSS in `base.html`: `break-inside: avoid; break-before: avoid;` — headings stay with their diagrams
+
+### Mermaid theming & fixture reorg (v0.7.0 feature branch: `feat/mermaid-theming`)
+
+- [x] Gantt contrast fix — remove gantt text color overrides from all 5 presets (mermaid defaults are readable)
+- [x] Timeline contrast fix — inject `cScale[0-11]` (light fill) and `cScaleLabel[0-11]` (dark text) to compensate for mermaid's 25% darken
+- [x] ER diagram parser compatibility — avoid reserved word `to` in labels; avoid `o{`/`o|`/`}|` relationship tokens (only `||` and `|{` work in 11.16)
+- [x] Per-preset fixture files — 10 diagram types each, content tailored to preset aesthetic
+- [x] Old monolithic `test/fixtures/mermaid.md` deleted
+- [x] `test/mermaid/pie.test.js` — pie label regression + per-preset fixture rendering tests
+- [x] Test modularization — all mermaid tests + fixtures moved to `test/mermaid/`
+- [ ] **Mermaid sizing & layout** — diagrams are currently rendered at default mermaid size, leading to inconsistent proportions. Need to research mermaid dimension options, test what works in Playwright/PDF context, and create intelligent sizing (fit content, cap max width, handle wide diagrams like gantt/timeline gracefully)
 
 ---
 
@@ -152,11 +163,53 @@ Launched via the `forgr-tui` command (separate bin), not an `--interactive` flag
 
 ---
 
-## Milestone 4 — TUI with Live PDF Preview (Pending)
+## Milestone 4 — Interactive TUI with Full Document Control & Live Preview (Pending)
 
-- [ ] After preset selection, render first page as PNG via Playwright screenshot
-- [ ] Display PNG in terminal via terminal-image
-- [ ] Cache by content_hash + preset_hash (~200ms warm target)
+### UX
+- [ ] Options screen after preset selection — interactive form with toggles/fields
+- [ ] Arrow-key navigation between fields, ←/→ or space to toggle, Enter to confirm
+- [ ] Draw new TUI screens with Ink; refactor `launchTui` to return a config object, not just a preset name
+
+### Settings the TUI controls
+
+**Cover page**
+- [ ] on/off toggle
+- [ ] Editable fields: title, subtitle, author, date
+- [ ] Cover renders as a separate first page before the document body
+
+**Table of Contents**
+- [ ] 3-way choice: auto / on / off (overrides the two-pass heuristic)
+- [ ] Auto is the default (word count >= 8000 OR pages >= 3)
+
+**Doc-meta header** (top bar on first page)
+- [ ] show/hide toggle
+- [ ] Editable label text (default: `forgr / {preset} / {filename}`)
+- [ ] Editable timestamp format
+
+**PDF page header** (repeated on every printed page)
+- [ ] Currently empty (`<div></div>`) — TUI enables content: document title, preset name, or nothing
+
+**PDF footer** (page numbers)
+- [ ] Switchable: none / "1 / 10" / "Page 1 of 10"
+- [ ] Optionally include document title or date alongside page numbers
+
+**Section numbering**
+- [ ] on/off toggle (currently per-preset CSS, needs to be generalized)
+
+**Output path**
+- [ ] Optional: show the inferred output path and let user edit it (instead of only `-o` flag)
+
+### Architecture
+- [ ] TUI returns a structured config object: `{ preset, toc, cover, coverTitle, coverAuthor, header, footer, ... }`
+- [ ] `bin/forgr-tui` maps config to pipeline + template context
+- [ ] Pipeline accepts new options (cover, header/footer mode, section numbering) and passes them through to template/PDF
+- [ ] Cover page template partial (`templates/partials/cover.html`) renders the cover page
+- [ ] Footer/header mode selection drives Playwright's `displayHeaderFooter`, `headerTemplate`, `footerTemplate`
+
+### Live PDF Preview
+- [ ] After configuration, render first page as PNG via Playwright screenshot
+- [ ] Display PNG in terminal via `terminal-image`
+- [ ] Cache by content_hash + config_hash (~200ms warm target)
 - [ ] Fallback to text mode if terminal lacks image support
 
 ---
@@ -182,12 +235,34 @@ TOC is implemented without template partials — it runs at the markdown-render 
 ## Milestone 5 — Config, Watch, Cover (Pending)
 
 - [ ] .forgrrc config file support
-- [ ] Frontmatter support in Markdown files
 - [ ] Watch mode (--watch flag, re-render on file change)
 - [ ] Plugin system for custom Markdown transformations
 - [ ] Implement cover_page preset feature flag (cover.html partial)
 - [ ] Implement section_numbering preset feature flag
 - [ ] Populate templates/partials/ directory
+
+---
+
+## Milestone 6 — LaTeX Math & Front-Matter (On Demand)
+
+*Not started. These ship only after Milestones 1-5 are fully polished.*
+
+### LaTeX Math Notation
+- [ ] Math rendering via `markdown-it-texmath` or `markdown-it-katex`
+  - [ ] Inline math: `$...$` and `\(...\)`
+  - [ ] Display math: `$$...$$`, `\[...\]`, and fenced `` ```math `` blocks
+- [ ] KaTeX CSS bundled per-preset (or a shared math stylesheet)
+- [ ] Font loading for math glyphs (KaTeX fonts embedded or CDN)
+- [ ] Math in mermaid labels (stretch goal — mermaid's built-in math is experimental)
+- [ ] Test fixtures with mixed math/markdown content
+
+### Jekyll Front-Matter
+- [ ] Parse YAML front-matter (delimited by `---`) at the top of `.md` files
+- [ ] Extract `title`, `date`, `author`, `layout`, `tags`, `description`, `toc`, `math`
+- [ ] Map front-matter fields into template context (e.g., `title` becomes the PDF title, `date` the cover date, `toc: false` disables TOC)
+- [ ] Ignore front-matter in body rendering (strip before markdown-it processes)
+- [ ] Non-Jekyll files render unchanged (no front-matter = no change)
+- [ ] `layout` field maps to a preset name (e.g., `layout: academic` = academic preset)
 
 ---
 
