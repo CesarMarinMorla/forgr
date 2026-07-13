@@ -266,6 +266,37 @@ TOC is implemented without template partials — it runs at the markdown-render 
 
 ---
 
+## Milestone 7 — `forgr doctor` diagnostic command (Pending)
+
+*Not started. A self-check command that validates the installation and reports/fixes common issues.*
+
+### What it checks
+
+- [ ] **Chromium binary** — verify `~/.forgr/browsers/chromium-*` exists and is executable
+- [ ] **Preset CSS files** — for each built-in preset, check the CSS file exists at the expected path inside the package
+- [ ] **User preset files** — validate all `~/.config/forgr/presets/*.json` are parseable and have required fields
+- [ ] **User preset CSS targets** — for presets that reference an external CSS path, check the file exists and is readable
+- [ ] **Font files** — verify `IBMPlexSans-Variable.woff2`, `IBMPlexMono-400.woff2`, `IBMPlexMono-600.woff2` exist in the package assets dir
+- [ ] **Template file** — verify `base.html` exists
+- [ ] **Node version** — warn if below the minimum supported version
+
+### Fix modes
+
+- [ ] `forgr doctor` — report-only (exit code 0 = all good, non-zero = issues found)
+- [ ] `forgr doctor --fix` — auto-fix where possible:
+  - Re-download Chromium if missing/corrupt (re-run `ensureChromium`)
+  - Reinstall package if built-in files are missing (prompt user to run `npm install` or re-download)
+  - Remove malformed user preset files (with confirmation)
+- [ ] `forgr doctor --verbose` — print full paths inspected, file sizes, and checksums (or mtime) for debugging
+
+### Output format
+
+- [ ] Colored output: green ✓ / red ✗ per check
+- [ ] Summary line: "3 passed, 1 warning, 1 error"
+- [ ] Suggestions for each failure ("Run `forgr uninstall && forgr <file>` to re-download Chromium")
+
+---
+
 ## Publishing workflow
 
 - **Automatic**: semantic-release on push to `main`. Conventional commits drive version bumps.
