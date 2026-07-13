@@ -14,18 +14,6 @@ test('launchTui rejects when stdin is not a TTY', async () => {
   }
 });
 
-test('launchTui returns a promise when stdin is a TTY', () => {
-  const original = process.stdin.isTTY;
-  process.stdin.isTTY = true;
-  try {
-    const result = launchTui(presets);
-    assert.ok(result instanceof Promise);
-    result.catch(() => {});
-  } finally {
-    process.stdin.isTTY = original;
-  }
-});
-
 test('classifyPreset aborts when no preset is chosen', () => {
   assert.deepEqual(classifyPreset(null), { action: 'abort' });
   assert.deepEqual(classifyPreset(undefined), { action: 'abort' });

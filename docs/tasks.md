@@ -7,7 +7,7 @@
 | 1 | Published CLI (v0.1.0) | Done |
 | 2 | Mermaid rendering & image embedding | Done |
 | 2.5 | Preset expansion & polish (newsletter preset, academic revamp, spacing, mermaid colors) | Done |
-| 3 | TUI preset picker | In Progress |
+| 3 | TUI preset picker (v0.6.0) | Done |
 | 4 | TUI with live PDF preview | Pending |
 | 5 | Config, watch mode, cover page | Pending |
 
@@ -135,7 +135,7 @@
 
 ---
 
-## Milestone 3 — TUI Preset Picker (In Progress)
+## Milestone 3 — TUI Preset Picker (Done, v0.6.0)
 
 Launched via the `forgr-tui` command (separate bin), not an `--interactive` flag.
 
@@ -147,8 +147,8 @@ Launched via the `forgr-tui` command (separate bin), not an `--interactive` flag
 - [x] Non-TTY guard: `launchTui` throws a clear error when stdin is not a TTY
 - [x] `test/presets.test.js` — registry + user-preset scan (valid, malformed, incomplete)
 - [x] `test/tui.test.js` — TUI non-TTY guard
-- [ ] User-preset *rendering* deferred to Milestone 5 (config); selecting a user preset prints an informative message
-- [ ] No PDF preview (that is Milestone 4)
+- User-preset *rendering* is deferred to Milestone 5 (config); selecting a user preset prints an informative message
+- No PDF preview in this milestone (that is Milestone 4)
 
 ---
 
