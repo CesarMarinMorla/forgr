@@ -376,7 +376,28 @@ Affects: `src/pipeline.js`.
 *Not started. Evaluate once `BrowserWindow.printToPdf()` stabilises in Deno 2.10+.
 This would replace Playwright + Chromium (~300MB dependency) with the OS-native WebView.*
 
-- [ ] Evaluate `Deno.BrowserWindow` API — `printToPdf()`, `visible: false` headless mode, `executeJs()` for mermaid
+### What Deno Desktop has today (Deno 2.9, canary)
+
+| Feature | Status |
+|---------|--------|
+| `Deno.BrowserWindow` | Shipped — lifecycle, navigation, events |
+| `executeJs()` | Shipped — run JS in WebView, get JSON result |
+| `window.print()` | Shipped — triggers OS print dialog (not headless) |
+| `visible: false` (headless window) | PR #35967 — ready, not merged |
+| `printToPdf()` (programmatic PDF) | PR #35967 — ready, not merged |
+| `printToPdf()` with page size / margins / header/footer options | **Not designed yet** — PR API is minimal `{ path?: string }` |
+
+### What forgr needs that Deno doesn't cover yet
+
+- **Page size control** — Playwright's `page.pdf({ format: 'A4' })`. In Deno, this would need to come from CSS `@page { size: A4 }` if the WebView respects it, or be added to `printToPdf()` options.
+- **Margin control** — Playwright's `margin: { top, bottom, left, right }`. Same story — CSS `@page { margin: 2cm }` might work, needs testing.
+- **PDF header/footer** — forgr uses Playwright's `headerTemplate`/`footerTemplate` for page numbers. Deno has no equivalent; page numbering would need a CSS-based approach (e.g., `@page { @bottom-center { content: counter(page) } }`) or a future API addition.
+- **Font subsetting / embedding control** — Playwright handles this automatically. Deno's WebView would use system fonts, so the same base64-embedded `@font-face` approach forgr already uses would work — no Playwright dependency there.
+- **Mermaid in headless WebView** — Doable via `executeJs()` but unproven. Mermaid's `.render()` is synchronous and the WebView needs a full DOM. A hidden window with `visible: false` should work, but needs a real test.
+
+### Porting plan
+
+- [ ] Re-evaluate once `BrowserWindow.printToPdf()` ships in stable Deno — confirm CSS `@page` rules for margins/size are respected by the OS WebView
 - [ ] Port markdown pipeline (markdown-it, highlight.js, Handlebars) to Deno runtime (pure JS, should be trivial)
 - [ ] Implement mermaid rendering via hidden WebView: inject mermaid.js → `executeJs()` → extract SVGs
 - [ ] Port PDF generation: replace Playwright's `page.pdf()` with `BrowserWindow.printToPdf()`
