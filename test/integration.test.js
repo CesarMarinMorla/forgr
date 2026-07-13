@@ -25,7 +25,7 @@ if (!VALID_PRESETS.includes(PRESET)) {
 async function getFixtures() {
   const entries = await readdir(FIXTURES_DIR);
   return entries
-    .filter(f => f.endsWith('.md') && !f.startsWith('mermaid-'))
+    .filter(f => f.endsWith('.md'))
     .map(f => ({
       name: f,
       input: path.join(FIXTURES_DIR, f),

@@ -1,4 +1,4 @@
-import '../src/browsers-path.js';
+import '../../src/browsers-path.js';
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -8,11 +8,11 @@ import path from 'path';
 import { join } from 'path';
 import { platform, homedir } from 'os';
 import { fileURLToPath } from 'url';
-import { BROWSERS_PATH } from '../src/browsers-path.js';
+import { BROWSERS_PATH } from '../../src/browsers-path.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const MERMAID_DIST = path.resolve(__dirname, '..', 'node_modules', 'mermaid', 'dist', 'mermaid.min.js');
+const MERMAID_DIST = path.resolve(__dirname, '..', '..', 'node_modules', 'mermaid', 'dist', 'mermaid.min.js');
 
 function getHeadlessShellPath() {
   let entries;

@@ -4,6 +4,7 @@ node_modules/
 # output
 *.pdf
 test/fixtures/*.pdf
+test/mermaid/fixtures/*.pdf
 
 # test fixtures (downloaded)
 test/fixtures/assets/

@@ -1,4 +1,4 @@
-import '../src/browsers-path.js';
+import '../../src/browsers-path.js';
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -8,12 +8,12 @@ import path from 'path';
 import { join } from 'path';
 import { platform } from 'os';
 import { fileURLToPath } from 'url';
-import { BROWSERS_PATH } from '../src/browsers-path.js';
-import { PRESET_MERMAID_THEMES } from '../src/pdf.js';
+import { BROWSERS_PATH } from '../../src/browsers-path.js';
+import { PRESET_MERMAID_THEMES } from '../../src/pdf.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const MERMAID_DIST = path.resolve(__dirname, '..', 'node_modules', 'mermaid', 'dist', 'mermaid.min.js');
+const MERMAID_DIST = path.resolve(__dirname, '..', '..', 'node_modules', 'mermaid', 'dist', 'mermaid.min.js');
 
 function getHeadlessShellPath() {
   let entries;
@@ -111,7 +111,7 @@ for (const preset of PRESET_NAMES) {
       throw new Error('Chromium headless-shell not found. Run `npm run install-chromium` first.');
     }
 
-    const fixturePath = path.join(__dirname, 'fixtures', `mermaid-${preset}.md`);
+    const fixturePath = path.join(__dirname, 'fixtures', `${preset}.md`);
     const content = readFileSync(fixturePath, 'utf8');
     const diagrams = [...content.matchAll(/```mermaid\n([\s\S]*?)```/g)].map((m) => m[1].trim());
 
