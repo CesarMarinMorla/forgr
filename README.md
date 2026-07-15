@@ -12,11 +12,11 @@
 
 ## Features
 
-- **Five presets** — `terminal`, `minimal`, `technical`, `academic`, `newsletter`, each a standalone CSS theme built from the ground up.
-- **Diagrams** — native [Mermaid](https://mermaid.js.org) rendering (flowchart, sequence, state, class) with per-preset color theming.
-- **Images** — local images are inlined automatically as base64 data URIs, so they resolve without a base URL.
-- **Table of contents** — generated automatically for longer documents (>= 8000 words or 3+ pages).
-- **No install friction** — Chromium downloads on your first run, not during `npm install`.
+- **Five presets**: `terminal`, `minimal`, `technical`, `academic`, `newsletter`, each a standalone CSS theme built from the ground up.
+- **Diagrams**: native [Mermaid](https://mermaid.js.org) rendering (flowchart, sequence, state, class) with per-preset color theming.
+- **Images**: local images are inlined automatically as base64 data URIs, so they resolve without a base URL.
+- **Table of contents**: generated automatically for longer documents (>= 8000 words or 3+ pages).
+- **No install friction**: Chromium downloads on your first run, not during `npm install`.
 
 ---
 
@@ -26,7 +26,7 @@
 npm install -g forgr
 ```
 
-Chromium (~195MB) is not downloaded during install — it downloads automatically on your first `forgr` run into `~/.forgr/browsers`. Subsequent runs skip this step.
+Chromium (~195MB) is not downloaded during install: it downloads automatically on your first `forgr` run into `~/.forgr/browsers`. Subsequent runs skip this step.
 
 ---
 
@@ -89,7 +89,7 @@ Remote URLs (`http://`, `https://`) and existing `data:` URIs pass through uncha
 
 ## Table of contents
 
-A table of contents is added automatically when a document is long enough — 8000 or more words, or 3 or more pages. Control it explicitly with `--toc` / `--no-toc`:
+A table of contents is added automatically when a document is long enough: 8000 or more words, or 3 or more pages. Control it explicitly with `--toc` / `--no-toc`:
 
 ```bash
 forgr long-report.md --toc
@@ -158,4 +158,4 @@ Integration tests accept a `FORGR_PRESET` environment variable (`terminal`, `min
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT: see [LICENSE](LICENSE).
