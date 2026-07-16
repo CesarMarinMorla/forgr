@@ -360,25 +360,22 @@ function getHeadlessShellPath() {
   if (!entries.length) return null;
 
   const base = join(BROWSERS_PATH, entries[0]);
-  const candidates = [() => {
-    switch (platform()) {
-      case 'darwin': return join(base, 'chrome-headless-shell-mac-arm64', 'chrome-headless-shell');
-      case 'linux': return join(base, 'chrome-headless-shell-linux-x64', 'chrome-headless-shell');
-      case 'win32': return join(base, 'chrome-headless-shell-win64', 'chrome-headless-shell.exe');
-      default: return null;
+  const binaryName = platform() === 'win32'
+    ? 'chrome-headless-shell.exe'
+    : 'chrome-headless-shell';
+
+  try {
+    for (const entry of readdirSync(base)) {
+      const candidate = join(base, entry, binaryName);
+      if (existsSync(candidate)) return candidate;
     }
-  }, () => {
-    switch (platform()) {
-      case 'darwin': return join(base, 'chrome-headless-shell');
-      case 'linux': return join(base, 'chrome-headless-shell');
-      case 'win32': return join(base, 'chrome-headless-shell.exe');
-      default: return null;
-    }
-  }];
-  for (const fn of candidates) {
-    const p = fn();
-    if (p && existsSync(p)) return p;
+  } catch {
+    return null;
   }
+
+  const flat = join(base, binaryName);
+  if (existsSync(flat)) return flat;
+
   return null;
 }
 
