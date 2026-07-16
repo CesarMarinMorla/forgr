@@ -4,7 +4,7 @@ import { Command } from 'commander';
 import { run } from '../src/pipeline.js';
 import { listPresets } from '../src/presets.js';
 import { launchTui, classifyPreset } from '../src/tui.js';
-import { normalizeTocOption } from '../src/utils.js';
+import { printOutputMsg, handleCliError } from '../src/utils.js';
 
 const program = new Command();
 
@@ -16,7 +16,6 @@ program
   .option('--toc', 'Force generate table of contents')
   .option('--no-toc', 'Skip table of contents')
   .action(async (input, options) => {
-    const toc = normalizeTocOption(options.toc);
     const presets = listPresets();
 
     let chosen;
@@ -49,15 +48,17 @@ program
     }
 
     try {
-      const outputPath = await run(input, { ...options, preset: decision.name, toc });
-      console.log(`Written: ${outputPath}`);
+      const cliOptions = {
+        output: options.output,
+        toc: options.toc === true ? 'on' : options.toc === false ? 'off' : undefined,
+        preset: decision.name,
+      };
+      const outputPath = await run(input, cliOptions);
+      printOutputMsg(outputPath);
     } catch (err) {
       console.error(`Error: ${err.message}`);
       process.exit(1);
     }
   });
 
-program.parseAsync(process.argv).catch((err) => {
-  console.error(err.message);
-  process.exit(1);
-});
+program.parseAsync(process.argv).catch(handleCliError);

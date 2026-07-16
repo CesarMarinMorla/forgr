@@ -10,32 +10,66 @@ function wordCount(str) {
   return str.split(/\s+/).filter(Boolean).length;
 }
 
-function templateContext(body, preset, meta) {
+function resolveToc(config, wordCount) {
+  if (config.toc === 'on') return true;
+  if (config.toc === 'off') return false;
+  return wordCount >= config.tocWordThreshold;
+}
+
+function buildConfig(cliOptions, frontMatter) {
   return {
-    body,
-    preset,
-    timestamp: meta.date || new Date().toISOString().slice(0, 10),
-    title: meta.title || null,
-    author: meta.author || null,
+    preset: cliOptions.preset || frontMatter.preset || DEFAULTS.preset,
+    toc: cliOptions.toc || frontMatter.toc || DEFAULTS.toc,
+    tocWordThreshold: DEFAULTS.tocWordThreshold,
+    minPagesForToc: DEFAULTS.minPagesForToc,
+    docMeta: frontMatter.docMeta ?? DEFAULTS.docMeta,
+    dateFormat: DEFAULTS.dateFormat,
+    cover: DEFAULTS.cover,
+    footer: DEFAULTS.footer,
+    sectionNumbering: DEFAULTS.sectionNumbering,
+    paperFormat: DEFAULTS.paperFormat,
+    margins: DEFAULTS.margins,
+    outputPath: cliOptions.outputPath || '',
+    _pdf: DEFAULTS._pdf,
+    meta: {
+      title: frontMatter.title,
+      date: frontMatter.date,
+      author: frontMatter.author,
+    },
   };
 }
 
-async function renderStage(markdown, options, absInput, outputPath, withToc, headingPages) {
-  const baseDir = path.dirname(absInput);
-  const { body, tocHtml } = renderMarkdown(markdown, { toc: withToc, headingPages, baseDir });
-  const html = await renderTemplate(templateContext(tocHtml + body, options.preset, options.meta || {}));
-  return generatePdf(html, outputPath, { captureHeadings: !withToc, preset: options.preset });
+function formatDate(dateStr, format) {
+  if (dateStr) return dateStr;
+  return new Date().toISOString().slice(0, 10);
 }
 
-export async function run(inputPath, options = {}) {
+function templateContext(body, config) {
+  return {
+    body,
+    preset: config.preset,
+    timestamp: formatDate(config.meta.date, config.dateFormat),
+    title: config.meta.title || null,
+    author: config.meta.author || null,
+  };
+}
+
+async function renderStage(markdownBody, config, absInput, outputPath, withToc, headingPages) {
+  const baseDir = path.dirname(absInput);
+  const { body, tocHtml } = renderMarkdown(markdownBody, { toc: withToc, headingPages, baseDir });
+  const html = await renderTemplate(templateContext(tocHtml + body, config));
+  return generatePdf(html, outputPath, { captureHeadings: !withToc, ...config });
+}
+
+export async function run(inputPath, cliOptions = {}) {
   const absInput = path.resolve(inputPath);
 
   if (!await fs.pathExists(absInput)) {
     throw new Error(`file not found: ${absInput}`);
   }
 
-  const outputPath = options.output
-    ? path.resolve(options.output)
+  let outputPath = cliOptions.output
+    ? path.resolve(cliOptions.output)
     : path.join(path.dirname(absInput), `${path.basename(absInput, path.extname(absInput))}.pdf`);
 
   let markdown;
@@ -45,40 +79,26 @@ export async function run(inputPath, options = {}) {
     throw new Error(`could not read ${absInput}: ${err.message}`);
   }
 
-  // Parse front-matter and merge with CLI defaults
   const { frontMatter, body: markdownBody } = parseFrontMatter(markdown);
-  const preset = options.preset || frontMatter.preset || DEFAULTS.preset;
-  const meta = {
-    title: frontMatter.title,
-    date: frontMatter.date,
-    author: frontMatter.author,
-  };
-  const mergedOptions = { ...options, meta, preset };
+  const config = buildConfig(cliOptions, frontMatter);
+  config.outputPath = outputPath;
 
-  // TOC decision: CLI flag > front-matter > auto-detect
-  let toc = options.toc;
-  if (toc === undefined) {
-    toc = frontMatter.toc;
-  }
-  if (toc === undefined) {
-    toc = wordCount(markdownBody) >= DEFAULTS.toc.longDocWords;
-  }
+  const needsTocByLength = resolveToc(config, wordCount(markdownBody));
 
   let result;
   try {
-    result = await renderStage(markdownBody, mergedOptions, absInput, outputPath, false);
+    result = await renderStage(markdownBody, config, absInput, outputPath, false);
   } catch (err) {
     throw new Error(`render failed: ${err.message}`);
   }
 
   const { pageCount, headingPages } = result;
 
-  // Decide if TOC should be included
-  const needsToc = toc === true || (toc === false && options.toc === undefined && pageCount >= DEFAULTS.toc.minPages);
+  const needsToc = needsTocByLength && pageCount >= config.minPagesForToc;
 
   if (needsToc) {
     try {
-      await renderStage(markdownBody, mergedOptions, absInput, outputPath, true, headingPages);
+      await renderStage(markdownBody, config, absInput, outputPath, true, headingPages);
     } catch (err) {
       throw new Error(`render failed: ${err.message}`);
     }

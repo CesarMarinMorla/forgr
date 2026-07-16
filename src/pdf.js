@@ -7,7 +7,6 @@ import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { platform } from 'os';
 import { BROWSERS_PATH, CHROMIUM_INSTALL_CMD, removeFfmpeg } from './browsers-path.js';
-import { DEFAULTS } from './config.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MERMAID_DIST = path.resolve(__dirname, '..', 'node_modules', 'mermaid', 'dist', 'mermaid.min.js');
@@ -418,7 +417,8 @@ function countPdfPages(buffer) {
 // 297mm - 40mm = 257mm, at 96/25.4 px/mm ≈ 971px
 const A4_CONTENT_HEIGHT = 971;
 
-export async function generatePdf(html, outputPath, { captureHeadings, preset } = {}) {
+export async function generatePdf(html, outputPath, opts = {}) {
+  const { captureHeadings, preset, paperFormat, margins, _pdf } = opts;
   const outputDir = path.dirname(outputPath);
   try {
     await fs.access(outputDir, fs.constants.W_OK);
@@ -443,7 +443,7 @@ export async function generatePdf(html, outputPath, { captureHeadings, preset } 
     if (captureHeadings) {
       // Match the body max-width used by presets so on-screen and print
       // layouts align closely for heading-position calculations
-      await page.setViewportSize(DEFAULTS.pdf.viewport);
+      await page.setViewportSize(_pdf.viewport);
     }
 
     await page.setContent(html, { waitUntil: 'domcontentloaded' });
@@ -496,14 +496,13 @@ export async function generatePdf(html, outputPath, { captureHeadings, preset } 
       }, A4_CONTENT_HEIGHT);
     }
 
-    const pdfOpts = DEFAULTS.pdf;
     const pdfBuffer = await page.pdf({
-      format: pdfOpts.format,
-      printBackground: pdfOpts.printBackground,
-      margin: pdfOpts.margin,
-      displayHeaderFooter: pdfOpts.displayHeaderFooter,
-      headerTemplate: pdfOpts.headerTemplate,
-      footerTemplate: pdfOpts.footerTemplate,
+      format: paperFormat,
+      printBackground: _pdf.printBackground,
+      margin: margins,
+      displayHeaderFooter: _pdf.displayHeaderFooter,
+      headerTemplate: _pdf.headerTemplate,
+      footerTemplate: _pdf.footerTemplate,
     });
 
     const pageCount = countPdfPages(pdfBuffer);

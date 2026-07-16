@@ -4,9 +4,7 @@ import { existsSync, rmSync } from 'fs';
 import { dirname } from 'path';
 import { run } from './pipeline.js';
 import { BROWSERS_PATH } from './browsers-path.js';
-import { BUILTIN_PRESETS } from './presets.js';
-import { normalizeTocOption } from './utils.js';
-import { DEFAULTS } from './config.js';
+import { printOutputMsg, handleCliError } from './utils.js';
 
 const require = createRequire(import.meta.url);
 const { version } = require('../package.json');
@@ -76,16 +74,17 @@ program
   .description('Convert a Markdown file to PDF')
   .argument('<input>', 'Markdown file to convert')
   .option('-o, --output <path>', 'Output PDF path (default: same directory as input)')
-  .option('-p, --preset <name>', `Preset to use (${BUILTIN_PRESETS.map(p => p.name).join(', ')})`)
+  .option('-p, --preset <name>', 'Preset to use')
   .option('--toc', 'Force generate table of contents')
   .option('--no-toc', 'Skip table of contents')
   .action(async (input, options) => {
-    const toc = normalizeTocOption(options.toc);
-    const outputPath = await run(input, { ...options, toc });
-    console.log(`Written: ${outputPath}`);
+    const cliOptions = {
+      preset: options.preset,
+      output: options.output,
+      toc: options.toc === true ? 'on' : options.toc === false ? 'off' : undefined,
+    };
+    const outputPath = await run(input, cliOptions);
+    printOutputMsg(outputPath);
   });
 
-program.parseAsync(process.argv).catch((err) => {
-  console.error(err.message);
-  process.exit(1);
-});
+program.parseAsync(process.argv).catch(handleCliError);

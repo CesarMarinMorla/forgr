@@ -20,7 +20,8 @@ export function parseFrontMatter(source) {
     if (data.title) frontMatter.title = String(data.title);
     if (data.date) frontMatter.date = String(data.date);
     if (data.author) frontMatter.author = String(data.author);
-    if (data.toc === true || data.toc === false) frontMatter.toc = data.toc;
+    if (data.toc === true) frontMatter.toc = 'on';
+    else if (data.toc === false) frontMatter.toc = 'off';
   }
   return { frontMatter, body: content };
 }
@@ -146,7 +147,7 @@ function buildTocHtml(tokens, headingPages) {
   if (headings.length === 0) return '';
 
   let html = '<nav class="toc" role="navigation">\n';
-  html += `  <div class="toc__title">${DEFAULTS.toc.title}</div>\n`;
+  html += `  <div class="toc__title">${DEFAULTS.tocTitle}</div>\n`;
   html += '  <ul class="toc__list">\n';
   for (const h of headings) {
     const escaped = h.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
