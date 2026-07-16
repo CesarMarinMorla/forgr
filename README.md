@@ -105,6 +105,9 @@ forgr short-note.md --no-toc
 | `--output <path>` | Write the PDF to a specific path instead of next to the input file. |
 | `--preset <name>` | Apply a preset: `terminal` (default), `minimal`, `technical`, `academic`, `newsletter`. |
 | `--toc` / `--no-toc` | Force the table of contents on or off. Without either, it is decided automatically. |
+| `doctor` | Diagnose installation and fix common issues. |
+| `doctor --fix` | Auto-fix detected issues (re-download Chromium, remove malformed user presets). |
+| `doctor --verbose` | Show full paths, file sizes, and timestamps. |
 | `uninstall` | Remove the Chromium cache (~195MB) without removing the tool. |
 
 ### Interactive preset picker
@@ -118,6 +121,20 @@ config support in a later milestone.
 forgr-tui report.md
 forgr-tui report.md -o out.pdf --no-toc
 ```
+
+---
+
+## Doctor
+
+```bash
+forgr doctor                 # check everything
+forgr doctor --verbose       # full paths, file sizes
+forgr doctor --fix           # auto-fix where possible
+```
+
+Checks Chromium, built-in presets, user presets, font files, the base template, and Node version. Reports a summary and exits with code 0 if all good, 1 on failure.
+
+`--fix` re-downloads Chromium if missing and removes malformed user preset files.
 
 ---
 
