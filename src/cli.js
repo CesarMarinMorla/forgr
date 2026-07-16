@@ -58,6 +58,17 @@ program
   });
 
 program
+  .command('doctor')
+  .description('Diagnose installation and fix common issues')
+  .option('-f, --fix', 'Auto-fix detected issues where possible')
+  .option('-v, --verbose', 'Show full paths, file sizes, and timestamps')
+  .action(async (options) => {
+    const { runDoctor } = await import('./doctor.js');
+    const exitCode = await runDoctor(options);
+    process.exit(exitCode);
+  });
+
+program
   .command('convert', { isDefault: true })
   .description('Convert a Markdown file to PDF')
   .argument('<input>', 'Markdown file to convert')
