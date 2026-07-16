@@ -103,6 +103,7 @@ export async function runDoctor({ fix, verbose } = {}) {
 
   // 3. User preset files
   let malformedFiles = [];
+  let cssTargetsMissing = [];
   if (existsSync(USER_PRESETS_DIR)) {
     const files = readdirSync(USER_PRESETS_DIR).filter(f => f.endsWith('.json'));
     if (files.length > 0) {
@@ -112,32 +113,44 @@ export async function runDoctor({ fix, verbose } = {}) {
           const parsed = JSON.parse(readFileSync(fullPath, 'utf8'));
           if (typeof parsed.name !== 'string' || typeof parsed.description !== 'string') {
             malformedFiles.push(fullPath);
+          } else if (typeof parsed.css_file === 'string' && parsed.css_file.length > 0) {
+            const cssTarget = join(USER_PRESETS_DIR, parsed.css_file);
+            if (!existsSync(cssTarget)) {
+              cssTargetsMissing.push({ preset: parsed.name, file: parsed.css_file, path: cssTarget });
+            }
           }
         } catch {
           malformedFiles.push(fullPath);
         }
       }
       const valid = files.length - malformedFiles.length;
-      if (malformedFiles.length === 0) {
+      if (malformedFiles.length === 0 && cssTargetsMissing.length === 0) {
         ok('User presets valid', `${files.length} file${files.length !== 1 ? 's' : ''}`);
         record('pass');
       } else {
-        warn('User presets', `${valid} valid, ${malformedFiles.length} malformed`);
-        if (verbose) malformedFiles.forEach(f => detail(f));
-        if (fix) {
-          sep();
-          for (const mf of malformedFiles) {
-            try {
-              rmSync(mf);
-              ok(`Removed: ${mf}`);
-            } catch (err) {
-              fail(`Could not remove: ${mf}`, err.message);
+        if (malformedFiles.length > 0) {
+          warn('User presets', `${valid} valid, ${malformedFiles.length} malformed`);
+          if (verbose) malformedFiles.forEach(f => detail(f));
+          if (fix) {
+            sep();
+            for (const mf of malformedFiles) {
+              try {
+                rmSync(mf);
+                ok(`Removed: ${mf}`);
+              } catch (err) {
+                fail(`Could not remove: ${mf}`, err.message);
+              }
             }
           }
-          record('warn');
-        } else {
-          record('warn');
         }
+        if (cssTargetsMissing.length > 0) {
+          warn('User preset CSS targets', `${cssTargetsMissing.length} missing`);
+          for (const c of cssTargetsMissing) {
+            const msg = verbose ? c.path : `${c.file} (referenced by "${c.preset}")`;
+            detail(msg);
+          }
+        }
+        record('warn');
       }
     } else {
       ok('User presets', 'none found');

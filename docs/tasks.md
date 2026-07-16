@@ -7,9 +7,12 @@
 | 1 | Published CLI (v0.1.0) | Done |
 | 2 | Mermaid rendering & image embedding | Done |
 | 2.5 | Preset expansion & polish (newsletter preset, academic revamp, spacing, mermaid colors) | Done |
+| 2.75 | TUI & CLI polish | Pending |
 | 3 | TUI preset picker (v0.6.0) | Done |
-| 4 | TUI with live PDF preview | Pending |
-| 5 | Config, watch mode, cover page | Pending |
+| 3.5 | Front-matter parsing | Pending |
+| 4 | TUI settings form | Pending |
+| 5 | Watch mode & user presets | Pending |
+| 7 | `forgr doctor` diagnostic | Done |
 
 ## Milestone 1 — Published (v0.1.0)
 
@@ -146,6 +149,30 @@
 
 ---
 
+## Milestone 2.75 — TUI & CLI Polish (Pending)
+
+### CLI output
+
+- [ ] Colored prefixes: ✓ success, ✗ error, ℹ info
+- [ ] Inline spinner during PDF generation (replaces silent gap)
+- [ ] Completion summary: page count, word count, file size, preset, elapsed
+- [ ] Chromium download as single-line progress (no Playwright noise)
+
+### TUI (Ink)
+
+- [ ] Visual preset cards with accent color swatch beside each name
+- [ ] Confirmation animation before generation kicks off
+- [ ] Result screen after render: file path, page count, preset, time — "done" state, q quits
+- [ ] Consistent accent color for TUI chrome (separate from document presets)
+
+### Error format (both paths)
+
+- [ ] Chromium not found → message + fix hint, no stack trace
+- [ ] Invalid preset → formatted list of available presets
+- [ ] Pipeline errors → single line + hint, never raw dump
+
+---
+
 ## Milestone 3 — TUI Preset Picker (Done, v0.6.0)
 
 Launched via the `forgr-tui` command (separate bin), not an `--interactive` flag.
@@ -163,54 +190,79 @@ Launched via the `forgr-tui` command (separate bin), not an `--interactive` flag
 
 ---
 
-## Milestone 4 — Interactive TUI with Full Document Control & Live Preview (Pending)
+## Milestone 3.5 — Front-Matter Parsing (Pending)
+
+### Reading
+
+- [ ] Parse YAML front-matter (delimited by `---`) at top of `.md` files
+- [ ] Shared fields: `layout` → preset, `title` → cover title, `date`, `author`
+- [ ] Namespaced fields: `forgr.toc`, `forgr.cover`, `forgr.footer`, `forgr.section_numbering`
+- [ ] Ignore unrecognized fields (Obsidian/Jekyll/Typora safe)
+- [ ] Files without front-matter render unchanged
+
+### Merge priority
+
+- [ ] CLI flags win over front-matter
+- [ ] TUI settings win over front-matter
+- [ ] Front-matter is the baseline (no CLI flags + no TUI = file config)
+- [ ] TUI form pre-fills from front-matter when available
+
+### Write discipline
+
+- [ ] forgr never writes to the input `.md` file
+- [ ] Settings are ephemeral per render
+- [ ] Future `--write` flag to save TUI settings as front-matter
+
+### README
+
+- [ ] Document all supported front-matter keys with examples
+- [ ] Show minimal block for fully automated render (title + layout = zero CLI flags)
+
+---
+
+## Milestone 4 — TUI Settings Form (Pending)
+
+After the Ink preset picker exits, the TUI moves to an inline (npm-style) settings form:
 
 ### UX
-- [ ] Options screen after preset selection — interactive form with toggles/fields
-- [ ] Arrow-key navigation between fields, ←/→ or space to toggle, Enter to confirm
-- [ ] Draw new TUI screens with Ink; refactor `launchTui` to return a config object, not just a preset name
 
-### Settings the TUI controls
+- [ ] Settings appear as sequential prompts after the Ink picker
+- [ ] Defaults shown in brackets, Enter accepts default
+- [ ] Form pre-fills from front-matter when available
+- [ ] Final confirmation: "Render with these settings? [Y/n]"
+
+### Settings (sequential prompts)
 
 **Cover page**
 - [ ] on/off toggle
-- [ ] Editable fields: title, subtitle, author, date
-- [ ] Cover renders as a separate first page before the document body
+- [ ] Editable fields: title, author, date (only shown when cover is on)
+- [ ] Cover renders as separate first page before body
 
 **Table of Contents**
-- [ ] 3-way choice: auto / on / off (overrides the two-pass heuristic)
-- [ ] Auto is the default (word count >= 8000 OR pages >= 3)
+- [ ] 3-way choice: auto / on / off (overrides two-pass heuristic)
+- [ ] Auto is default (word count >= 8000 OR pages >= 3)
 
-**Doc-meta header** (top bar on first page)
+**Doc-meta header**
 - [ ] show/hide toggle
 - [ ] Editable label text (default: `forgr / {preset} / {filename}`)
 - [ ] Editable timestamp format
 
-**PDF page header** (repeated on every printed page)
-- [ ] Currently empty (`<div></div>`) — TUI enables content: document title, preset name, or nothing
-
-**PDF footer** (page numbers)
+**Footer (page numbers)**
 - [ ] Switchable: none / "1 / 10" / "Page 1 of 10"
-- [ ] Optionally include document title or date alongside page numbers
+- [ ] Optionally include title or preset name alongside numbers
 
 **Section numbering**
-- [ ] on/off toggle (currently per-preset CSS, needs to be generalized)
+- [ ] on/off toggle
 
 **Output path**
-- [ ] Optional: show the inferred output path and let user edit it (instead of only `-o` flag)
+- [ ] Optional: show inferred path, let user edit it
 
 ### Architecture
-- [ ] TUI returns a structured config object: `{ preset, toc, cover, coverTitle, coverAuthor, header, footer, ... }`
-- [ ] `bin/forgr-tui` maps config to pipeline + template context
-- [ ] Pipeline accepts new options (cover, header/footer mode, section numbering) and passes them through to template/PDF
-- [ ] Cover page template partial (`templates/partials/cover.html`) renders the cover page
-- [ ] Footer/header mode selection drives Playwright's `displayHeaderFooter`, `headerTemplate`, `footerTemplate`
 
-### Live PDF Preview
-- [ ] After configuration, render first page as PNG via Playwright screenshot
-- [ ] Display PNG in terminal via `terminal-image`
-- [ ] Cache by content_hash + config_hash (~200ms warm target)
-- [ ] Fallback to text mode if terminal lacks image support
+- [ ] TUI returns structured config merging: front-matter < TUI overrides < CLI flags
+- [ ] Pipeline accepts cover, footer mode, section numbering options
+- [ ] Cover page rendered via template partial (separate first page)
+- [ ] Footer/header mode drives Playwright displayHeaderFooter
 
 ---
 
@@ -232,20 +284,17 @@ TOC is implemented without template partials — it runs at the markdown-render 
 | `LONG_DOC_WORDS` | `src/pipeline.js` | `8000` |
 | `MIN_PAGES_FOR_TOC` | `src/pipeline.js` | `3` |
 
-## Milestone 5 — Config, Watch, Cover (Pending)
+## Milestone 5 — Watch Mode & User Presets (Pending)
 
-- [ ] .forgrrc config file support
-- [ ] Watch mode (--watch flag, re-render on file change)
+- [ ] Watch mode (`--watch` flag, re-render on file change)
+- [ ] User-preset rendering (discovery done in M3)
 - [ ] Plugin system for custom Markdown transformations
-- [ ] Implement cover_page preset feature flag (cover.html partial)
-- [ ] Implement section_numbering preset feature flag
-- [ ] Populate templates/partials/ directory
 
 ---
 
-## Milestone 6 — LaTeX Math & Front-Matter (On Demand)
+## Milestone 6 — LaTeX Math (On Demand)
 
-*Not started. These ship only after Milestones 1-5 are fully polished.*
+*Not started. Ships after Milestones 1-5 are fully polished.*
 
 ### LaTeX Math Notation
 - [ ] Math rendering via `markdown-it-texmath` or `markdown-it-katex`
@@ -256,44 +305,36 @@ TOC is implemented without template partials — it runs at the markdown-render 
 - [ ] Math in mermaid labels (stretch goal — mermaid's built-in math is experimental)
 - [ ] Test fixtures with mixed math/markdown content
 
-### Jekyll Front-Matter
-- [ ] Parse YAML front-matter (delimited by `---`) at the top of `.md` files
-- [ ] Extract `title`, `date`, `author`, `layout`, `tags`, `description`, `toc`, `math`
-- [ ] Map front-matter fields into template context (e.g., `title` becomes the PDF title, `date` the cover date, `toc: false` disables TOC)
-- [ ] Ignore front-matter in body rendering (strip before markdown-it processes)
-- [ ] Non-Jekyll files render unchanged (no front-matter = no change)
-- [ ] `layout` field maps to a preset name (e.g., `layout: academic` = academic preset)
-
 ---
 
-## Milestone 7 — `forgr doctor` diagnostic command (Pending)
+## Milestone 7 — `forgr doctor` diagnostic command (Done)
 
-*Not started. A self-check command that validates the installation and reports/fixes common issues.*
+*Self-check command at `src/doctor.js`, registered as `forgr doctor` in `cli.js`.*
 
 ### What it checks
 
-- [ ] **Chromium binary** — verify `~/.forgr/browsers/chromium-*` exists and is executable
-- [ ] **Preset CSS files** — for each built-in preset, check the CSS file exists at the expected path inside the package
-- [ ] **User preset files** — validate all `~/.config/forgr/presets/*.json` are parseable and have required fields
-- [ ] **User preset CSS targets** — for presets that reference an external CSS path, check the file exists and is readable
-- [ ] **Font files** — verify `IBMPlexSans-Variable.woff2`, `IBMPlexMono-400.woff2`, `IBMPlexMono-600.woff2` exist in the package assets dir
-- [ ] **Template file** — verify `base.html` exists
-- [ ] **Node version** — warn if below the minimum supported version
+- [x] **Chromium binary** — verify `~/.forgr/browsers/chromium_headless_shell-*` exists and is executable
+- [x] **Preset CSS files** — for each built-in preset, check the CSS file exists at the expected path inside the package
+- [x] **User preset files** — validate all `~/.config/forgr/presets/*.json` are parseable and have required fields
+- [x] **User preset CSS targets** — for presets that reference an external CSS path, check the file exists and is readable
+- [x] **Font files** — verify `IBMPlexSans-Variable.woff2`, `IBMPlexMono-400.woff2`, `IBMPlexMono-600.woff2` exist in the package assets dir
+- [x] **Template file** — verify `base.html` exists
+- [x] **Node version** — warn if below the minimum supported version
 
 ### Fix modes
 
-- [ ] `forgr doctor` — report-only (exit code 0 = all good, non-zero = issues found)
-- [ ] `forgr doctor --fix` — auto-fix where possible:
-  - Re-download Chromium if missing/corrupt (re-run `ensureChromium`)
+- [x] `forgr doctor` — report-only (exit code 0 = all good, non-zero = issues found)
+- [x] `forgr doctor --fix` — auto-fix where possible:
+  - Re-download Chromium if missing/corrupt
   - Reinstall package if built-in files are missing (prompt user to run `npm install` or re-download)
-  - Remove malformed user preset files (with confirmation)
-- [ ] `forgr doctor --verbose` — print full paths inspected, file sizes, and checksums (or mtime) for debugging
+  - Remove malformed user preset files
+- [x] `forgr doctor --verbose` — print full paths inspected, file sizes, and timestamps
 
 ### Output format
 
-- [ ] Colored output: green ✓ / red ✗ per check
-- [ ] Summary line: "3 passed, 1 warning, 1 error"
-- [ ] Suggestions for each failure ("Run `forgr uninstall && forgr <file>` to re-download Chromium")
+- [x] Colored output: green OK / red FAIL / yellow WARN per check
+- [x] Summary line: "N passed, N warnings, N errors"
+- [x] Suggestions for each failure
 
 ---
 
