@@ -32,8 +32,10 @@
 </head>
 <body>
   <header class="doc-meta">
+    {{#if title}}<span class="doc-meta__title">{{title}}</span>{{/if}}
     <span class="doc-meta__dot"></span>
     <span class="doc-meta__timestamp">{{timestamp}}</span>
+    {{#if author}}<span class="doc-meta__author">{{author}}</span>{{/if}}
   </header>
   <main>
     {{{body}}}

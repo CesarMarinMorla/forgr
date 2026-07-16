@@ -6,8 +6,24 @@ import markdownItHighlightjs from 'markdown-it-highlightjs';
 import { full as markdownItEmoji } from 'markdown-it-emoji';
 import markdownItSub from 'markdown-it-sub';
 import markdownItSup from 'markdown-it-sup';
+import matter from 'gray-matter';
 import { DEFAULTS } from './config.js';
 import hljs from './highlighter.js';
+
+
+export function parseFrontMatter(source) {
+  const { data, content, isEmpty } = matter(source);
+  const frontMatter = {};
+  if (!isEmpty) {
+    if (data.layout) frontMatter.preset = data.layout;
+    if (data.preset) frontMatter.preset = data.preset;
+    if (data.title) frontMatter.title = String(data.title);
+    if (data.date) frontMatter.date = String(data.date);
+    if (data.author) frontMatter.author = String(data.author);
+    if (data.toc === true || data.toc === false) frontMatter.toc = data.toc;
+  }
+  return { frontMatter, body: content };
+}
 
 
 function slugify(str) {

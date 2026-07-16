@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import './browsers-path.js';
-import { renderMarkdown } from './markdown.js';
+import { parseFrontMatter, renderMarkdown } from './markdown.js';
 import { renderTemplate } from './template.js';
 import { generatePdf } from './pdf.js';
 import { DEFAULTS } from './config.js';
@@ -10,20 +10,21 @@ function wordCount(str) {
   return str.split(/\s+/).filter(Boolean).length;
 }
 
-function templateContext(body, options) {
-  const preset = options.preset || DEFAULTS.preset;
+function templateContext(body, preset, meta) {
   return {
     body,
     preset,
-    timestamp: new Date().toISOString().slice(0, 10),
+    timestamp: meta.date || new Date().toISOString().slice(0, 10),
+    title: meta.title || null,
+    author: meta.author || null,
   };
 }
 
 async function renderStage(markdown, options, absInput, outputPath, withToc, headingPages) {
   const baseDir = path.dirname(absInput);
   const { body, tocHtml } = renderMarkdown(markdown, { toc: withToc, headingPages, baseDir });
-  const html = await renderTemplate(templateContext(tocHtml + body, options));
-  return generatePdf(html, outputPath, { captureHeadings: !withToc, preset: options.preset || DEFAULTS.preset });
+  const html = await renderTemplate(templateContext(tocHtml + body, options.preset, options.meta || {}));
+  return generatePdf(html, outputPath, { captureHeadings: !withToc, preset: options.preset });
 }
 
 export async function run(inputPath, options = {}) {
@@ -44,15 +45,28 @@ export async function run(inputPath, options = {}) {
     throw new Error(`could not read ${absInput}: ${err.message}`);
   }
 
-  // TOC decision: --toc / --no-toc win; otherwise auto-detect
+  // Parse front-matter and merge with CLI defaults
+  const { frontMatter, body: markdownBody } = parseFrontMatter(markdown);
+  const preset = options.preset || frontMatter.preset || DEFAULTS.preset;
+  const meta = {
+    title: frontMatter.title,
+    date: frontMatter.date,
+    author: frontMatter.author,
+  };
+  const mergedOptions = { ...options, meta, preset };
+
+  // TOC decision: CLI flag > front-matter > auto-detect
   let toc = options.toc;
   if (toc === undefined) {
-    toc = wordCount(markdown) >= DEFAULTS.toc.longDocWords;
+    toc = frontMatter.toc;
+  }
+  if (toc === undefined) {
+    toc = wordCount(markdownBody) >= DEFAULTS.toc.longDocWords;
   }
 
   let result;
   try {
-    result = await renderStage(markdown, options, absInput, outputPath, false);
+    result = await renderStage(markdownBody, mergedOptions, absInput, outputPath, false);
   } catch (err) {
     throw new Error(`render failed: ${err.message}`);
   }
@@ -64,7 +78,7 @@ export async function run(inputPath, options = {}) {
 
   if (needsToc) {
     try {
-      await renderStage(markdown, options, absInput, outputPath, true, headingPages);
+      await renderStage(markdownBody, mergedOptions, absInput, outputPath, true, headingPages);
     } catch (err) {
       throw new Error(`render failed: ${err.message}`);
     }
