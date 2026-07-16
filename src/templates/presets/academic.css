@@ -77,7 +77,6 @@ main {
   vertical-align: middle;
   flex-shrink: 0;
 }
-.doc-meta__label { flex: 1; }
 .doc-meta__timestamp { font-weight: 400; }
 
 /* Title: large, serif, closed by a signal rule */

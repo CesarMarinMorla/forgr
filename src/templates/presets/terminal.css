@@ -58,11 +58,6 @@ body {
   flex-shrink: 0;
 }
 
-.doc-meta__label {
-  flex: 1;
-  color: var(--ink-soft);
-}
-
 .doc-meta__timestamp {
   color: var(--graphite);
 }

@@ -53,7 +53,6 @@ body {
 }
 .doc-meta__dot { display: none; }
 .doc-meta__label { flex: 1; color: var(--ink-soft); }
-.doc-meta__label::before { content: "RUN "; color: var(--signal); font-weight: 600; }
 .doc-meta__timestamp { color: var(--graphite); }
 
 h1, h2, h3, h4, h5, h6 {

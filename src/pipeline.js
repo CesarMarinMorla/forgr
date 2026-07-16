@@ -12,11 +12,17 @@ function wordCount(str) {
   return str.split(/\s+/).filter(Boolean).length;
 }
 
+const PRESET_LABELS = {
+  technical: 'RUN',
+  newsletter: 'ISSUE',
+};
+
 function templateContext(body, options, absInput) {
+  const preset = options.preset || 'terminal';
   return {
     body,
-    preset: options.preset || 'terminal',
-    label: `forgr / ${options.preset || 'terminal'} / ${path.basename(absInput)}`,
+    preset,
+    label: PRESET_LABELS[preset] ?? '',
     timestamp: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long' }),
   };
 }
