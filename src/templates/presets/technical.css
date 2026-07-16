@@ -52,6 +52,7 @@ body {
   letter-spacing: 0.02em;
 }
 .doc-meta__dot { display: none; }
+.doc-meta__label { flex: 1; color: var(--ink-soft); }
 .doc-meta__timestamp { color: var(--graphite); }
 
 h1, h2, h3, h4, h5, h6 {
