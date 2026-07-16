@@ -1,8 +1,12 @@
+import { createRequire } from 'module';
 import { Command } from 'commander';
 import { existsSync, rmSync } from 'fs';
 import { dirname } from 'path';
 import { run } from './pipeline.js';
 import { BROWSERS_PATH } from './browsers-path.js';
+
+const require = createRequire(import.meta.url);
+const { version } = require('../package.json');
 
 const FORGR_DIR = dirname(BROWSERS_PATH);
 
@@ -11,7 +15,7 @@ const program = new Command();
 program
   .name('forgr')
   .description('Convert Markdown files into polished PDFs')
-  .version('0.1.0');
+  .version(version);
 
 program
   .command('uninstall')
