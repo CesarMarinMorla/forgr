@@ -12,18 +12,12 @@ function wordCount(str) {
   return str.split(/\s+/).filter(Boolean).length;
 }
 
-const PRESET_LABELS = {
-  technical: 'RUN',
-  newsletter: 'ISSUE',
-};
-
 function templateContext(body, options, absInput) {
   const preset = options.preset || 'terminal';
   return {
     body,
     preset,
-    label: PRESET_LABELS[preset] ?? '',
-    timestamp: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long' }),
+    timestamp: new Date().toISOString().slice(0, 10),
   };
 }
 
