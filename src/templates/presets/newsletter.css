@@ -52,7 +52,6 @@ body {
   margin-bottom: 2.5rem;
 }
 .doc-meta__dot { display: none; }
-.doc-meta__label { text-transform: uppercase; letter-spacing: 0.08em; }
 .doc-meta__timestamp { margin-left: 0.6em; }
 
 h1, h2, h3, h4, h5, h6 {
