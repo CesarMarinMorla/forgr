@@ -25,16 +25,26 @@ function getHeadlessShellPath() {
   if (!entries.length) return null;
 
   const base = join(BROWSERS_PATH, entries[0]);
-  switch (platform()) {
-    case 'darwin':
-      return join(base, 'chrome-headless-shell-mac-arm64', 'chrome-headless-shell');
-    case 'linux':
-      return join(base, 'chrome-headless-shell-linux-x64', 'chrome-headless-shell');
-    case 'win32':
-      return join(base, 'chrome-headless-shell-win64', 'chrome-headless-shell.exe');
-    default:
-      return null;
+  const candidates = [() => {
+    switch (platform()) {
+      case 'darwin': return join(base, 'chrome-headless-shell-mac-arm64', 'chrome-headless-shell');
+      case 'linux': return join(base, 'chrome-headless-shell-linux-x64', 'chrome-headless-shell');
+      case 'win32': return join(base, 'chrome-headless-shell-win64', 'chrome-headless-shell.exe');
+      default: return null;
+    }
+  }, () => {
+    switch (platform()) {
+      case 'darwin': return join(base, 'chrome-headless-shell');
+      case 'linux': return join(base, 'chrome-headless-shell');
+      case 'win32': return join(base, 'chrome-headless-shell.exe');
+      default: return null;
+    }
+  }];
+  for (const fn of candidates) {
+    const p = fn();
+    if (p && existsSync(p)) return p;
   }
+  return null;
 }
 
 // Five slices so all of pie1..pie5 are exercised per preset.
