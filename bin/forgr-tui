@@ -4,6 +4,7 @@ import { Command } from 'commander';
 import { run } from '../src/pipeline.js';
 import { listPresets } from '../src/presets.js';
 import { launchTui, classifyPreset } from '../src/tui.js';
+import { normalizeTocOption } from '../src/utils.js';
 
 const program = new Command();
 
@@ -15,7 +16,7 @@ program
   .option('--toc', 'Force generate table of contents')
   .option('--no-toc', 'Skip table of contents')
   .action(async (input, options) => {
-    const toc = options.toc === true ? true : options.toc === false ? false : undefined;
+    const toc = normalizeTocOption(options.toc);
     const presets = listPresets();
 
     let chosen;

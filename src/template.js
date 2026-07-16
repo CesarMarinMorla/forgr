@@ -2,6 +2,7 @@ import { readFile } from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import Handlebars from 'handlebars';
+import { BUILTIN_PRESETS } from './presets.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -19,7 +20,8 @@ export async function renderTemplate(context = {}) {
   try {
     presetCss = await readFile(presetPath, 'utf8');
   } catch {
-    throw new Error(`preset "${preset}" not found. Available: terminal, minimal, technical, academic, newsletter`);
+    const names = BUILTIN_PRESETS.map(p => p.name).join(', ');
+    throw new Error(`preset "${preset}" not found. Available: ${names}`);
   }
 
   const [templateSrc, plexSansRaw, plexMono400Raw, plexMono600Raw] = await Promise.all([

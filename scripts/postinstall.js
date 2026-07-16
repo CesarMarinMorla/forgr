@@ -1,24 +1,6 @@
-import { existsSync, readdirSync } from 'fs';
-import { rm } from 'fs/promises';
+import { existsSync } from 'fs';
 import { execSync } from 'child_process';
-import { homedir } from 'os';
-import { join } from 'path';
-
-const BROWSERS_PATH = join(homedir(), '.forgr', 'browsers');
-
-async function removeFfmpeg() {
-  let entries;
-  try {
-    entries = readdirSync(BROWSERS_PATH);
-  } catch {
-    return;
-  }
-  for (const entry of entries) {
-    if (entry.startsWith('ffmpeg-')) {
-      await rm(join(BROWSERS_PATH, entry), { recursive: true, force: true });
-    }
-  }
-}
+import { BROWSERS_PATH, CHROMIUM_INSTALL_CMD, removeFfmpeg } from '../src/browsers-path.js';
 
 async function main() {
   process.env.PLAYWRIGHT_BROWSERS_PATH = BROWSERS_PATH;
@@ -50,7 +32,7 @@ async function main() {
   const env = { ...process.env, PLAYWRIGHT_BROWSERS_PATH: BROWSERS_PATH };
 
   try {
-    execSync('npx playwright-core install chromium-headless-shell', {
+    execSync(CHROMIUM_INSTALL_CMD, {
       stdio: 'inherit',
       env,
     });

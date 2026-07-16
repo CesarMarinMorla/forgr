@@ -4,6 +4,8 @@ import { existsSync, rmSync } from 'fs';
 import { dirname } from 'path';
 import { run } from './pipeline.js';
 import { BROWSERS_PATH } from './browsers-path.js';
+import { BUILTIN_PRESETS } from './presets.js';
+import { normalizeTocOption } from './utils.js';
 
 const require = createRequire(import.meta.url);
 const { version } = require('../package.json');
@@ -73,12 +75,11 @@ program
   .description('Convert a Markdown file to PDF')
   .argument('<input>', 'Markdown file to convert')
   .option('-o, --output <path>', 'Output PDF path (default: same directory as input)')
-  .option('-p, --preset <name>', 'Preset to use (terminal, minimal, technical, academic, newsletter)', 'terminal')
+  .option('-p, --preset <name>', `Preset to use (${BUILTIN_PRESETS.map(p => p.name).join(', ')})`, 'terminal')
   .option('--toc', 'Force generate table of contents')
   .option('--no-toc', 'Skip table of contents')
   .action(async (input, options) => {
-    // Normalize toc: --toc sets true, --no-toc sets false, neither sets undefined
-    const toc = options.toc === true ? true : options.toc === false ? false : undefined;
+    const toc = normalizeTocOption(options.toc);
     const outputPath = await run(input, { ...options, toc });
     console.log(`Written: ${outputPath}`);
   });

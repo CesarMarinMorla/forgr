@@ -1,13 +1,12 @@
 import { chromium } from 'playwright-core';
 import { execSync } from 'child_process';
 import { existsSync, readdirSync } from 'fs';
-import { rm } from 'fs/promises';
 import fs from 'fs-extra';
 import path from 'path';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { platform } from 'os';
-import { BROWSERS_PATH } from './browsers-path.js';
+import { BROWSERS_PATH, CHROMIUM_INSTALL_CMD, removeFfmpeg } from './browsers-path.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MERMAID_DIST = path.resolve(__dirname, '..', 'node_modules', 'mermaid', 'dist', 'mermaid.min.js');
@@ -379,20 +378,6 @@ export function getHeadlessShellPath() {
   return null;
 }
 
-async function removeFfmpeg() {
-  let entries;
-  try {
-    entries = readdirSync(BROWSERS_PATH);
-  } catch {
-    return;
-  }
-  for (const entry of entries) {
-    if (entry.startsWith('ffmpeg-')) {
-      await rm(join(BROWSERS_PATH, entry), { recursive: true, force: true });
-    }
-  }
-}
-
 let chromiumChecked = false;
 
 async function ensureChromium() {
@@ -407,7 +392,7 @@ async function ensureChromium() {
   console.log('');
 
   try {
-    execSync('npx playwright-core install chromium-headless-shell', {
+    execSync(CHROMIUM_INSTALL_CMD, {
       stdio: 'inherit',
       env: { ...process.env, PLAYWRIGHT_BROWSERS_PATH: BROWSERS_PATH },
     });
