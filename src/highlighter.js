@@ -90,6 +90,7 @@ hljs.registerLanguage('markdown', markdown);
 hljs.registerLanguage('md', markdown);
 hljs.registerLanguage('plaintext', plaintext);
 hljs.registerLanguage('text', plaintext);
+hljs.registerLanguage('tree', plaintext);
 
 hljs.registerLanguage('sql', sql);
 hljs.registerLanguage('dockerfile', dockerfile);
