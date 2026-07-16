@@ -350,7 +350,7 @@ export const PRESET_MERMAID_THEMES = {
   },
 };
 
-function getHeadlessShellPath() {
+export function getHeadlessShellPath() {
   let entries;
   try {
     entries = readdirSync(BROWSERS_PATH).filter(e => e.startsWith('chromium_headless_shell-'));
