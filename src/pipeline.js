@@ -4,16 +4,14 @@ import './browsers-path.js';
 import { renderMarkdown } from './markdown.js';
 import { renderTemplate } from './template.js';
 import { generatePdf } from './pdf.js';
-
-const LONG_DOC_WORDS = 8000;
-const MIN_PAGES_FOR_TOC = 3;
+import { DEFAULTS } from './config.js';
 
 function wordCount(str) {
   return str.split(/\s+/).filter(Boolean).length;
 }
 
-function templateContext(body, options, absInput) {
-  const preset = options.preset || 'terminal';
+function templateContext(body, options) {
+  const preset = options.preset || DEFAULTS.preset;
   return {
     body,
     preset,
@@ -24,8 +22,8 @@ function templateContext(body, options, absInput) {
 async function renderStage(markdown, options, absInput, outputPath, withToc, headingPages) {
   const baseDir = path.dirname(absInput);
   const { body, tocHtml } = renderMarkdown(markdown, { toc: withToc, headingPages, baseDir });
-  const html = await renderTemplate(templateContext(tocHtml + body, options, absInput));
-  return generatePdf(html, outputPath, { captureHeadings: !withToc, preset: options.preset || 'terminal' });
+  const html = await renderTemplate(templateContext(tocHtml + body, options));
+  return generatePdf(html, outputPath, { captureHeadings: !withToc, preset: options.preset || DEFAULTS.preset });
 }
 
 export async function run(inputPath, options = {}) {
@@ -49,7 +47,7 @@ export async function run(inputPath, options = {}) {
   // TOC decision: --toc / --no-toc win; otherwise auto-detect
   let toc = options.toc;
   if (toc === undefined) {
-    toc = wordCount(markdown) >= LONG_DOC_WORDS;
+    toc = wordCount(markdown) >= DEFAULTS.toc.longDocWords;
   }
 
   let result;
@@ -62,7 +60,7 @@ export async function run(inputPath, options = {}) {
   const { pageCount, headingPages } = result;
 
   // Decide if TOC should be included
-  const needsToc = toc === true || (toc === false && options.toc === undefined && pageCount >= MIN_PAGES_FOR_TOC);
+  const needsToc = toc === true || (toc === false && options.toc === undefined && pageCount >= DEFAULTS.toc.minPages);
 
   if (needsToc) {
     try {

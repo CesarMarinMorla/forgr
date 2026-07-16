@@ -7,6 +7,7 @@ import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { platform } from 'os';
 import { BROWSERS_PATH, CHROMIUM_INSTALL_CMD, removeFfmpeg } from './browsers-path.js';
+import { DEFAULTS } from './config.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MERMAID_DIST = path.resolve(__dirname, '..', 'node_modules', 'mermaid', 'dist', 'mermaid.min.js');
@@ -442,7 +443,7 @@ export async function generatePdf(html, outputPath, { captureHeadings, preset } 
     if (captureHeadings) {
       // Match the body max-width used by presets so on-screen and print
       // layouts align closely for heading-position calculations
-      await page.setViewportSize({ width: 720, height: 720 });
+      await page.setViewportSize(DEFAULTS.pdf.viewport);
     }
 
     await page.setContent(html, { waitUntil: 'domcontentloaded' });
@@ -495,13 +496,14 @@ export async function generatePdf(html, outputPath, { captureHeadings, preset } 
       }, A4_CONTENT_HEIGHT);
     }
 
+    const pdfOpts = DEFAULTS.pdf;
     const pdfBuffer = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-      margin: { top: '2cm', bottom: '2cm', left: '2cm', right: '2cm' },
-      displayHeaderFooter: true,
-      headerTemplate: '<div></div>',
-      footerTemplate: '<div style="width:100%; font-family:Menlo,monospace; font-size:7px; color:#666; text-align:center; padding:0 2cm;"><span class="pageNumber"></span> / <span class="totalPages"></span></div>',
+      format: pdfOpts.format,
+      printBackground: pdfOpts.printBackground,
+      margin: pdfOpts.margin,
+      displayHeaderFooter: pdfOpts.displayHeaderFooter,
+      headerTemplate: pdfOpts.headerTemplate,
+      footerTemplate: pdfOpts.footerTemplate,
     });
 
     const pageCount = countPdfPages(pdfBuffer);

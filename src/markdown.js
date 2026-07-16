@@ -6,6 +6,7 @@ import markdownItHighlightjs from 'markdown-it-highlightjs';
 import { full as markdownItEmoji } from 'markdown-it-emoji';
 import markdownItSub from 'markdown-it-sub';
 import markdownItSup from 'markdown-it-sup';
+import { DEFAULTS } from './config.js';
 import hljs from './highlighter.js';
 
 
@@ -129,7 +130,7 @@ function buildTocHtml(tokens, headingPages) {
   if (headings.length === 0) return '';
 
   let html = '<nav class="toc" role="navigation">\n';
-  html += '  <div class="toc__title">Contents</div>\n';
+  html += `  <div class="toc__title">${DEFAULTS.toc.title}</div>\n`;
   html += '  <ul class="toc__list">\n';
   for (const h of headings) {
     const escaped = h.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');

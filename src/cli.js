@@ -6,6 +6,7 @@ import { run } from './pipeline.js';
 import { BROWSERS_PATH } from './browsers-path.js';
 import { BUILTIN_PRESETS } from './presets.js';
 import { normalizeTocOption } from './utils.js';
+import { DEFAULTS } from './config.js';
 
 const require = createRequire(import.meta.url);
 const { version } = require('../package.json');
@@ -75,7 +76,7 @@ program
   .description('Convert a Markdown file to PDF')
   .argument('<input>', 'Markdown file to convert')
   .option('-o, --output <path>', 'Output PDF path (default: same directory as input)')
-  .option('-p, --preset <name>', `Preset to use (${BUILTIN_PRESETS.map(p => p.name).join(', ')})`, 'terminal')
+  .option('-p, --preset <name>', `Preset to use (${BUILTIN_PRESETS.map(p => p.name).join(', ')})`, DEFAULTS.preset)
   .option('--toc', 'Force generate table of contents')
   .option('--no-toc', 'Skip table of contents')
   .action(async (input, options) => {
