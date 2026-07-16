@@ -51,15 +51,7 @@ body {
   padding-bottom: 10px;
   margin-bottom: 2.5rem;
 }
-.doc-meta__dot {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--signal);
-  margin-right: 6px;
-  vertical-align: middle;
-}
+.doc-meta__dot { display: none; }
 .doc-meta__label { text-transform: uppercase; letter-spacing: 0.08em; }
 .doc-meta__timestamp { margin-left: 0.6em; }
 

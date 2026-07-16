@@ -68,15 +68,7 @@ main {
   align-items: center;
   gap: 0.6em;
 }
-.doc-meta__dot {
-  display: inline-block;
-  width: 5px;
-  height: 5px;
-  background: var(--signal);
-  border-radius: 50%;
-  vertical-align: middle;
-  flex-shrink: 0;
-}
+.doc-meta__dot { display: none; }
 .doc-meta__timestamp { font-weight: 400; }
 
 /* Title: large, serif, closed by a signal rule */
