@@ -15,6 +15,7 @@ program
   .option('-o, --output <path>', 'Output PDF path (default: same directory as input)')
   .option('--toc', 'Force generate table of contents')
   .option('--no-toc', 'Skip table of contents')
+  .option('--write', 'Save CLI settings into the file\'s front-matter')
   .action(async (input, options) => {
     const presets = listPresets();
 
@@ -53,7 +54,15 @@ program
         toc: normalizeTocOption(options.toc),
         preset: decision.name,
       };
-      const outputPath = await run(input, cliOptions);
+
+      const writeKeys = {};
+      writeKeys.preset = decision.name;
+      if (options.toc !== undefined) writeKeys.toc = normalizeTocOption(options.toc);
+
+      const outputPath = await run(input, cliOptions, {
+        write: options.write,
+        writeKeys: options.write ? writeKeys : undefined,
+      });
       printOutputMsg(outputPath);
     } catch (err) {
       console.error(`Error: ${err.message}`);

@@ -19,8 +19,8 @@ function resolveToc(config, wordCount) {
 
 function buildConfig(cliOptions, frontMatter) {
   return {
-    preset: cliOptions.preset || frontMatter.preset || DEFAULTS.preset,
-    toc: cliOptions.toc || frontMatter.toc || DEFAULTS.toc,
+    preset: cliOptions.preset ?? frontMatter.preset ?? DEFAULTS.preset,
+    toc: cliOptions.toc ?? frontMatter.toc ?? DEFAULTS.toc,
     tocTitle: frontMatter.tocTitle ?? DEFAULTS.tocTitle,
     tocWordThreshold: DEFAULTS.tocWordThreshold,
     minPagesForToc: DEFAULTS.minPagesForToc,
@@ -35,7 +35,7 @@ function buildConfig(cliOptions, frontMatter) {
     sectionNumbering: frontMatter.sectionNumbering ?? DEFAULTS.sectionNumbering,
     paperFormat: frontMatter.paperFormat ?? DEFAULTS.paperFormat,
     margins: frontMatter.margins ?? DEFAULTS.margins,
-    outputPath: cliOptions.outputPath || '',
+    outputPath: cliOptions.outputPath ?? '',
     meta: {
       title: frontMatter.title,
       date: frontMatter.date,
