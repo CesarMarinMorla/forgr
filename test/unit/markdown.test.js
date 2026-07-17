@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { renderMarkdown } from '../src/markdown.js';
+import { renderMarkdown } from '../../src/markdown.js';
 
 function body(source, options) {
   return renderMarkdown(source, options).body;

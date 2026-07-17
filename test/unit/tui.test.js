@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { launchTui, classifyPreset } from '../src/tui.js';
+import { launchTui, classifyPreset } from '../../src/tui.js';
 
 const presets = [{ name: 'terminal', description: 'd', source: 'builtin' }];
 

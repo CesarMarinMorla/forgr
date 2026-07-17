@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { existsSync, statSync, openSync, readSync, closeSync } from 'fs';
-import { run } from '../src/pipeline.js';
+import { run } from '../../src/pipeline.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const FIXTURES_DIR = path.join(__dirname, 'fixtures');
+const FIXTURES_DIR = path.join(__dirname, '..', 'fixtures');
 const COMPREHENSIVE_MD = path.join(FIXTURES_DIR, 'comprehensive.md');
 
 const PRESETS = ['terminal', 'minimal', 'technical', 'academic', 'newsletter'];

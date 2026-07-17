@@ -4,10 +4,10 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs-extra';
 import { open, readdir } from 'node:fs/promises';
-import { run } from '../src/pipeline.js';
+import { run } from '../../src/pipeline.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const FIXTURES_DIR = path.join(__dirname, 'fixtures');
+const FIXTURES_DIR = path.join(__dirname, '..', 'fixtures');
 
 // Run against a single preset at a time. Override with the FORGR_PRESET env var:
 //   FORGR_PRESET=technical npm test

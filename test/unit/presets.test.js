@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, writeFileSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { BUILTIN_PRESETS, scanUserPresets, listPresets } from '../src/presets.js';
+import { BUILTIN_PRESETS, scanUserPresets, listPresets } from '../../src/presets.js';
 
 test('BUILTIN_PRESETS lists the five shipped presets', () => {
   const names = BUILTIN_PRESETS.map((p) => p.name);

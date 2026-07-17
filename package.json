@@ -18,7 +18,9 @@
   },
   "scripts": {
     "test": "node --test test/**/*.test.js",
-    "test:unit": "node --test test/markdown.test.js test/pipeline.test.js test/presets.test.js test/tui.test.js",
+    "test:unit": "node --test test/unit/*.test.js",
+    "test:integration": "node --test test/integration/*.test.js",
+    "test:mermaid": "node --test test/mermaid/*.test.js",
     "install-chromium": "node scripts/postinstall.js",
     "preuninstall": "node scripts/preuninstall.js"
   },
