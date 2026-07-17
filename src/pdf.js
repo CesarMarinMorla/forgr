@@ -11,12 +11,7 @@ import { PRESET_MERMAID_THEMES } from './themes/index.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MERMAID_DIST = path.resolve(__dirname, '..', 'node_modules', 'mermaid', 'dist', 'mermaid.min.js');
 
-let chromiumChecked = false;
-
 async function ensureChromium() {
-  if (chromiumChecked) return;
-  chromiumChecked = true;
-
   const execPath = getHeadlessShellPath();
   if (execPath && existsSync(execPath)) return;
 

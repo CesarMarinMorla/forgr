@@ -54,11 +54,9 @@ Each concern extracted to its own exported function (`assertWritableDir`, `launc
 
 All `||` operators in `buildConfig()` replaced with `??`. Empty-string and `false` values are now preserved instead of silently falling through to the default.
 
-### 7. Two-pass render with zero caching
+### 7. Two-pass render with zero caching [WON'T FIX]
 
-`src/pipeline.js:99-115`: When TOC is needed, the entire pipeline runs twice — markdown re-parsed, HTML regenerated, Chromium re-launched. No work is reused between passes. The second pass is a full re-execution from markdown to PDF.
-
-**If this becomes a bottleneck**: The first pass's rendered HTML and Chromium page could be cached and reused.
+The second pass inserts the TOC which shifts pagination, requiring a fresh render. Chromium launch and PDF generation dominate — caching HTML between passes saves negligible time for significant complexity.
 
 ### 8. `--write` duplicates option processing [RESOLVED]
 
@@ -90,9 +88,9 @@ Functions like `buildConfig()`, `resolveToc()`, `normalizeTocOption()`, and `wor
 
 Each preset's theme moved to its own JSON file under `src/themes/`. A 7-line `src/themes/index.js` imports and re-exports them. `src/pdf.js` lost 337 lines of inline data.
 
-### 12. Module-level mutable cache
+### 12. Module-level mutable cache [RESOLVED]
 
-`src/pdf.js:381`: `let chromiumChecked = false`. Once set to `true`, `ensureChromium()` becomes a no-op for the entire process lifetime. The cache is never invalidated — fine for CLI usage but would break in a long-running server context.
+Removed `chromiumChecked` flag and early return from `ensureChromium()`. Each call now checks directly via `existsSync()` — negligible perf cost, no cache invalidation risk.
 
 ### 13. `bin/forgr-tui` duplicates CLI patterns [RESOLVED]
 
@@ -123,12 +121,12 @@ Removed from `buildConfig()`. `generatePdf()` reads `DEFAULTS._pdf` directly.
 | Critical | `doctor.js` 172-line monolith | `src/doctor.js:51-223` | Resolved |
 | Critical | `generatePdf()` 97 lines, 6 concerns | `src/pdf.js:420-517` | Resolved |
 | Moderate | `buildConfig()` inconsistent `||` vs `??` | `src/pipeline.js:19-45` | Resolved |
-| Moderate | Two-pass render no caching | `src/pipeline.js:99-115` | Open |
+| Moderate | Two-pass render no caching | `src/pipeline.js:99-115` | Won't fix |
 | Moderate | `--write` duplicates option processing | `src/cli.js:88-94` | Resolved |
 | Moderate | `toc` string-triple normalization | 3 files | Resolved |
 | Moderate | 7/12 modules lack unit tests | Multiple | Open |
 | Low | Mermaid theme data inline | `src/pdf.js:14-350` | Resolved |
-| Low | Module-level cache never invalidated | `src/pdf.js:381` | Open |
+| Low | Module-level cache never invalidated | `src/pdf.js:381` | Resolved |
 | Low | `bin/forgr-tui` duplicates `cli.js` | `bin/forgr-tui` | Resolved |
 | Low | Integration tests shallow assertions | `test/integration/*.test.js` | Open |
 | Low | `_pdf` hardcoded in merge | `src/pipeline.js:38` | Resolved |
