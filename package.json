@@ -58,6 +58,7 @@
     "react": "18.3.1"
   },
   "devDependencies": {
+    "@semantic-release/git": "^10.0.1",
     "semantic-release": "25.0.6",
     "terminal-image": "2.0.0"
   },
