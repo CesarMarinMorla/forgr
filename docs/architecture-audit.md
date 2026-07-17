@@ -60,29 +60,13 @@ All `||` operators in `buildConfig()` replaced with `??`. Empty-string and `fals
 
 **If this becomes a bottleneck**: The first pass's rendered HTML and Chromium page could be cached and reused.
 
-### 8. `--write` duplicates option processing
+### 8. `--write` duplicates option processing [RESOLVED]
 
-`src/cli.js:88-94` manually mirrors Commander's option parsing:
+Replaced manual `if` blocks with shared `WRITEABLE_KEYS` array and `buildWriteKeys()` helper in `src/utils.js`. Both `cli.js` and `bin/forgr-tui` use it.
 
-```js
-const writeKeys = {};
-if (options.preset !== undefined) writeKeys.preset = options.preset;
-if (options.toc !== undefined) writeKeys.toc = normalizeTocOption(options.toc);
-```
+### 9. `toc` as string-triple [RESOLVED]
 
-Adding a new CLI flag means updating the option definition AND the `writeKeys` block in lockstep. This is a maintenance burden — expect it to be forgotten when someone adds e.g. `--footer`.
-
-### 9. `toc` as string-triple
-
-`toc` flows through the system as `'on'`/`'off'`/`'auto'`:
-
-- CLI normalizes `true`/`false` to `'on'`/`'off'` via `normalizeTocOption()` (`src/utils.js:1`)
-- Front-matter normalizes YAML booleans/strings via `normalizeTocFromYaml()` (`src/markdown.js:20`)
-- `resolveToc()` (`src/pipeline.js:13`) switches on `'on'`/`'off'`/`'auto'`
-
-Three normalization boundaries, each accepting a slightly different input format. The string encoding is non-standard and creates an impedance mismatch at every boundary.
-
-**Prefer**: A `TocOption` enum or boolean + threshold approach.
+`toc` now flows as `true`/`false`/`'auto'` throughout the system. Two normalization boundaries eliminated. `normalizeTocOption()` removed from `src/utils.js`. `normalizeTocFromYaml()` still exists in `src/frontmatter.js` for backward-compatible YAML parsing.
 
 ### 10. 7 of 12 source modules have no unit tests
 
@@ -102,11 +86,9 @@ Functions like `buildConfig()`, `resolveToc()`, `normalizeTocOption()`, and `wor
 
 ## Low
 
-### 11. Mermaid theme data should be external
+### 11. Mermaid theme data should be external [RESOLVED]
 
-`src/pdf.js:14-350` — 336 lines of repetitive theme objects. Five presets, each ~70 lines, with identical structure (`cScale0` through `cScale11` repeated in every preset). This is data, not code.
-
-**Prefer**: JSON files or a shared base with per-preset overrides.
+Each preset's theme moved to its own JSON file under `src/themes/`. A 7-line `src/themes/index.js` imports and re-exports them. `src/pdf.js` lost 337 lines of inline data.
 
 ### 12. Module-level mutable cache
 
@@ -142,10 +124,10 @@ Removed from `buildConfig()`. `generatePdf()` reads `DEFAULTS._pdf` directly.
 | Critical | `generatePdf()` 97 lines, 6 concerns | `src/pdf.js:420-517` | Resolved |
 | Moderate | `buildConfig()` inconsistent `||` vs `??` | `src/pipeline.js:19-45` | Resolved |
 | Moderate | Two-pass render no caching | `src/pipeline.js:99-115` | Open |
-| Moderate | `--write` duplicates option processing | `src/cli.js:88-94` | Open |
-| Moderate | `toc` string-triple normalization | 3 files | Open |
+| Moderate | `--write` duplicates option processing | `src/cli.js:88-94` | Resolved |
+| Moderate | `toc` string-triple normalization | 3 files | Resolved |
 | Moderate | 7/12 modules lack unit tests | Multiple | Open |
-| Low | Mermaid theme data inline | `src/pdf.js:14-350` | Open |
+| Low | Mermaid theme data inline | `src/pdf.js:14-350` | Resolved |
 | Low | Module-level cache never invalidated | `src/pdf.js:381` | Open |
 | Low | `bin/forgr-tui` duplicates `cli.js` | `bin/forgr-tui` | Resolved |
 | Low | Integration tests shallow assertions | `test/integration/*.test.js` | Open |
