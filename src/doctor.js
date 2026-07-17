@@ -4,8 +4,7 @@ import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
 import { createRequire } from 'module';
 import { homedir } from 'os';
-import { BROWSERS_PATH, getChromiumInstallCmd } from './browsers-path.js';
-import { getHeadlessShellPath } from './pdf.js';
+import { BROWSERS_PATH, getChromiumInstallCmd, getHeadlessShellPath } from './browsers-path.js';
 import { BUILTIN_PRESETS } from './presets.js';
 
 const require = createRequire(import.meta.url);

@@ -1,12 +1,10 @@
 import { chromium } from 'playwright-core';
 import { execSync } from 'child_process';
-import { existsSync, readdirSync } from 'fs';
+import { existsSync } from 'fs';
 import fs from 'fs-extra';
 import path from 'path';
-import { join } from 'path';
 import { fileURLToPath } from 'url';
-import { platform } from 'os';
-import { BROWSERS_PATH, getChromiumInstallCmd, removeFfmpeg } from './browsers-path.js';
+import { BROWSERS_PATH, getChromiumInstallCmd, getHeadlessShellPath, removeFfmpeg } from './browsers-path.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MERMAID_DIST = path.resolve(__dirname, '..', 'node_modules', 'mermaid', 'dist', 'mermaid.min.js');
@@ -348,35 +346,6 @@ export const PRESET_MERMAID_THEMES = {
     },
   },
 };
-
-export function getHeadlessShellPath() {
-  let entries;
-  try {
-    entries = readdirSync(BROWSERS_PATH).filter(e => e.startsWith('chromium_headless_shell-'));
-  } catch {
-    return null;
-  }
-  if (!entries.length) return null;
-
-  const base = join(BROWSERS_PATH, entries[0]);
-  const binaryName = platform() === 'win32'
-    ? 'chrome-headless-shell.exe'
-    : 'chrome-headless-shell';
-
-  try {
-    for (const entry of readdirSync(base)) {
-      const candidate = join(base, entry, binaryName);
-      if (existsSync(candidate)) return candidate;
-    }
-  } catch {
-    return null;
-  }
-
-  const flat = join(base, binaryName);
-  if (existsSync(flat)) return flat;
-
-  return null;
-}
 
 let chromiumChecked = false;
 

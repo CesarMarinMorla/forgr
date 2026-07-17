@@ -1,43 +1,16 @@
-import '../../src/browsers-path.js';
+import { initBrowsersPath, getHeadlessShellPath } from '../../src/browsers-path.js';
+initBrowsersPath();
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright-core';
-import { existsSync, readdirSync } from 'fs';
+import { existsSync } from 'fs';
 import path from 'path';
-import { join } from 'path';
-import { platform, homedir } from 'os';
 import { fileURLToPath } from 'url';
-import { BROWSERS_PATH } from '../../src/browsers-path.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const MERMAID_DIST = path.resolve(__dirname, '..', '..', 'node_modules', 'mermaid', 'dist', 'mermaid.min.js');
-
-function getHeadlessShellPath() {
-  let entries;
-  try {
-    entries = readdirSync(BROWSERS_PATH).filter(e => e.startsWith('chromium_headless_shell-'));
-  } catch {
-    return null;
-  }
-  if (!entries.length) return null;
-  const base = join(BROWSERS_PATH, entries[0]);
-  const binaryName = platform() === 'win32'
-    ? 'chrome-headless-shell.exe'
-    : 'chrome-headless-shell';
-  try {
-    for (const entry of readdirSync(base)) {
-      const candidate = join(base, entry, binaryName);
-      if (existsSync(candidate)) return candidate;
-    }
-  } catch {
-    return null;
-  }
-  const flat = join(base, binaryName);
-  if (existsSync(flat)) return flat;
-  return null;
-}
 
 test('renders mermaid diagrams to SVGs', { timeout: 30000 }, async () => {
   const executablePath = getHeadlessShellPath();

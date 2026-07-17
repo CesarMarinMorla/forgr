@@ -1,12 +1,16 @@
-import { homedir } from 'os';
+import { homedir, platform } from 'os';
 import { join, dirname } from 'path';
-import { readdirSync } from 'fs';
+import { existsSync, readdirSync } from 'fs';
 import { rm } from 'fs/promises';
 import { createRequire } from 'module';
 
 const _require = createRequire(import.meta.url);
 
 export const BROWSERS_PATH = join(homedir(), '.forgr', 'browsers');
+
+export function initBrowsersPath() {
+  process.env.PLAYWRIGHT_BROWSERS_PATH = BROWSERS_PATH;
+}
 
 let _installCmd = null;
 export function getChromiumInstallCmd() {
@@ -32,7 +36,31 @@ export async function removeFfmpeg() {
   }
 }
 
-// Must be set before playwright is imported anywhere in the process.
-// Importing this module early (bin/forgr, pipeline.js) ensures the env var
-// is in place before playwright-core resolves its executable path.
-process.env.PLAYWRIGHT_BROWSERS_PATH = BROWSERS_PATH;
+export function getHeadlessShellPath() {
+  let entries;
+  try {
+    entries = readdirSync(BROWSERS_PATH).filter(e => e.startsWith('chromium_headless_shell-'));
+  } catch {
+    return null;
+  }
+  if (!entries.length) return null;
+
+  const base = join(BROWSERS_PATH, entries[0]);
+  const binaryName = platform() === 'win32'
+    ? 'chrome-headless-shell.exe'
+    : 'chrome-headless-shell';
+
+  try {
+    for (const entry of readdirSync(base)) {
+      const candidate = join(base, entry, binaryName);
+      if (existsSync(candidate)) return candidate;
+    }
+  } catch {
+    return null;
+  }
+
+  const flat = join(base, binaryName);
+  if (existsSync(flat)) return flat;
+
+  return null;
+}

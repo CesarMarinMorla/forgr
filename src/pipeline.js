@@ -1,6 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
-import './browsers-path.js';
+import { initBrowsersPath } from './browsers-path.js';
+initBrowsersPath();
 import { parseFrontMatter, writeForgrFrontMatter, renderMarkdown } from './markdown.js';
 import { renderTemplate } from './template.js';
 import { generatePdf } from './pdf.js';
