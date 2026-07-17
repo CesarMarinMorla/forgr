@@ -7,7 +7,7 @@ import { chromium } from 'playwright-core';
 import { existsSync, readFileSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { PRESET_MERMAID_THEMES } from '../../src/pdf.js';
+import { PRESET_MERMAID_THEMES } from '../../src/themes/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
