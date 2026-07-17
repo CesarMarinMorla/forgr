@@ -36,7 +36,7 @@ function ok(line, detail) {
 
 function fail(line, hint) {
   console.log(`  ${R}FAIL${N} ${line}`);
-  if (hint) console.log(`       ${B}→${N} ${hint}`);
+  if (hint) console.log(`       ${B}\u2192${N} ${hint}`);
 }
 
 function warn(line, detail) {
@@ -47,27 +47,14 @@ function detail(line) {
   console.log(`       ${D}${line}${N}`);
 }
 
-export async function runDoctor({ fix, verbose } = {}) {
-  let passed = 0;
-  let warnings = 0;
-  let errors = 0;
-
-  function record(status) {
-    if (status === 'pass') passed++;
-    else if (status === 'warn') warnings++;
-    else errors++;
-  }
-
-  console.log(`  ${B}forgr doctor${N}  (v${PACKAGE_VERSION})`);
-  sep();
-
-  // 1. Chromium
+async function checkChromium({ fix, verbose }) {
   const execPath = getHeadlessShellPath();
   const chromiumOk = execPath && existsSync(execPath);
   if (chromiumOk) {
     ok('Chromium binary found', verbose ? execPath : undefined);
-    record('pass');
-  } else if (fix) {
+    return 'pass';
+  }
+  if (fix) {
     warn('Chromium binary not found — attempting download');
     try {
       execSync(getChromiumInstallCmd(), {
@@ -75,17 +62,17 @@ export async function runDoctor({ fix, verbose } = {}) {
         env: { ...process.env, PLAYWRIGHT_BROWSERS_PATH: BROWSERS_PATH },
       });
       ok('Chromium downloaded successfully');
-      record('pass');
+      return 'pass';
     } catch {
       fail('Failed to download Chromium', 'Try running: npx playwright-core install chromium-headless-shell');
-      record('fail');
+      return 'fail';
     }
-  } else {
-    fail('Chromium binary not found', 'Run: forgr uninstall && forgr convert <file> to re-download');
-    record('fail');
   }
+  fail('Chromium binary not found', 'Run: forgr uninstall && forgr convert <file> to re-download');
+  return 'fail';
+}
 
-  // 2. Built-in preset CSS
+function checkPresets({ verbose }) {
   const presetResults = BUILTIN_PRESETS.map(p => {
     const cssPath = join(PRESETS_DIR, `${p.name}.css`);
     return { name: p.name, path: cssPath, exists: existsSync(cssPath) };
@@ -94,73 +81,71 @@ export async function runDoctor({ fix, verbose } = {}) {
   if (missingPresets.length === 0) {
     const all = verbose ? presetResults.map(r => r.name).join(', ') : `${presetResults.length}/${BUILTIN_PRESETS.length} files`;
     ok('Preset CSS files', all);
-    record('pass');
-  } else {
-    fail('Preset CSS files missing', missingPresets.map(r => r.name).join(', ') + ' — reinstall package: npm install -g forgr');
-    record('fail');
+    return 'pass';
   }
+  fail('Preset CSS files missing', missingPresets.map(r => r.name).join(', ') + ' — reinstall package: npm install -g forgr');
+  return 'fail';
+}
 
-  // 3. User preset files
+function checkUserPresets({ fix, verbose }) {
   let malformedFiles = [];
   let cssTargetsMissing = [];
-  if (existsSync(USER_PRESETS_DIR)) {
-    const files = readdirSync(USER_PRESETS_DIR).filter(f => f.endsWith('.json'));
-    if (files.length > 0) {
-      for (const file of files) {
-        const fullPath = join(USER_PRESETS_DIR, file);
-        try {
-          const parsed = JSON.parse(readFileSync(fullPath, 'utf8'));
-          if (typeof parsed.name !== 'string' || typeof parsed.description !== 'string') {
-            malformedFiles.push(fullPath);
-          } else if (typeof parsed.css_file === 'string' && parsed.css_file.length > 0) {
-            const cssTarget = join(USER_PRESETS_DIR, parsed.css_file);
-            if (!existsSync(cssTarget)) {
-              cssTargetsMissing.push({ preset: parsed.name, file: parsed.css_file, path: cssTarget });
-            }
-          }
-        } catch {
-          malformedFiles.push(fullPath);
-        }
-      }
-      const valid = files.length - malformedFiles.length;
-      if (malformedFiles.length === 0 && cssTargetsMissing.length === 0) {
-        ok('User presets valid', `${files.length} file${files.length !== 1 ? 's' : ''}`);
-        record('pass');
-      } else {
-        if (malformedFiles.length > 0) {
-          warn('User presets', `${valid} valid, ${malformedFiles.length} malformed`);
-          if (verbose) malformedFiles.forEach(f => detail(f));
-          if (fix) {
-            sep();
-            for (const mf of malformedFiles) {
-              try {
-                rmSync(mf);
-                ok(`Removed: ${mf}`);
-              } catch (err) {
-                fail(`Could not remove: ${mf}`, err.message);
-              }
-            }
-          }
-        }
-        if (cssTargetsMissing.length > 0) {
-          warn('User preset CSS targets', `${cssTargetsMissing.length} missing`);
-          for (const c of cssTargetsMissing) {
-            const msg = verbose ? c.path : `${c.file} (referenced by "${c.preset}")`;
-            detail(msg);
-          }
-        }
-        record('warn');
-      }
-    } else {
-      ok('User presets', 'none found');
-      record('pass');
-    }
-  } else {
+  if (!existsSync(USER_PRESETS_DIR)) {
     ok('User presets', 'none found');
-    record('pass');
+    return 'pass';
   }
+  const files = readdirSync(USER_PRESETS_DIR).filter(f => f.endsWith('.json'));
+  if (files.length === 0) {
+    ok('User presets', 'none found');
+    return 'pass';
+  }
+  for (const file of files) {
+    const fullPath = join(USER_PRESETS_DIR, file);
+    try {
+      const parsed = JSON.parse(readFileSync(fullPath, 'utf8'));
+      if (typeof parsed.name !== 'string' || typeof parsed.description !== 'string') {
+        malformedFiles.push(fullPath);
+      } else if (typeof parsed.css_file === 'string' && parsed.css_file.length > 0) {
+        const cssTarget = join(USER_PRESETS_DIR, parsed.css_file);
+        if (!existsSync(cssTarget)) {
+          cssTargetsMissing.push({ preset: parsed.name, file: parsed.css_file, path: cssTarget });
+        }
+      }
+    } catch {
+      malformedFiles.push(fullPath);
+    }
+  }
+  const valid = files.length - malformedFiles.length;
+  if (malformedFiles.length === 0 && cssTargetsMissing.length === 0) {
+    ok('User presets valid', `${files.length} file${files.length !== 1 ? 's' : ''}`);
+    return 'pass';
+  }
+  if (malformedFiles.length > 0) {
+    warn('User presets', `${valid} valid, ${malformedFiles.length} malformed`);
+    if (verbose) malformedFiles.forEach(f => detail(f));
+    if (fix) {
+      sep();
+      for (const mf of malformedFiles) {
+        try {
+          rmSync(mf);
+          ok(`Removed: ${mf}`);
+        } catch (err) {
+          fail(`Could not remove: ${mf}`, err.message);
+        }
+      }
+    }
+  }
+  if (cssTargetsMissing.length > 0) {
+    warn('User preset CSS targets', `${cssTargetsMissing.length} missing`);
+    for (const c of cssTargetsMissing) {
+      const msg = verbose ? c.path : `${c.file} (referenced by "${c.preset}")`;
+      detail(msg);
+    }
+  }
+  return 'warn';
+}
 
-  // 4. Font files
+function checkFonts({ verbose }) {
   const fontResults = FONT_FILES.map(name => {
     const fontPath = join(FONT_DIR, name);
     let extra = '';
@@ -174,13 +159,13 @@ export async function runDoctor({ fix, verbose } = {}) {
   if (missingFonts.length === 0) {
     const all = verbose ? fontResults.map(r => `${r.name} (${r.extra})`).join(', ') : `${fontResults.length}/${FONT_FILES.length} files`;
     ok('Font files found', all);
-    record('pass');
-  } else {
-    fail('Font files missing', missingFonts.map(r => r.name).join(', ') + ' — reinstall package: npm install -g forgr');
-    record('fail');
+    return 'pass';
   }
+  fail('Font files missing', missingFonts.map(r => r.name).join(', ') + ' — reinstall package: npm install -g forgr');
+  return 'fail';
+}
 
-  // 5. Template file
+function checkTemplate({ verbose }) {
   const templateOk = existsSync(TEMPLATE_PATH);
   if (templateOk) {
     let extra = '';
@@ -189,13 +174,13 @@ export async function runDoctor({ fix, verbose } = {}) {
       extra = `${(st.size / 1024).toFixed(1)}KB`;
     }
     ok('Template found', verbose ? `${TEMPLATE_PATH} (${extra})` : 'base.html');
-    record('pass');
-  } else {
-    fail('Template file missing (base.html)', 'Reinstall package: npm install -g forgr');
-    record('fail');
+    return 'pass';
   }
+  fail('Template file missing (base.html)', 'Reinstall package: npm install -g forgr');
+  return 'fail';
+}
 
-  // 6. Node version
+function checkNodeVersion() {
   const current = process.versions.node;
   const currentParts = current.split('.').map(Number);
   const minParts = MIN_NODE_VERSION.split('.').map(Number);
@@ -203,10 +188,34 @@ export async function runDoctor({ fix, verbose } = {}) {
     (currentParts[0] > minParts[0] || currentParts[1] >= minParts[1]);
   if (nodeOk) {
     ok('Node version', `v${current} \u2265 v${MIN_NODE_VERSION}`);
-    record('pass');
-  } else {
-    warn('Node version', `v${current} (expected v${MIN_NODE_VERSION}+)`);
-    record('warn');
+    return 'pass';
+  }
+  warn('Node version', `v${current} (expected v${MIN_NODE_VERSION}+)`);
+  return 'warn';
+}
+
+export async function runDoctor({ fix, verbose } = {}) {
+  let passed = 0;
+  let warnings = 0;
+  let errors = 0;
+
+  console.log(`  ${B}forgr doctor${N}  (v${PACKAGE_VERSION})`);
+  sep();
+
+  const checks = [
+    () => checkChromium({ fix, verbose }),
+    () => checkPresets({ verbose }),
+    () => checkUserPresets({ fix, verbose }),
+    () => checkFonts({ verbose }),
+    () => checkTemplate({ verbose }),
+    checkNodeVersion,
+  ];
+
+  for (const check of checks) {
+    const status = await check();
+    if (status === 'pass') passed++;
+    else if (status === 'warn') warnings++;
+    else errors++;
   }
 
   sep();
