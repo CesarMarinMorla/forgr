@@ -1,5 +1,5 @@
 export function normalizeTocOption(toc) {
-  return toc === true ? true : toc === false ? false : undefined;
+  return toc === true ? 'on' : toc === false ? 'off' : undefined;
 }
 
 export function printOutputMsg(outputPath) {

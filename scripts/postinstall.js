@@ -1,6 +1,6 @@
 import { existsSync } from 'fs';
 import { execSync } from 'child_process';
-import { BROWSERS_PATH, CHROMIUM_INSTALL_CMD, removeFfmpeg } from '../src/browsers-path.js';
+import { BROWSERS_PATH, getChromiumInstallCmd, removeFfmpeg } from '../src/browsers-path.js';
 
 async function main() {
   process.env.PLAYWRIGHT_BROWSERS_PATH = BROWSERS_PATH;
@@ -32,7 +32,7 @@ async function main() {
   const env = { ...process.env, PLAYWRIGHT_BROWSERS_PATH: BROWSERS_PATH };
 
   try {
-    execSync(CHROMIUM_INSTALL_CMD, {
+    execSync(getChromiumInstallCmd(), {
       stdio: 'inherit',
       env,
     });

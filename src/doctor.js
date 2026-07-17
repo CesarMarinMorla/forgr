@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
 import { createRequire } from 'module';
 import { homedir } from 'os';
-import { BROWSERS_PATH, CHROMIUM_INSTALL_CMD } from './browsers-path.js';
+import { BROWSERS_PATH, getChromiumInstallCmd } from './browsers-path.js';
 import { getHeadlessShellPath } from './pdf.js';
 import { BUILTIN_PRESETS } from './presets.js';
 
@@ -71,7 +71,7 @@ export async function runDoctor({ fix, verbose } = {}) {
   } else if (fix) {
     warn('Chromium binary not found — attempting download');
     try {
-      execSync(CHROMIUM_INSTALL_CMD, {
+      execSync(getChromiumInstallCmd(), {
         stdio: 'inherit',
         env: { ...process.env, PLAYWRIGHT_BROWSERS_PATH: BROWSERS_PATH },
       });

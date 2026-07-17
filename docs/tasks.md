@@ -9,10 +9,11 @@
 | 2.5 | Preset expansion & polish (newsletter preset, academic revamp, spacing, mermaid colors) | Done |
 | 2.75 | TUI & CLI polish | Pending |
 | 3 | TUI preset picker (v0.6.0) | Done |
-| 3.5 | Front-matter parsing | Pending |
+| 3.5 | Front-matter parsing | Done |
 | 4 | TUI settings form | Pending |
 | 5 | Watch mode & user presets | Pending |
 | 7 | `forgr doctor` diagnostic | Done |
+| — | Structural cleanup (P1–P3) | Done |
 
 ## Milestone 1 — Published (v0.1.0)
 
@@ -190,27 +191,27 @@ Launched via the `forgr-tui` command (separate bin), not an `--interactive` flag
 
 ---
 
-## Milestone 3.5 — Front-Matter Parsing (Pending)
+## Milestone 3.5 — Front-Matter Parsing (Done)
 
 ### Reading
 
-- [ ] Parse YAML front-matter (delimited by `---`) at top of `.md` files
-- [ ] Shared fields: `layout` → preset, `title` → cover title, `date`, `author`
+- [x] Parse YAML front-matter (delimited by `---`) at top of `.md` files (via `gray-matter`)
+- [x] Shared fields: `layout` / `preset`, `title`, `date`, `author`
 - [ ] Namespaced fields: `forgr.toc`, `forgr.cover`, `forgr.footer`, `forgr.section_numbering`
-- [ ] Ignore unrecognized fields (Obsidian/Jekyll/Typora safe)
-- [ ] Files without front-matter render unchanged
+- [x] Ignore unrecognized fields (Obsidian/Jekyll/Typora safe)
+- [x] Files without front-matter render unchanged
 
 ### Merge priority
 
-- [ ] CLI flags win over front-matter
-- [ ] TUI settings win over front-matter
-- [ ] Front-matter is the baseline (no CLI flags + no TUI = file config)
-- [ ] TUI form pre-fills from front-matter when available
+- [x] CLI flags win over front-matter
+- [ ] TUI settings win over front-matter (TUI settings form not yet implemented)
+- [x] Front-matter is the baseline (no CLI flags + no TUI = file config)
+- [ ] TUI form pre-fills from front-matter when available (TUI settings form not yet implemented)
 
 ### Write discipline
 
-- [ ] forgr never writes to the input `.md` file
-- [ ] Settings are ephemeral per render
+- [x] forgr never writes to the input `.md` file
+- [x] Settings are ephemeral per render
 - [ ] Future `--write` flag to save TUI settings as front-matter
 
 ### README
@@ -277,12 +278,19 @@ TOC is implemented without template partials — it runs at the markdown-render 
 - [x] TOC styling in all 5 presets (.toc, .toc__title, .toc__list, .toc__item--hN)
 - [x] Input: docs/elements.md — checklist of all basic styling elements
 
-### Hardcoded constants (configurable later via .forgrrc)
+### Hardcoded constants (now in `src/config.js`)
 
-| Constant | Location | Value |
-|---|---|---|
-| `LONG_DOC_WORDS` | `src/pipeline.js` | `8000` |
-| `MIN_PAGES_FOR_TOC` | `src/pipeline.js` | `3` |
+| Key | Default |
+|---|---|
+| `tocWordThreshold` | `8000` |
+| `minPagesForToc` | `3` |
+| `paperFormat` | `A4` |
+| `margins` | `{ top: '2cm', bottom: '2cm', left: '2cm', right: '2cm' }` |
+| `footer` | `'page-numbers'` |
+| `dateFormat` | `'iso'` |
+| `docMeta` | `true` |
+| `cover` | `false` |
+| `sectionNumbering` | `false` |
 
 ## Milestone 5 — Watch Mode & User Presets (Pending)
 
@@ -335,6 +343,40 @@ TOC is implemented without template partials — it runs at the markdown-render 
 - [x] Colored output: green OK / red FAIL / yellow WARN per check
 - [x] Summary line: "N passed, N warnings, N errors"
 - [x] Suggestions for each failure
+
+---
+
+## Structural cleanup (P1–P3) — Done
+
+Three-phase refactor eliminating duplicated code and centralizing hardcoded configuration.
+
+### P1 — Extract duplicates
+
+- [x] `getChromiumInstallCmd()` in `browsers-path.js` — replaces `npx` string in `pdf.js`, `doctor.js`, `postinstall.js`
+- [x] `removeFfmpeg()` in `browsers-path.js` — extracted from `pdf.js` and `postinstall.js`
+- [x] Preset name list — `cli.js` and `template.js` read from `BUILTIN_PRESETS` (single source)
+- [x] `normalizeTocOption()` in `utils.js` — shared by `cli.js` and `bin/forgr-tui`
+- [x] `printOutputMsg()` in `utils.js` — shared by `cli.js` and `bin/forgr-tui`
+- [x] `handleCliError()` in `utils.js` — shared by `cli.js` and `bin/forgr-tui`
+
+### P2 — Config object
+
+- [x] `src/config.js` — single `DEFAULTS` object with all hardcoded values
+- [x] `buildConfig()` in `pipeline.js` — merges CLI options > front-matter > DEFAULTS
+- [x] Config flows through `pipeline.js` → `pdf.js`, `template.js` instead of loose options
+- [x] `toc` field uses `'auto' | 'on' | 'off'` strings (merged via priority: CLI > FM > defaults)
+- [x] `dateFormat`, `docMeta`, `cover`, `footer`, `sectionNumbering` ready for TUI/front-matter wiring
+
+### P3 — Front-matter merge
+
+- [x] `gray-matter` dependency added for YAML parsing
+- [x] `parseFrontMatter()` in `markdown.js` — extracts `preset`, `title`, `date`, `author`, `toc`
+- [x] Merged into config in `pipeline.js` — front-matter sits between CLI flags and DEFAULTS
+- [x] Title, author, date passed to template context and rendered conditionally in `base.html`
+
+### Extra — `npx` lockfile pollution fix
+
+- [x] `getChromiumInstallCmd()` resolves playwright-core CLI path via `require.resolve` instead of shelling to `npx`, preventing random `package-lock.json` files in the working directory
 
 ---
 

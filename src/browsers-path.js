@@ -1,11 +1,22 @@
 import { homedir } from 'os';
-import { join } from 'path';
+import { join, dirname } from 'path';
 import { readdirSync } from 'fs';
 import { rm } from 'fs/promises';
+import { createRequire } from 'module';
+
+const _require = createRequire(import.meta.url);
 
 export const BROWSERS_PATH = join(homedir(), '.forgr', 'browsers');
 
-export const CHROMIUM_INSTALL_CMD = 'npx playwright-core install chromium-headless-shell';
+let _installCmd = null;
+export function getChromiumInstallCmd() {
+  if (!_installCmd) {
+    const pkgPath = _require.resolve('playwright-core/package.json');
+    const cliPath = join(dirname(pkgPath), 'cli.js');
+    _installCmd = `node "${cliPath}" install chromium-headless-shell`;
+  }
+  return _installCmd;
+}
 
 export async function removeFfmpeg() {
   let entries;

@@ -6,7 +6,7 @@ import path from 'path';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { platform } from 'os';
-import { BROWSERS_PATH, CHROMIUM_INSTALL_CMD, removeFfmpeg } from './browsers-path.js';
+import { BROWSERS_PATH, getChromiumInstallCmd, removeFfmpeg } from './browsers-path.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MERMAID_DIST = path.resolve(__dirname, '..', 'node_modules', 'mermaid', 'dist', 'mermaid.min.js');
@@ -392,7 +392,7 @@ async function ensureChromium() {
   console.log('');
 
   try {
-    execSync(CHROMIUM_INSTALL_CMD, {
+    execSync(getChromiumInstallCmd(), {
       stdio: 'inherit',
       env: { ...process.env, PLAYWRIGHT_BROWSERS_PATH: BROWSERS_PATH },
     });
