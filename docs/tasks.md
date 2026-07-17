@@ -9,9 +9,10 @@
 | 2.5 | Preset expansion & polish (newsletter preset, academic revamp, spacing, mermaid colors) | Done |
 | 2.75 | TUI & CLI polish | Pending |
 | 3 | TUI preset picker (v0.6.0) | Done |
-| 3.5 | Front-matter parsing | Done |
-| 4 | TUI settings form | Pending |
+| 3.5 | Front-matter processing | In progress |
+| 4 | Rendering options (doc-meta, footer, cover, section numbering) | Pending |
 | 5 | Watch mode & user presets | Pending |
+| 6 | Extended format support (LaTeX, Jekyll/Liquid preprocessing) | Later |
 | 7 | `forgr doctor` diagnostic | Done |
 | — | Structural cleanup (P1–P3) | Done |
 
@@ -221,49 +222,34 @@ Launched via the `forgr-tui` command (separate bin), not an `--interactive` flag
 
 ---
 
-## Milestone 4 — TUI Settings Form (Pending)
+## Milestone 4 — Rendering options (Pending)
 
-After the Ink preset picker exits, the TUI moves to an inline (npm-style) settings form:
+Decoupled from the TUI. Each option works as a CLI flag and front-matter key first; TUI controls can be added later.
 
-### UX
+### Doc-meta header
 
-- [ ] Settings appear as sequential prompts after the Ink picker
-- [ ] Defaults shown in brackets, Enter accepts default
-- [ ] Form pre-fills from front-matter when available
-- [ ] Final confirmation: "Render with these settings? [Y/n]"
+- [ ] `--doc-meta` / `--no-doc-meta` flag + `forgr.docMeta` front-matter key
+- [ ] `--date-format <iso|locale>` flag + `forgr.dateFormat` key
+- [ ] Template conditionally shows/hides the header block
+- [ ] Locale-aware date formatting when `dateFormat: locale`
 
-### Settings (sequential prompts)
+### Footer
 
-**Cover page**
-- [ ] on/off toggle
-- [ ] Editable fields: title, author, date (only shown when cover is on)
+- [ ] `--footer <page-numbers|page-x-of-y|none>` flag + `forgr.footer` front-matter key
+- [ ] Footer template switches between `1 / 10` and `Page 1 of 10` and empty
+- [ ] `displayHeaderFooter` and `footerTemplate` driven by config, not hardcoded
+
+### Cover page
+
+- [ ] `--cover` flag + `forgr.cover` front-matter key
+- [ ] `--cover-title`, `--cover-author`, `--cover-date` flags + front-matter keys
+- [ ] Cover template partial in `base.html`
 - [ ] Cover renders as separate first page before body
 
-**Table of Contents**
-- [ ] 3-way choice: auto / on / off (overrides two-pass heuristic)
-- [ ] Auto is default (word count >= 8000 OR pages >= 3)
+### Section numbering
 
-**Doc-meta header**
-- [ ] show/hide toggle
-- [ ] Editable label text (default: `forgr / {preset} / {filename}`)
-- [ ] Editable timestamp format
-
-**Footer (page numbers)**
-- [ ] Switchable: none / "1 / 10" / "Page 1 of 10"
-- [ ] Optionally include title or preset name alongside numbers
-
-**Section numbering**
-- [ ] on/off toggle
-
-**Output path**
-- [ ] Optional: show inferred path, let user edit it
-
-### Architecture
-
-- [ ] TUI returns structured config merging: front-matter < TUI overrides < CLI flags
-- [ ] Pipeline accepts cover, footer mode, section numbering options
-- [ ] Cover page rendered via template partial (separate first page)
-- [ ] Footer/header mode drives Playwright displayHeaderFooter
+- [ ] `--section-numbering` / `--no-section-numbering` flag + `forgr.sectionNumbering` key
+- [ ] CSS counters in presets (off by default)
 
 ---
 
@@ -300,9 +286,9 @@ TOC is implemented without template partials — it runs at the markdown-render 
 
 ---
 
-## Milestone 6 — LaTeX Math (On Demand)
+## Milestone 6 — Extended format support (Later)
 
-*Not started. Ships after Milestones 1-5 are fully polished.*
+*Deferred until Milestones 1-5 are fully polished.*
 
 ### LaTeX Math Notation
 - [ ] Math rendering via `markdown-it-texmath` or `markdown-it-katex`
@@ -312,6 +298,16 @@ TOC is implemented without template partials — it runs at the markdown-render 
 - [ ] Font loading for math glyphs (KaTeX fonts embedded or CDN)
 - [ ] Math in mermaid labels (stretch goal — mermaid's built-in math is experimental)
 - [ ] Test fixtures with mixed math/markdown content
+
+### Jekyll / Liquid preprocessing
+
+Jekyll files contain Liquid templating (`{% %}`, `{{ }}`) that passes through as raw text. A pre-processor steps before markdown-it:
+
+- [ ] Strip or transform `{% highlight lang %}...{% endhighlight %}` to fenced code blocks
+- [ ] Strip `{% raw %}...{% endraw %}` wrappers, keep inner content
+- [ ] Strip unknown `{% %}` tags to avoid raw text in output
+- [ ] Resolve Liquid variables from front-matter data where possible
+- [ ] Option: full `liquidjs` processing for `{% include %}` resolution
 
 ---
 

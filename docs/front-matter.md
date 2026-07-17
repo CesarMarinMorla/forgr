@@ -30,7 +30,7 @@ These are standard front-matter keys recognized by many tools (Obsidian, Hugo, J
 These go under a `forgr:` key and control rendering behavior.
 
 | Key | Type | Default | Description |
-|---|---|---|---|
+|---|---|---|---|---|
 | `preset` | string | `terminal` | CSS preset: `terminal`, `minimal`, `technical`, `academic`, `newsletter` |
 | `toc` | string | `auto` | Table of contents: `auto` (word/page threshold), `on` (always), `off` (never) |
 | `tocTitle` | string | `Contents` | Custom heading text for the table of contents |
@@ -54,4 +54,38 @@ CLI flags > front-matter `forgr:` keys > front-matter shared keys > built-in def
 
 - Files without front-matter render with all defaults — nothing is required.
 - Unrecognized keys are silently ignored (safe with Obsidian, Jekyll, etc.).
-- forgr never writes to the input `.md` file.
+
+## Writing settings back with `--write`
+
+Passing `--write` saves the CLI flags into the file's front-matter so the file renders the same way without flags next time.
+
+### What gets written
+
+Only the keys you explicitly set on the command line go into the `forgr:` block. If your file already has `forgr: { footer: none }` and you run `--preset academic --write`, the result is:
+
+```yaml
+forgr:
+  preset: academic
+  footer: none
+```
+
+`preset` is written (you passed it), `footer` stays (you didn't). Keys matching built-in defaults are omitted — the file stays clean and picks up future default changes automatically.
+
+### What is preserved
+
+Every key outside the `forgr:` namespace is left untouched — `tags`, `category`, Obsidian front-matter, anything. Shared keys (`title`, `date`, `author`) are only written if explicitly passed on the command line.
+
+### Merge source priority
+
+```
+CLI flag  >  existing file  >  built-in DEFAULTS
+```
+
+### What stays read-only
+
+The following settings cannot be saved via `--write` because forgr does not write to the user's file without an explicit flag:
+
+```sh
+forgr doc.md --preset academic       # reads front-matter, ignores --write
+forgr doc.md --preset academic --write  # saves preset into front-matter
+```
