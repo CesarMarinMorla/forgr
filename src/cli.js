@@ -4,7 +4,7 @@ import { existsSync, rmSync } from 'fs';
 import { dirname } from 'path';
 import { run } from './pipeline.js';
 import { BROWSERS_PATH } from './browsers-path.js';
-import { normalizeTocOption, printOutputMsg, handleCliError } from './utils.js';
+import { buildWriteKeys, printOutputMsg, handleCliError } from './utils.js';
 
 const require = createRequire(import.meta.url);
 const { version } = require('../package.json');
@@ -82,12 +82,10 @@ program
     const cliOptions = {
       preset: options.preset,
       output: options.output,
-      toc: normalizeTocOption(options.toc),
+      toc: options.toc,
     };
 
-    const writeKeys = {};
-    if (options.preset !== undefined) writeKeys.preset = options.preset;
-    if (options.toc !== undefined) writeKeys.toc = normalizeTocOption(options.toc);
+    const writeKeys = buildWriteKeys(options);
 
     const outputPath = await run(input, cliOptions, {
       write: options.write,

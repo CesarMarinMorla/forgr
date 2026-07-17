@@ -26,22 +26,9 @@ doctor.js
 
 ## Critical
 
-### 1. `markdown.js` — 5 concerns in one module
+### 1. `markdown.js` — 5 concerns in one module [RESOLVED]
 
-`src/markdown.js` owns:
-
-| Concern | Lines | Exported? |
-|---|---|---|
-| YAML front-matter parsing & writing | 14-92 | Yes (`parseFrontMatter`, `writeForgrFrontMatter`) |
-| markdown-it instance + plugin reg. | 94-110 | Module-level side effect |
-| Image inlining (local → base64) | 112-150 | Rule on `md.renderer.rules` |
-| Mermaid fence → `<div class="mermaid">` | 152-163 | Rule on `md.renderer.rules` |
-| H2 number stripping (core ruler) | 165-183 | Rule on `md.core.ruler` |
-| Table number wrapping (HTML post) | 185-190 | Internal helper |
-| ToC HTML builder | 192-228 | Internal (`buildTocHtml`) |
-| Public render entry point | 230-239 | Yes (`renderMarkdown`) |
-
-A front-matter schema change, a markdown-it plugin upgrade, and a ToC layout tweak all touch the same file. These are independently versionable concerns.
+Front-matter parsing/writing extracted to `src/frontmatter.js`. `markdown.js` now owns only the render pipeline (markdown-it setup, rules, ToC builder, `renderMarkdown`).
 
 ### 2. Side-effect import pattern [RESOLVED]
 
@@ -51,16 +38,9 @@ Replaced with explicit `initBrowsersPath()` call in `src/pipeline.js:3-4` and te
 
 Consolidated into `src/browsers-path.js`. All callers import from there.
 
-### 4. `doctor.js` — 172-line monolith with no internal structure
+### 4. `doctor.js` — 172-line monolith with no internal structure [RESOLVED]
 
-`src/doctor.js:51-223`, `runDoctor()`:
-
-- 6 inline health checks (Chromium, presets, fonts, template, Node version)
-- Each check mixes: diagnostic logic, colored console formatting, `--fix` auto-repair
-- A `record()` closure mutates outer-scope `passed`/`warnings`/`errors` state
-- No function boundaries between checks
-
-Extracting each check into its own function would make the module testable and the `--fix` path clearer.
+Each of the 6 health checks extracted to its own function (`checkChromium`, `checkPresets`, `checkUserPresets`, `checkFonts`, `checkTemplate`, `checkNodeVersion`). `runDoctor()` is now a 16-line loop over the check functions with no inline diagnostic logic.
 
 ### 5. `generatePdf()` — 97 lines, 6 concerns interleaved [RESOLVED]
 
@@ -155,10 +135,10 @@ Removed from `buildConfig()`. `generatePdf()` reads `DEFAULTS._pdf` directly.
 
 | Severity | Finding | Location | Status |
 |---|---|---|---|
-| Critical | `markdown.js` violates SRP — 5 concerns | `src/markdown.js` | Open |
+| Critical | `markdown.js` violates SRP — 5 concerns | `src/markdown.js` | Resolved |
 | Critical | Side-effect import pattern | `src/pipeline.js:3`, test files | Resolved |
 | Critical | `getHeadlessShellPath()` 3 copies | `src/pdf.js:352`, test files | Resolved |
-| Critical | `doctor.js` 172-line monolith | `src/doctor.js:51-223` | Open |
+| Critical | `doctor.js` 172-line monolith | `src/doctor.js:51-223` | Resolved |
 | Critical | `generatePdf()` 97 lines, 6 concerns | `src/pdf.js:420-517` | Resolved |
 | Moderate | `buildConfig()` inconsistent `||` vs `??` | `src/pipeline.js:19-45` | Resolved |
 | Moderate | Two-pass render no caching | `src/pipeline.js:99-115` | Open |

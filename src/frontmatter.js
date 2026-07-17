@@ -8,8 +8,8 @@ const FORGR_ONLY_KEYS = [
 ];
 
 function normalizeTocFromYaml(val) {
-  if (val === true || val === 'on' || val === 'yes') return 'on';
-  if (val === false || val === 'off' || val === 'no') return 'off';
+  if (val === true || val === 'on' || val === 'yes') return true;
+  if (val === false || val === 'off' || val === 'no') return false;
   return 'auto';
 }
 

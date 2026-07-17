@@ -13,8 +13,8 @@ function wordCount(str) {
 }
 
 function resolveToc(config, wordCount) {
-  if (config.toc === 'on') return true;
-  if (config.toc === 'off') return false;
+  if (config.toc === true) return true;
+  if (config.toc === false) return false;
   return wordCount >= config.tocWordThreshold;
 }
 

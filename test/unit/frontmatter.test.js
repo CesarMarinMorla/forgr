@@ -35,7 +35,7 @@ test('parseFrontMatter: top-level keys only (no forgr namespace)', () => {
   ].join('\n');
   const { frontMatter } = parseFrontMatter(src);
   assert.equal(frontMatter.preset, 'academic');
-  assert.equal(frontMatter.toc, 'on');
+  assert.equal(frontMatter.toc, true);
   assert.equal(frontMatter.title, 'My Doc');
   assert.equal(frontMatter.date, '2024-01-01');
   assert.equal(frontMatter.author, 'Alice');
@@ -56,7 +56,7 @@ test('parseFrontMatter: forgr namespace overrides top-level shared keys', () => 
   ].join('\n');
   const { frontMatter } = parseFrontMatter(src);
   assert.equal(frontMatter.preset, 'minimal');
-  assert.equal(frontMatter.toc, 'off');
+  assert.equal(frontMatter.toc, false);
   assert.equal(frontMatter.title, 'Override');
 });
 
@@ -126,19 +126,19 @@ test('parseFrontMatter: forgr.preset overrides layout', () => {
   assert.equal(frontMatter.preset, 'minimal');
 });
 
-test('parseFrontMatter: toc normalization — truthy variants map to "on"', () => {
+test('parseFrontMatter: toc normalization — truthy variants map to true', () => {
   for (const val of ['true', 'on', 'yes']) {
     const src = `---\nforgr:\n  toc: ${val}\n---\n# Body`;
     const { frontMatter } = parseFrontMatter(src);
-    assert.equal(frontMatter.toc, 'on', `toc: ${val} should normalize to 'on'`);
+    assert.equal(frontMatter.toc, true, `toc: ${val} should normalize to true`);
   }
 });
 
-test('parseFrontMatter: toc normalization — falsy variants map to "off"', () => {
+test('parseFrontMatter: toc normalization — falsy variants map to false', () => {
   for (const val of ['false', 'off', 'no']) {
     const src = `---\nforgr:\n  toc: ${val}\n---\n# Body`;
     const { frontMatter } = parseFrontMatter(src);
-    assert.equal(frontMatter.toc, 'off', `toc: ${val} should normalize to 'off'`);
+    assert.equal(frontMatter.toc, false, `toc: ${val} should normalize to false`);
   }
 });
 

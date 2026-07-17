@@ -1,5 +1,13 @@
-export function normalizeTocOption(toc) {
-  return toc === true ? 'on' : toc === false ? 'off' : undefined;
+export const WRITEABLE_KEYS = ['preset', 'toc'];
+
+export function buildWriteKeys(options) {
+  const keys = {};
+  for (const key of WRITEABLE_KEYS) {
+    if (options[key] !== undefined) {
+      keys[key] = options[key];
+    }
+  }
+  return keys;
 }
 
 export function printOutputMsg(outputPath) {
