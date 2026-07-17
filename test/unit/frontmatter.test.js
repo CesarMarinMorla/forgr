@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseFrontMatter, writeForgrFrontMatter } from '../../src/markdown.js';
+import { parseFrontMatter, writeForgrFrontMatter } from '../../src/frontmatter.js';
 import { DEFAULTS } from '../../src/config.js';
 
 // ---------------------------------------------------------------------------
