@@ -77,13 +77,22 @@ program
   .option('-p, --preset <name>', 'Preset to use')
   .option('--toc', 'Force generate table of contents')
   .option('--no-toc', 'Skip table of contents')
+  .option('--write', 'Save CLI settings into the file\'s front-matter')
   .action(async (input, options) => {
     const cliOptions = {
       preset: options.preset,
       output: options.output,
       toc: normalizeTocOption(options.toc),
     };
-    const outputPath = await run(input, cliOptions);
+
+    const writeKeys = {};
+    if (options.preset !== undefined) writeKeys.preset = options.preset;
+    if (options.toc !== undefined) writeKeys.toc = normalizeTocOption(options.toc);
+
+    const outputPath = await run(input, cliOptions, {
+      write: options.write,
+      writeKeys: options.write ? writeKeys : undefined,
+    });
     printOutputMsg(outputPath);
   });
 

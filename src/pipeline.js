@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 import './browsers-path.js';
-import { parseFrontMatter, renderMarkdown } from './markdown.js';
+import { parseFrontMatter, writeForgrFrontMatter, renderMarkdown } from './markdown.js';
 import { renderTemplate } from './template.js';
 import { generatePdf } from './pdf.js';
 import { DEFAULTS } from './config.js';
@@ -20,15 +20,20 @@ function buildConfig(cliOptions, frontMatter) {
   return {
     preset: cliOptions.preset || frontMatter.preset || DEFAULTS.preset,
     toc: cliOptions.toc || frontMatter.toc || DEFAULTS.toc,
+    tocTitle: frontMatter.tocTitle ?? DEFAULTS.tocTitle,
     tocWordThreshold: DEFAULTS.tocWordThreshold,
     minPagesForToc: DEFAULTS.minPagesForToc,
     docMeta: frontMatter.docMeta ?? DEFAULTS.docMeta,
-    dateFormat: DEFAULTS.dateFormat,
-    cover: DEFAULTS.cover,
-    footer: DEFAULTS.footer,
-    sectionNumbering: DEFAULTS.sectionNumbering,
-    paperFormat: DEFAULTS.paperFormat,
-    margins: DEFAULTS.margins,
+    dateFormat: frontMatter.dateFormat ?? DEFAULTS.dateFormat,
+    dateLocale: frontMatter.dateLocale ?? DEFAULTS.dateLocale,
+    cover: frontMatter.cover ?? DEFAULTS.cover,
+    coverTitle: frontMatter.coverTitle ?? DEFAULTS.coverTitle,
+    coverAuthor: frontMatter.coverAuthor ?? DEFAULTS.coverAuthor,
+    coverDate: frontMatter.coverDate ?? DEFAULTS.coverDate,
+    footer: frontMatter.footer ?? DEFAULTS.footer,
+    sectionNumbering: frontMatter.sectionNumbering ?? DEFAULTS.sectionNumbering,
+    paperFormat: frontMatter.paperFormat ?? DEFAULTS.paperFormat,
+    margins: frontMatter.margins ?? DEFAULTS.margins,
     outputPath: cliOptions.outputPath || '',
     _pdf: DEFAULTS._pdf,
     meta: {
@@ -61,7 +66,7 @@ async function renderStage(markdownBody, config, absInput, outputPath, withToc, 
   return generatePdf(html, outputPath, { captureHeadings: !withToc, ...config });
 }
 
-export async function run(inputPath, cliOptions = {}) {
+export async function run(inputPath, cliOptions = {}, { write, writeKeys } = {}) {
   const absInput = path.resolve(inputPath);
 
   if (!await fs.pathExists(absInput)) {
@@ -79,9 +84,14 @@ export async function run(inputPath, cliOptions = {}) {
     throw new Error(`could not read ${absInput}: ${err.message}`);
   }
 
-  const { frontMatter, body: markdownBody } = parseFrontMatter(markdown);
+  const { frontMatter, rawData, body: markdownBody } = parseFrontMatter(markdown);
   const config = buildConfig(cliOptions, frontMatter);
   config.outputPath = outputPath;
+
+  if (write && writeKeys) {
+    const updated = writeForgrFrontMatter(markdownBody, rawData, writeKeys);
+    await fs.writeFile(absInput, updated, 'utf8');
+  }
 
   const needsTocByLength = resolveToc(config, wordCount(markdownBody));
 
