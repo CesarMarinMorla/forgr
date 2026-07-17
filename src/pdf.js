@@ -35,7 +35,7 @@ async function ensureChromium() {
   }
 }
 
-function countPdfPages(buffer) {
+export function countPdfPages(buffer) {
   const text = buffer.toString();
   const matches = text.match(/\/Type\s*\/Page\b/g);
   return matches ? matches.length : 0;
