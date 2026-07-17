@@ -5,6 +5,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { BROWSERS_PATH, getChromiumInstallCmd, getHeadlessShellPath, removeFfmpeg } from './browsers-path.js';
+import { DEFAULTS } from './config.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MERMAID_DIST = path.resolve(__dirname, '..', 'node_modules', 'mermaid', 'dist', 'mermaid.min.js');
@@ -387,7 +388,8 @@ function countPdfPages(buffer) {
 const A4_CONTENT_HEIGHT = 971;
 
 export async function generatePdf(html, outputPath, opts = {}) {
-  const { captureHeadings, preset, paperFormat, margins, _pdf } = opts;
+  const { captureHeadings, preset, paperFormat, margins } = opts;
+  const _pdf = DEFAULTS._pdf;
   const outputDir = path.dirname(outputPath);
   try {
     await fs.access(outputDir, fs.constants.W_OK);

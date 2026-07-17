@@ -36,7 +36,6 @@ function buildConfig(cliOptions, frontMatter) {
     paperFormat: frontMatter.paperFormat ?? DEFAULTS.paperFormat,
     margins: frontMatter.margins ?? DEFAULTS.margins,
     outputPath: cliOptions.outputPath || '',
-    _pdf: DEFAULTS._pdf,
     meta: {
       title: frontMatter.title,
       date: frontMatter.date,
