@@ -124,9 +124,9 @@ Removed from `buildConfig()`. `generatePdf()` reads `DEFAULTS._pdf` directly.
 | Moderate | Two-pass render no caching | `src/pipeline.js:99-115` | Won't fix |
 | Moderate | `--write` duplicates option processing | `src/cli.js:88-94` | Resolved |
 | Moderate | `toc` string-triple normalization | 3 files | Resolved |
-| Moderate | 7/12 modules lack unit tests | Multiple | Open |
+| Moderate | 7/12 modules lack unit tests | Multiple | Resolved |
 | Low | Mermaid theme data inline | `src/pdf.js:14-350` | Resolved |
 | Low | Module-level cache never invalidated | `src/pdf.js:381` | Resolved |
 | Low | `bin/forgr-tui` duplicates `cli.js` | `bin/forgr-tui` | Resolved |
-| Low | Integration tests shallow assertions | `test/integration/*.test.js` | Open |
+| Low | Integration tests shallow assertions | `test/integration/*.test.js` | Resolved |
 | Low | `_pdf` hardcoded in merge | `src/pipeline.js:38` | Resolved |
