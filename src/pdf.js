@@ -88,19 +88,25 @@ export async function renderMermaid(page, preset) {
   }
 }
 
-export async function computeHeadingPages(page) {
-  return page.evaluate((pageHeight) => {
+export function contentHeight(paperFormat) {
+  const mm = paperFormat === 'Letter' ? 279 : 297;
+  return Math.round((mm - 40) * (96 / 25.4));
+}
+
+export async function computeHeadingPages(page, paperFormat) {
+  const pageHeight = contentHeight(paperFormat);
+  return page.evaluate((h) => {
     const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6[id]');
     const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
-    return Array.from(headings).map(h => {
-      const rect = h.getBoundingClientRect();
+    return Array.from(headings).map(el => {
+      const rect = el.getBoundingClientRect();
       const y = rect.top + scrollTop;
       return {
-        id: h.id,
-        page: Math.floor(y / pageHeight) + 1,
+        id: el.id,
+        page: Math.floor(y / h) + 1,
       };
     });
-  }, A4_CONTENT_HEIGHT);
+  }, pageHeight);
 }
 
 export function generatePdfOptions(paperFormat, margins, _pdf) {
@@ -113,10 +119,6 @@ export function generatePdfOptions(paperFormat, margins, _pdf) {
     footerTemplate: _pdf.footerTemplate,
   };
 }
-
-// The content height of an A4 page with 2cm margins, in CSS pixels at 96dpi:
-// 297mm - 40mm = 257mm, at 96/25.4 px/mm ≈ 971px
-const A4_CONTENT_HEIGHT = 971;
 
 export async function generatePdf(html, outputPath, opts = {}) {
   const { captureHeadings, preset, paperFormat, margins } = opts;
@@ -142,7 +144,7 @@ export async function generatePdf(html, outputPath, opts = {}) {
 
     await page.evaluate(() => document.fonts.ready);
 
-    const headingPages = captureHeadings ? await computeHeadingPages(page) : [];
+    const headingPages = captureHeadings ? await computeHeadingPages(page, paperFormat) : [];
     const pdfBuffer = await page.pdf(generatePdfOptions(paperFormat, margins, _pdf));
     const pageCount = countPdfPages(pdfBuffer);
     await fs.writeFile(outputPath, pdfBuffer);
