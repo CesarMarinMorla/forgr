@@ -67,7 +67,7 @@
 - [x] test/pipeline.test.js — output path resolution tests
 - [x] test/integration.test.js — end-to-end PDF generation test (globs all fixtures)
 - [x] npm test = 92 tests, all passing
-- [x] npm run test:unit = unit tests only (30 tests, excludes integration)
+- [x] npm run test:unit = unit tests only (71 tests, excludes integration)
 - [x] integration test accepts `FORGR_PRESET` env var (terminal|minimal|technical|academic|newsletter, default terminal) to validate one preset at a time; rejects unknown values
 - [x] Rendered fixture PDFs stay in test/fixtures/ (gitignored) for visual review — do not delete them after a run
 
