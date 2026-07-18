@@ -105,10 +105,51 @@ forgr short-note.md --no-toc
 | `--output <path>` | Write the PDF to a specific path instead of next to the input file. |
 | `--preset <name>` | Apply a preset: `terminal` (default), `minimal`, `technical`, `academic`, `newsletter`. |
 | `--toc` / `--no-toc` | Force the table of contents on or off. Without either, it is decided automatically. |
+| `--write` | Persist CLI flags into the file's front-matter for repeatable builds. |
+| `convert <input>` | Convert a Markdown file to PDF (default command). |
 | `doctor` | Diagnose installation and fix common issues. |
 | `doctor --fix` | Auto-fix detected issues (re-download Chromium, remove malformed user presets). |
 | `doctor --verbose` | Show full paths, file sizes, and timestamps. |
 | `uninstall` | Remove the Chromium cache (~195MB) without removing the tool. |
+
+### Front-matter
+
+Control rendering from inside your Markdown file via YAML front-matter. CLI flags override front-matter, front-matter overrides defaults.
+
+```yaml
+---
+title: My Document
+author: Jane Doe
+date: 2025-01-15
+forgr:
+  preset: academic
+  toc: auto
+  tocTitle: Contents
+  cover: true
+  coverTitle: "My Document"
+  coverAuthor: "Jane Doe"
+  coverDate: "2025-01-15"
+  footer: true
+  sectionNumbering: true
+  paperFormat: a4
+  margins: moderate
+  docMeta: true
+  dateFormat: YYYY-MM-DD
+  dateLocale: en-US
+---
+```
+
+Shared keys (`title`, `author`, `date`, `preset`, `toc`) work at the top level or under `forgr:`. `preset` also accepts the legacy alias `layout`. All other forgr-only keys must live under `forgr:`.
+
+Docs can also be written to with `--write`:
+
+```bash
+forgr report.md --preset academic --write
+```
+
+This saves `preset: academic` into the file's front-matter (omitting values that match defaults), so subsequent runs don't need the flag.
+
+---
 
 ### Interactive preset picker
 
@@ -165,8 +206,10 @@ npm uninstall -g forgr
 ## Development
 
 ```bash
-npm test            # full suite (unit + integration)
-npm run test:unit   # unit tests only
+npm test                  # full suite (unit + integration)
+npm run test:unit         # unit tests (71)
+npm run test:integration  # integration tests (14)
+npm run test:mermaid      # mermaid-specific tests (7)
 ```
 
 Integration tests accept a `FORGR_PRESET` environment variable (`terminal`, `minimal`, `technical`, `academic`, `newsletter`) to validate one preset at a time.
