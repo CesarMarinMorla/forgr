@@ -5,11 +5,18 @@ import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { BROWSERS_PATH, getChromiumInstallCmd, getHeadlessShellPath, removeFfmpeg } from './browsers-path.js';
-import { DEFAULTS } from './config.js';
 import { PRESET_MERMAID_THEMES } from './themes/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MERMAID_DIST = path.resolve(__dirname, '..', 'node_modules', 'mermaid', 'dist', 'mermaid.min.js');
+
+const RENDER_DEFAULTS = {
+  printBackground: true,
+  displayHeaderFooter: true,
+  headerTemplate: '<div></div>',
+  footerTemplate: '<div style="width:100%; font-family:Menlo,monospace; font-size:7px; color:#666; text-align:center; padding:0 2cm;"><span class="pageNumber"></span> / <span class="totalPages"></span></div>',
+  viewport: { width: 720, height: 720 },
+};
 
 async function ensureChromium() {
   const execPath = getHeadlessShellPath();
@@ -109,20 +116,19 @@ export async function computeHeadingPages(page, paperFormat) {
   }, pageHeight);
 }
 
-export function generatePdfOptions(paperFormat, margins, _pdf) {
+export function generatePdfOptions(paperFormat, margins, render) {
   return {
     format: paperFormat,
-    printBackground: _pdf.printBackground,
+    printBackground: render.printBackground,
     margin: margins,
-    displayHeaderFooter: _pdf.displayHeaderFooter,
-    headerTemplate: _pdf.headerTemplate,
-    footerTemplate: _pdf.footerTemplate,
+    displayHeaderFooter: render.displayHeaderFooter,
+    headerTemplate: render.headerTemplate,
+    footerTemplate: render.footerTemplate,
   };
 }
 
 export async function generatePdf(html, outputPath, opts = {}) {
   const { captureHeadings, preset, paperFormat, margins } = opts;
-  const _pdf = DEFAULTS._pdf;
 
   assertWritableDir(path.dirname(outputPath));
   await ensureChromium();
@@ -133,7 +139,7 @@ export async function generatePdf(html, outputPath, opts = {}) {
     const page = await browser.newPage();
 
     if (captureHeadings) {
-      await page.setViewportSize(_pdf.viewport);
+      await page.setViewportSize(RENDER_DEFAULTS.viewport);
     }
 
     await page.setContent(html, { waitUntil: 'domcontentloaded' });
@@ -145,7 +151,7 @@ export async function generatePdf(html, outputPath, opts = {}) {
     await page.evaluate(() => document.fonts.ready);
 
     const headingPages = captureHeadings ? await computeHeadingPages(page, paperFormat) : [];
-    const pdfBuffer = await page.pdf(generatePdfOptions(paperFormat, margins, _pdf));
+    const pdfBuffer = await page.pdf(generatePdfOptions(paperFormat, margins, RENDER_DEFAULTS));
     const pageCount = countPdfPages(pdfBuffer);
     await fs.writeFile(outputPath, pdfBuffer);
 
