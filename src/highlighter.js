@@ -44,64 +44,49 @@ import makefile from 'highlight.js/lib/languages/makefile';
 import graphql from 'highlight.js/lib/languages/graphql';
 import protobuf from 'highlight.js/lib/languages/protobuf';
 
-hljs.registerLanguage('javascript', javascript);
-hljs.registerLanguage('js', javascript);
-hljs.registerLanguage('typescript', typescript);
-hljs.registerLanguage('ts', typescript);
-hljs.registerLanguage('python', python);
-hljs.registerLanguage('ruby', ruby);
-hljs.registerLanguage('rb', ruby);
-hljs.registerLanguage('php', php);
-hljs.registerLanguage('lua', lua);
-hljs.registerLanguage('r', r);
+const LANGUAGES = [
+  { module: javascript, names: ['javascript', 'js'] },
+  { module: typescript, names: ['typescript', 'ts'] },
+  { module: python, names: ['python'] },
+  { module: ruby, names: ['ruby', 'rb'] },
+  { module: php, names: ['php'] },
+  { module: lua, names: ['lua'] },
+  { module: r, names: ['r'] },
+  { module: c, names: ['c'] },
+  { module: cpp, names: ['cpp'] },
+  { module: rust, names: ['rust'] },
+  { module: go, names: ['go'] },
+  { module: swift, names: ['swift'] },
+  { module: java, names: ['java'] },
+  { module: kotlin, names: ['kotlin'] },
+  { module: scala, names: ['scala'] },
+  { module: csharp, names: ['csharp', 'cs'] },
+  { module: bash, names: ['bash', 'sh'] },
+  { module: shell, names: ['shell'] },
+  { module: powershell, names: ['powershell', 'ps1'] },
+  { module: vbscript, names: ['vbscript'] },
+  { module: nix, names: ['nix'] },
+  { module: json, names: ['json'] },
+  { module: yaml, names: ['yaml', 'yml'] },
+  { module: xml, names: ['xml', 'html'] },
+  { module: ini, names: ['ini', 'toml'] },
+  { module: diff, names: ['diff', 'patch'] },
+  { module: css, names: ['css'] },
+  { module: markdown, names: ['markdown', 'md'] },
+  { module: plaintext, names: ['plaintext', 'text', 'tree'] },
+  { module: sql, names: ['sql'] },
+  { module: dockerfile, names: ['dockerfile'] },
+  { module: nginx, names: ['nginx'] },
+  { module: apache, names: ['apache'] },
+  { module: makefile, names: ['makefile', 'make'] },
+  { module: graphql, names: ['graphql', 'gql'] },
+  { module: protobuf, names: ['protobuf', 'proto'] },
+];
 
-hljs.registerLanguage('c', c);
-hljs.registerLanguage('cpp', cpp);
-hljs.registerLanguage('rust', rust);
-hljs.registerLanguage('go', go);
-hljs.registerLanguage('swift', swift);
-
-hljs.registerLanguage('java', java);
-hljs.registerLanguage('kotlin', kotlin);
-hljs.registerLanguage('scala', scala);
-hljs.registerLanguage('csharp', csharp);
-hljs.registerLanguage('cs', csharp);
-
-hljs.registerLanguage('bash', bash);
-hljs.registerLanguage('sh', bash);
-hljs.registerLanguage('shell', shell);
-hljs.registerLanguage('powershell', powershell);
-hljs.registerLanguage('ps1', powershell);
-hljs.registerLanguage('vbscript', vbscript);
-hljs.registerLanguage('nix', nix);
-
-hljs.registerLanguage('json', json);
-hljs.registerLanguage('yaml', yaml);
-hljs.registerLanguage('yml', yaml);
-hljs.registerLanguage('xml', xml);
-hljs.registerLanguage('html', xml);
-hljs.registerLanguage('ini', ini);
-hljs.registerLanguage('toml', ini);
-hljs.registerLanguage('diff', diff);
-hljs.registerLanguage('patch', diff);
-
-hljs.registerLanguage('css', css);
-hljs.registerLanguage('markdown', markdown);
-hljs.registerLanguage('md', markdown);
-hljs.registerLanguage('plaintext', plaintext);
-hljs.registerLanguage('text', plaintext);
-hljs.registerLanguage('tree', plaintext);
-
-hljs.registerLanguage('sql', sql);
-hljs.registerLanguage('dockerfile', dockerfile);
-hljs.registerLanguage('nginx', nginx);
-hljs.registerLanguage('apache', apache);
-hljs.registerLanguage('makefile', makefile);
-hljs.registerLanguage('make', makefile);
-
-hljs.registerLanguage('graphql', graphql);
-hljs.registerLanguage('gql', graphql);
-hljs.registerLanguage('protobuf', protobuf);
-hljs.registerLanguage('proto', protobuf);
+for (const { module, names } of LANGUAGES) {
+  for (const name of names) {
+    hljs.registerLanguage(name, module);
+  }
+}
 
 export default hljs;
