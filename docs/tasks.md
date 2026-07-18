@@ -9,7 +9,7 @@
 | 2.5 | Preset expansion & polish (newsletter preset, academic revamp, spacing, mermaid colors) | Done |
 | 2.75 | TUI & CLI polish | Pending |
 | 3 | TUI preset picker (v0.6.0) | Done |
-| 3.5 | Front-matter processing | In progress |
+| 3.5 | Front-matter processing | Done |
 | 4 | Rendering options (doc-meta, footer, cover, section numbering) | Pending |
 | 5 | Watch mode & user presets | Pending |
 | 6 | Extended format support (LaTeX, Jekyll/Liquid preprocessing) | Later |
@@ -66,7 +66,7 @@
 - [x] test/markdown.test.js — unit tests for markdown rendering + table number wrapping
 - [x] test/pipeline.test.js — output path resolution tests
 - [x] test/integration.test.js — end-to-end PDF generation test (globs all fixtures)
-- [x] npm test = 38 tests (30 unit + 8 integration), all passing
+- [x] npm test = 92 tests, all passing
 - [x] npm run test:unit = unit tests only (30 tests, excludes integration)
 - [x] integration test accepts `FORGR_PRESET` env var (terminal|minimal|technical|academic|newsletter, default terminal) to validate one preset at a time; rejects unknown values
 - [x] Rendered fixture PDFs stay in test/fixtures/ (gitignored) for visual review — do not delete them after a run
@@ -112,7 +112,7 @@
 - [x] Fixed ASCII art alignment bug (text-align: justify bleeding into pre blocks)
 - [x] Fixed mermaid edge label colors (lineColor: brownish #244233 → true dark #1B4A36)
 - [x] Added secondaryColor for diamond nodes, edgeLabelBackground, primaryBorderColor
-- [x] Test with all fixture files (38 tests pass)
+- [x] Test with all fixture files (92 tests pass)
 
 ### newsletter.css — new preset (warm editorial)
 - [x] Warm off-white paper (#FAF8F5), dark warm gray ink (#2D2A24), terra-cotta coral accent (#C85A48)
@@ -198,7 +198,7 @@ Launched via the `forgr-tui` command (separate bin), not an `--interactive` flag
 
 - [x] Parse YAML front-matter (delimited by `---`) at top of `.md` files (via `gray-matter`)
 - [x] Shared fields: `layout` / `preset`, `title`, `date`, `author`
-- [ ] Namespaced fields: `forgr.toc`, `forgr.cover`, `forgr.footer`, `forgr.section_numbering`
+- [x] Namespaced fields: `forgr.toc`, `forgr.cover`, `forgr.footer`, `forgr.section_numbering`
 - [x] Ignore unrecognized fields (Obsidian/Jekyll/Typora safe)
 - [x] Files without front-matter render unchanged
 
@@ -213,12 +213,12 @@ Launched via the `forgr-tui` command (separate bin), not an `--interactive` flag
 
 - [x] forgr never writes to the input `.md` file
 - [x] Settings are ephemeral per render
-- [ ] Future `--write` flag to save TUI settings as front-matter
+- [x] `--write` flag saves CLI settings into file's front-matter
 
 ### README
 
-- [ ] Document all supported front-matter keys with examples
-- [ ] Show minimal block for fully automated render (title + layout = zero CLI flags)
+- [x] Document all supported front-matter keys with examples (`docs/front-matter.md`)
+- [x] Show minimal block for fully automated render (title + layout = zero CLI flags)
 
 ---
 

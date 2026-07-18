@@ -9,7 +9,7 @@ date: 2026-07-17
 author: Cesar Marin
 forgr:
   preset: academic
-  toc: on
+  toc: true
   cover: true
   footer: page-x-of-y
 ---
@@ -32,7 +32,7 @@ These go under a `forgr:` key and control rendering behavior.
 | Key | Type | Default | Description |
 |---|---|---|---|---|
 | `preset` | string | `terminal` | CSS preset: `terminal`, `minimal`, `technical`, `academic`, `newsletter` |
-| `toc` | string | `auto` | Table of contents: `auto` (word/page threshold), `on` (always), `off` (never) |
+| `toc` | bool/string | `auto` | Table of contents: `auto` (word/page threshold), `true` (always), `false` (never) |
 | `tocTitle` | string | `Contents` | Custom heading text for the table of contents |
 | `cover` | boolean | `false` | Enable a cover page |
 | `sectionNumbering` | boolean | `false` | Auto-number sections (h2+) in output |
