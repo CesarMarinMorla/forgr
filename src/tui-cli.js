@@ -1,0 +1,71 @@
+import { existsSync } from 'fs';
+import { Command } from 'commander';
+import { run } from './pipeline.js';
+import { listPresets } from './presets.js';
+import { launchTui, classifyPreset } from './tui.js';
+import { buildWriteKeys, printOutputMsg, handleCliError } from './utils.js';
+
+const program = new Command();
+
+program
+  .name('forgr-tui')
+  .description('Launch an interactive preset picker, then convert Markdown to PDF')
+  .argument('<input>', 'Markdown file to convert')
+  .option('-o, --output <path>', 'Output PDF path (default: same directory as input)')
+  .option('--toc', 'Force generate table of contents')
+  .option('--no-toc', 'Skip table of contents')
+  .option('--write', 'Save CLI settings into the file\'s front-matter')
+  .action(async (input, options) => {
+    const presets = listPresets();
+
+    let chosen;
+    try {
+      chosen = await launchTui(presets);
+    } catch (err) {
+      console.error(`Error: ${err.message}`);
+      process.exit(1);
+    }
+
+    if (!chosen) {
+      console.log('Aborted.');
+      process.exit(0);
+    }
+
+    const decision = classifyPreset(chosen);
+
+    if (decision.action === 'abort') {
+      console.log('Aborted.');
+      process.exit(0);
+    }
+
+    if (decision.action === 'unsupported-user') {
+      console.log('');
+      console.log(`  User preset "${decision.name}" was selected, but rendering custom presets`);
+      console.log('  arrives with config support in Milestone 5.');
+      console.log('  Pick a built-in preset to render a PDF now.');
+      console.log('');
+      process.exit(0);
+    }
+
+    try {
+      const cliOptions = {
+        output: options.output,
+        toc: options.toc,
+        preset: decision.name,
+      };
+
+      const writeKeys = buildWriteKeys(options);
+      writeKeys.preset = decision.name;
+
+      const outputPath = await run(input, cliOptions, {
+        write: options.write,
+        writeKeys: options.write ? writeKeys : undefined,
+      });
+      printOutputMsg(outputPath);
+    } catch (err) {
+      console.error(`Error: ${err.message}`);
+      process.exit(1);
+    }
+  });
+
+program.parseAsync(process.argv).catch(handleCliError);
