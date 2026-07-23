@@ -2,6 +2,8 @@ import { existsSync, rmSync } from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
 
+// Hardcoded — can't import from src/browsers-path.js because npm removes
+// node_modules before this preuninstall script runs.
 const BROWSERS_PATH = join(homedir(), '.forgr', 'browsers');
 
 if (!existsSync(BROWSERS_PATH)) {
