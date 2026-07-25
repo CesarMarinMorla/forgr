@@ -7,7 +7,7 @@
 | 1 | Published CLI (v0.1.0) | Done |
 | 2 | Mermaid rendering & image embedding | Done |
 | 2.5 | Preset expansion & polish (newsletter preset, academic revamp, spacing, mermaid colors) | Done |
-| 2.75 | TUI & CLI polish | Pending |
+| 2.75 | TUI & CLI polish | Done |
 | 3 | TUI preset picker (v0.6.0) | Done |
 | 3.5 | Front-matter processing | Done |
 | 4 | Rendering options (doc-meta, footer, cover, section numbering) | Pending |
@@ -66,7 +66,7 @@
 - [x] test/markdown.test.js — unit tests for markdown rendering + table number wrapping
 - [x] test/pipeline.test.js — output path resolution tests
 - [x] test/integration.test.js — end-to-end PDF generation test (globs all fixtures)
-- [x] npm test = 92 tests, all passing
+- [x] npm test = 108 tests, all passing
 - [x] npm run test:unit = unit tests only (71 tests, excludes integration)
 - [x] integration test accepts `FORGR_PRESET` env var (terminal|minimal|technical|academic|newsletter, default terminal) to validate one preset at a time; rejects unknown values
 - [x] Rendered fixture PDFs stay in test/fixtures/ (gitignored) for visual review — do not delete them after a run
@@ -155,23 +155,23 @@
 
 ### CLI output
 
-- [ ] Colored prefixes: ✓ success, ✗ error, ℹ info
-- [ ] Inline spinner during PDF generation (replaces silent gap)
-- [ ] Completion summary: page count, word count, file size, preset, elapsed
+- [x] Colored prefixes: ✓ success, ✗ error, ℹ info
+- [x] Inline spinner during PDF generation (replaces silent gap)
+- [x] Completion summary: page count, word count, file size, preset, elapsed
 - [ ] Chromium download as single-line progress (no Playwright noise)
 
 ### TUI (Ink)
 
-- [ ] Visual preset cards with accent color swatch beside each name
-- [ ] Confirmation animation before generation kicks off
-- [ ] Result screen after render: file path, page count, preset, time — "done" state, q quits
-- [ ] Consistent accent color for TUI chrome (separate from document presets)
+- [x] Visual preset cards with accent color swatch beside each name
+- [x] Confirmation animation before generation kicks off
+- [x] Result screen after render: file path, page count, preset, time — "done" state, q quits
+- [x] Consistent accent color for TUI chrome (separate from document presets)
 
 ### Error format (both paths)
 
-- [ ] Chromium not found → message + fix hint, no stack trace
-- [ ] Invalid preset → formatted list of available presets
-- [ ] Pipeline errors → single line + hint, never raw dump
+- [x] Chromium not found → message + fix hint, no stack trace
+- [x] Invalid preset → formatted list of available presets
+- [x] Pipeline errors → single line + hint, never raw dump
 
 ---
 
