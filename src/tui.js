@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { render, Box, Text, useInput } from 'ink';
+import { readdirSync, statSync } from 'fs';
 import { execFile } from 'child_process';
 import { stat, readFile, writeFile } from 'fs/promises';
 import path from 'path';
@@ -12,6 +13,20 @@ import { run } from './pipeline.js';
 const TUI_ACCENT = '#2DD4BF';
 const SPINNER_CHARS = '\u280B\u2839\u2879\u2878\u283C\u2834\u2826\u2827\u2807\u280F';
 
+function getMarkdownFiles(dir) {
+  let entries;
+  try {
+    entries = readdirSync(dir);
+  } catch {
+    return [];
+  }
+  return entries
+    .filter(f => f.endsWith('.md'))
+    .map(f => path.join(dir, f))
+    .filter(f => statSync(f).isFile())
+    .sort((a, b) => path.basename(a).localeCompare(path.basename(b)));
+}
+
 const SETTINGS = [
   { key: 'toc', label: 'Table of contents', values: ['auto', true, false], display: v => v === true ? 'on' : v === false ? 'off' : 'auto' },
   { key: 'docMeta', label: 'Doc-meta header', values: [true, false], display: v => v ? 'yes' : 'no' },
@@ -23,6 +38,87 @@ const SETTINGS = [
 
 function Swatch({ color }) {
   return React.createElement(Text, { color }, ' \u2588\u2588');
+}
+
+function FilePicker({ files, onSelect, onQuit }) {
+  const [index, setIndex] = useState(0);
+  const [selected, setSelected] = useState(new Set());
+
+  useInput((input, key) => {
+    if (key.upArrow) {
+      setIndex(i => (i + files.length - 1) % files.length);
+    } else if (key.downArrow) {
+      setIndex(i => (i + 1) % files.length);
+    } else if (input === ' ') {
+      setSelected(prev => {
+        const next = new Set(prev);
+        if (next.has(index)) next.delete(index);
+        else next.add(index);
+        return next;
+      });
+    } else if (key.return) {
+      if (selected.size === 0) return;
+      const chosen = Array.from(selected).sort().map(i => files[i]);
+      onSelect(chosen);
+    } else if (input === 'q' || key.escape) {
+      onQuit();
+    }
+  });
+
+  const title = React.createElement(
+    Text,
+    { color: TUI_ACCENT, bold: true },
+    'forgr \u2014 select files'
+  );
+
+  const hint = selected.size > 0
+    ? React.createElement(Text, { dimColor: true }, `  ${selected.size} of ${files.length} selected`)
+    : null;
+
+  const rows = files.map((f, i) => {
+    const isFocused = i === index;
+    const isSelected = selected.has(i);
+    const marker = isFocused
+      ? React.createElement(Text, { color: TUI_ACCENT }, '\u276F ')
+      : React.createElement(Text, null, '  ');
+    const check = isSelected
+      ? React.createElement(Text, { color: TUI_ACCENT }, '\u2713')
+      : React.createElement(Text, null, ' ');
+    const name = React.createElement(
+      Text,
+      { color: isFocused ? TUI_ACCENT : undefined },
+      ` ${path.basename(f)}`
+    );
+    return React.createElement(
+      Box,
+      { key: f },
+      marker,
+      check,
+      name
+    );
+  });
+
+  const help = React.createElement(
+    Box,
+    null,
+    React.createElement(Text, { color: TUI_ACCENT }, '\u2191/\u2193'),
+    React.createElement(Text, { dimColor: true }, ' navigate \u00B7 '),
+    React.createElement(Text, { color: TUI_ACCENT }, 'space'),
+    React.createElement(Text, { dimColor: true }, ' toggle \u00B7 '),
+    React.createElement(Text, { color: TUI_ACCENT }, 'enter'),
+    React.createElement(Text, { dimColor: true }, ' confirm \u00B7 '),
+    React.createElement(Text, { color: TUI_ACCENT }, 'q'),
+    React.createElement(Text, { dimColor: true }, ' quit')
+  );
+
+  return React.createElement(
+    Box,
+    { flexDirection: 'column', paddingX: 1, width: '100%' },
+    React.createElement(Box, { marginBottom: 1 }, title),
+    React.createElement(Box, { marginBottom: 1 }, hint),
+    React.createElement(Box, { flexDirection: 'column' }, ...rows),
+    React.createElement(Box, { marginTop: 1 }, help)
+  );
 }
 
 function PresetPicker({ presets, notification, onSelect }) {
@@ -109,7 +205,7 @@ function PresetPicker({ presets, notification, onSelect }) {
   );
 }
 
-function SettingsScreen({ settings, onChange, outputPath, preset, onRender, onBack }) {
+function SettingsScreen({ settings, onChange, preset, fileCount, onRender, onBack }) {
   const [focus, setFocus] = useState(0);
 
   useInput((input, key) => {
@@ -140,11 +236,11 @@ function SettingsScreen({ settings, onChange, outputPath, preset, onRender, onBa
     `forgr \u2014 settings (${preset})`
   );
 
-  const outputLine = React.createElement(
+  const fileCountLine = React.createElement(
     Box,
     null,
-    React.createElement(Text, { dimColor: true }, '  Output: '),
-    React.createElement(Text, null, outputPath)
+    React.createElement(Text, { dimColor: true }, '  Files: '),
+    React.createElement(Text, null, `${fileCount}`)
   );
 
   const rows = SETTINGS.map((def, i) => {
@@ -183,13 +279,13 @@ function SettingsScreen({ settings, onChange, outputPath, preset, onRender, onBa
     Box,
     { flexDirection: 'column', paddingX: 1, width: '100%' },
     React.createElement(Box, { marginBottom: 1 }, title),
-    outputLine,
+    fileCountLine,
     React.createElement(Box, { marginTop: 1, flexDirection: 'column' }, ...rows),
     React.createElement(Box, { marginTop: 1 }, help)
   );
 }
 
-function RenderingScreen({ preset, progress }) {
+function RenderingScreen({ preset, selectedFiles, results, currentFileIndex, progress }) {
   const [frame, setFrame] = useState(0);
   const intervalRef = useRef(null);
 
@@ -206,97 +302,115 @@ function RenderingScreen({ preset, progress }) {
     SPINNER_CHARS[frame]
   );
 
-  const label = React.createElement(
-    Text,
-    { bold: true },
-    ` Rendering with ${preset}...`
+  const header = React.createElement(
+    Box,
+    null,
+    spinner,
+    React.createElement(Text, { bold: true }, ` Rendering with ${preset}...`)
   );
+
+  const currentFile = currentFileIndex < selectedFiles.length
+    ? React.createElement(
+        Box,
+        { marginLeft: 2 },
+        React.createElement(Text, { dimColor: true }, `[${currentFileIndex + 1}/${selectedFiles.length}] ${path.basename(selectedFiles[currentFileIndex])}`)
+      )
+    : null;
 
   const prog = React.createElement(
     Box,
-    { marginLeft: 3 },
+    { marginLeft: 4 },
     React.createElement(Text, { dimColor: true }, progress)
+  );
+
+  const doneLines = results.map((r, i) =>
+    React.createElement(
+      Box,
+      { key: i, marginLeft: 2 },
+      React.createElement(Text, { color: 'green' }, '\u2713'),
+      React.createElement(Text, { dimColor: true }, ` ${path.basename(r.outputPath || r.filePath)}`),
+      r.pageCount ? React.createElement(Text, { dimColor: true }, `  ${r.pageCount} pages`) : null
+    )
   );
 
   return React.createElement(
     Box,
     { flexDirection: 'column', paddingX: 1, width: '100%' },
-    React.createElement(Box, null, spinner, label),
-    prog
+    header,
+    currentFile,
+    prog,
+    ...doneLines
   );
 }
 
-function ResultScreen({ result, error, isError, onSave, saveStatus, onBack, onQuit }) {
+function BatchResultScreen({ results, saveStatus, onSave, onBack, onQuit, onOpen }) {
   useInput((input, key) => {
     if (key.return) {
       onBack();
     } else if (input === 'q' || key.escape) {
       onQuit();
     } else if (input === 'o') {
-      const outputPath = result?.outputPath;
-      if (outputPath) {
-        const cmd = process.platform === 'darwin' ? 'open' : 'xdg-open';
-        execFile(cmd, [outputPath], () => {});
-      }
-    } else if (input === 's' && !isError && !saveStatus) {
+      onOpen();
+    } else if (input === 's' && !saveStatus) {
       onSave();
     }
   });
 
-  if (isError) {
-    const errBox = React.createElement(
-      Box,
-      { marginBottom: 1 },
-      React.createElement(Text, { color: 'red' }, '\u2717'),
-      React.createElement(Text, { bold: true }, ' Render failed')
-    );
+  const succeeded = results.filter(r => !r.error);
+  const failed = results.filter(r => r.error);
+  const totalElapsed = results.reduce((sum, r) => sum + (r.elapsed || 0), 0);
 
-    const errMsg = React.createElement(
-      Box,
-      { marginLeft: 2 },
-      React.createElement(Text, { dimColor: true }, error)
-    );
-
-    const footer = React.createElement(
-      Box,
-      { marginTop: 1 },
-      React.createElement(Text, { color: TUI_ACCENT }, 'Enter'),
-      React.createElement(Text, { dimColor: true }, ' try again \u00B7 '),
-      React.createElement(Text, { color: TUI_ACCENT }, 'q'),
-      React.createElement(Text, { dimColor: true }, ' quit')
-    );
-
-    return React.createElement(
-      Box,
-      { flexDirection: 'column', paddingX: 1, width: '100%' },
-      errBox,
-      errMsg,
-      footer
-    );
-  }
-
-  const fileSizeStr = result?.fileSize ? formatFileSize(result.fileSize) : '';
-  const elapsedStr = result?.elapsed != null ? formatElapsed(result.elapsed) : '';
-  const details = [
-    result?.pageCount ? `${result.pageCount} pages` : null,
-    fileSizeStr,
-    result?.preset,
-    elapsedStr,
-  ].filter(Boolean).join(' \u00B7 ');
+  const headerText = failed.length === 0
+    ? `\u2713  Batch complete \u2014 ${results.length} files`
+    : `\u2713  Batch complete \u2014 ${results.length} files (${failed.length} failed)`;
+  const headerColor = failed.length === results.length ? 'red' : 'green';
 
   const header = React.createElement(
     Box,
     { marginBottom: 1 },
-    React.createElement(Text, { color: 'green' }, '\u2713'),
-    React.createElement(Text, { bold: true }, ' PDF rendered')
+    React.createElement(Text, { color: headerColor, bold: true }, headerText)
   );
 
-  const info = React.createElement(
-    Box,
-    { flexDirection: 'column', marginLeft: 2 },
-    React.createElement(Text, null, result?.outputPath || ''),
-    React.createElement(Text, { dimColor: true }, details)
-  );
+  const MAX_VISIBLE = 6;
+  let visibleResults = results;
+  let overflow = 0;
+  if (results.length > MAX_VISIBLE) {
+    visibleResults = [...results.slice(0, MAX_VISIBLE - 1), ...results.slice(-1)];
+    overflow = results.length - MAX_VISIBLE;
+  }
+
+  const fileLines = visibleResults.map((r, i) => {
+    const isError = !!r.error;
+    const icon = isError ? '\u2717' : '\u2713';
+    const iconColor = isError ? 'red' : 'green';
+    const name = path.basename(r.outputPath || r.filePath);
+    let detail = '';
+    if (!isError && r.pageCount) {
+      const parts = [`${r.pageCount} pages`];
+      if (r.fileSize) parts.push(formatFileSize(r.fileSize));
+      detail = `  ${parts.join(' \u00B7 ')}`;
+    } else if (isError && r.error) {
+      detail = `  ${r.error}`;
+    }
+    return React.createElement(
+      Box,
+      { key: i, marginLeft: 2 },
+      React.createElement(Text, { color: iconColor }, icon),
+      React.createElement(Text, { dimColor: isError ? 'red' : undefined }, ` ${name}${detail}`)
+    );
+  });
+
+  const overflowLine = overflow > 0
+    ? React.createElement(Box, { marginLeft: 2 },
+        React.createElement(Text, { dimColor: true }, `  ... ${overflow} more`)
+      )
+    : null;
+
+  const presetLine = succeeded.length > 0
+    ? React.createElement(Box, { marginTop: 1 },
+        React.createElement(Text, { dimColor: true }, `  ${succeeded[0].preset} \u00B7 ${formatElapsed(totalElapsed)}`)
+      )
+    : null;
 
   const saveMsg = saveStatus === 'saving'
     ? React.createElement(Text, { dimColor: true }, '  saving settings...')
@@ -310,11 +424,11 @@ function ResultScreen({ result, error, isError, onSave, saveStatus, onBack, onQu
     Box,
     { marginTop: 1 },
     React.createElement(Text, { color: TUI_ACCENT }, 'Enter'),
-    React.createElement(Text, { dimColor: true }, ' render again \u00B7 '),
+    React.createElement(Text, { dimColor: true }, ' back \u00B7 '),
     React.createElement(Text, { color: TUI_ACCENT }, 's'),
     React.createElement(Text, { dimColor: true }, ' save \u00B7 '),
     React.createElement(Text, { color: TUI_ACCENT }, 'o'),
-    React.createElement(Text, { dimColor: true }, ' open \u00B7 '),
+    React.createElement(Text, { dimColor: true }, ' open folder \u00B7 '),
     React.createElement(Text, { color: TUI_ACCENT }, 'q'),
     React.createElement(Text, { dimColor: true }, ' quit')
   );
@@ -323,7 +437,9 @@ function ResultScreen({ result, error, isError, onSave, saveStatus, onBack, onQu
     Box,
     { flexDirection: 'column', paddingX: 1, width: '100%' },
     header,
-    info,
+    ...fileLines,
+    overflowLine,
+    presetLine,
     saveMsg,
     footer
   );
@@ -340,103 +456,101 @@ function defaultSettings() {
   };
 }
 
-function TuiApp({ presets, inputPath }) {
-  const [screen, setScreen] = useState('picker');
+function TuiApp({ presets }) {
+  const [screen, setScreen] = useState('files');
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const [selectedPreset, setSelectedPreset] = useState(null);
   const [settings, setSettings] = useState(defaultSettings);
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState(null);
+  const [results, setResults] = useState([]);
   const [progress, setProgress] = useState('');
+  const [currentFileIndex, setCurrentFileIndex] = useState(0);
   const [notification, setNotification] = useState('');
   const [saveStatus, setSaveStatus] = useState(null);
   const startTimeRef = useRef(null);
 
+  const mdFiles = React.useMemo(() => getMarkdownFiles(process.cwd()), []);
+
   const handleSave = async () => {
     setSaveStatus('saving');
-    try {
-      const content = await readFile(inputPath, 'utf8');
-      const { rawData, body } = parseFrontMatter(content);
-      const updated = writeForgrFrontMatter(body, rawData, settings);
-      await writeFile(inputPath, updated, 'utf8');
-      setSaveStatus('saved');
-    } catch {
-      setSaveStatus('error');
+    let ok = true;
+    for (const filePath of selectedFiles) {
+      try {
+        const content = await readFile(filePath, 'utf8');
+        const { rawData, body } = parseFrontMatter(content);
+        const updated = writeForgrFrontMatter(body, rawData, settings);
+        await writeFile(filePath, updated, 'utf8');
+      } catch {
+        ok = false;
+      }
     }
+    setSaveStatus(ok ? 'saved' : 'error');
   };
 
-  const outputPath = path.resolve(
-    path.dirname(inputPath),
-    path.basename(inputPath, path.extname(inputPath)) + '.pdf'
-  );
-
   useEffect(() => {
-    if (screen !== 'rendering' || !selectedPreset) return;
+    if (screen !== 'rendering' || !selectedPreset || selectedFiles.length === 0) return;
     let cancelled = false;
 
     (async () => {
-      try {
-        const cliOptions = { ...settings, preset: selectedPreset };
-        const res = await run(inputPath, cliOptions, {
-          onProgress: (stage) => {
-            if (!cancelled) setProgress(stage);
-          },
-        });
+      const cliOptions = { ...settings, preset: selectedPreset };
+      const batchResults = [];
 
+      for (let i = 0; i < selectedFiles.length; i++) {
         if (cancelled) return;
-        const elapsed = Date.now() - startTimeRef.current;
-        let fileSize;
+        const filePath = selectedFiles[i];
+        setCurrentFileIndex(i);
         try {
-          fileSize = (await stat(res.outputPath)).size;
-        } catch {}
-
-        setResult({ ...res, elapsed, fileSize });
-        setScreen('result');
-      } catch (err) {
-        if (!cancelled) {
-          setError(err.message);
-          setScreen('result');
+          const res = await run(filePath, cliOptions, {
+            onProgress: (stage) => { if (!cancelled) setProgress(stage); },
+          });
+          if (cancelled) return;
+          const elapsed = Date.now() - startTimeRef.current;
+          let fileSize;
+          try { fileSize = (await stat(res.outputPath)).size; } catch {}
+          batchResults.push({ ...res, filePath, elapsed, fileSize, error: null });
+        } catch (err) {
+          batchResults.push({ filePath, error: err.message, outputPath: null, pageCount: null, preset: selectedPreset, elapsed: 0, fileSize: 0 });
         }
+        setResults([...batchResults]);
+      }
+
+      if (!cancelled) {
+        setScreen('result');
       }
     })();
 
     return () => { cancelled = true; };
-  }, [screen, selectedPreset, settings, inputPath]);
+  }, [screen, selectedPreset, settings, selectedFiles]);
 
   switch (screen) {
-    case 'settings':
-      return React.createElement(SettingsScreen, {
-        settings,
-        onChange: (key, value) => setSettings(prev => ({ ...prev, [key]: value })),
-        outputPath,
-        preset: selectedPreset,
-        onRender: () => {
-          startTimeRef.current = Date.now();
-          setProgress('Reading file...');
-          setScreen('rendering');
-        },
-        onBack: () => {
-          setScreen('picker');
-        },
-      });
-    case 'rendering':
-      return React.createElement(RenderingScreen, { preset: selectedPreset, progress });
-    case 'result':
-      return React.createElement(ResultScreen, {
-        result,
-        error,
-        isError: !!error,
-        onSave: handleSave,
-        saveStatus,
-        onBack: () => {
-          setError(null);
-          setResult(null);
-          setProgress('');
-          setSaveStatus(null);
+    case 'files': {
+      if (mdFiles.length === 0) {
+        return React.createElement(
+          Box,
+          { flexDirection: 'column', paddingX: 1, width: '100%' },
+          React.createElement(Text, null, 'No Markdown files found in this directory'),
+          React.createElement(
+            Box,
+            { marginTop: 1 },
+            React.createElement(Text, { color: TUI_ACCENT }, 'q'),
+            React.createElement(Text, { dimColor: true }, ' quit')
+          )
+        );
+      }
+      if (mdFiles.length === 1) {
+        setSelectedFiles(mdFiles);
+        setScreen('picker');
+        return null;
+      }
+      return React.createElement(FilePicker, {
+        files: mdFiles,
+        onSelect: (chosen) => {
+          setSelectedFiles(chosen);
           setScreen('picker');
         },
         onQuit: () => process.exit(0),
       });
-    default:
+    }
+    case 'picker':
       return React.createElement(PresetPicker, {
         presets,
         notification,
@@ -451,16 +565,61 @@ function TuiApp({ presets, inputPath }) {
           setScreen('settings');
         },
       });
+    case 'settings':
+      return React.createElement(SettingsScreen, {
+        settings,
+        onChange: (key, value) => setSettings(prev => ({ ...prev, [key]: value })),
+        preset: selectedPreset,
+        fileCount: selectedFiles.length,
+        onRender: () => {
+          startTimeRef.current = Date.now();
+          setProgress('Reading file...');
+          setResults([]);
+          setCurrentFileIndex(0);
+          setScreen('rendering');
+        },
+        onBack: () => {
+          setScreen('picker');
+        },
+      });
+    case 'rendering':
+      return React.createElement(RenderingScreen, {
+        preset: selectedPreset,
+        selectedFiles,
+        results,
+        currentFileIndex,
+        progress,
+      });
+    case 'result':
+      return React.createElement(BatchResultScreen, {
+        results,
+        saveStatus,
+        onSave: handleSave,
+        onBack: () => {
+          setResults([]);
+          setProgress('');
+          setSaveStatus(null);
+          setCurrentFileIndex(0);
+          setScreen('files');
+        },
+        onQuit: () => process.exit(0),
+        onOpen: () => {
+          const cmd = process.platform === 'darwin' ? 'open' : process.platform === 'linux' ? 'xdg-open' : '';
+          if (cmd) execFile(cmd, [process.cwd()], () => {});
+        },
+      });
+    default:
+      return null;
   }
 }
 
-export function launchTui(presets, inputPath) {
+export function launchTui(presets) {
   if (!process.stdin.isTTY) {
     return Promise.reject(new Error('interactive mode requires a terminal (stdin is not a TTY)'));
   }
 
   const { waitUntilExit } = render(
-    React.createElement(TuiApp, { presets, inputPath })
+    React.createElement(TuiApp, { presets })
   );
   return waitUntilExit;
 }
