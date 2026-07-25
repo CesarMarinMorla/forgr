@@ -1,8 +1,10 @@
 import { createRequire } from 'module';
 import { Command } from 'commander';
+import fs from 'fs-extra';
+import ora from 'ora';
 import { run } from './pipeline.js';
 import { runUninstall } from './uninstall.js';
-import { buildWriteKeys, printOutputMsg, handleCliError } from './utils.js';
+import { buildWriteKeys, printResult, handleCliError } from './utils.js';
 
 const require = createRequire(import.meta.url);
 const { version } = require('../package.json');
@@ -48,11 +50,34 @@ program
 
     const writeKeys = buildWriteKeys(options);
 
-    const outputPath = await run(input, cliOptions, {
-      write: options.write,
-      writeKeys: options.write ? writeKeys : undefined,
-    });
-    printOutputMsg(outputPath);
+    const spinner = ora('Reading file...').start();
+    const startTime = Date.now();
+
+    try {
+      const result = await run(input, cliOptions, {
+        write: options.write,
+        writeKeys: options.write ? writeKeys : undefined,
+        onProgress: (stage) => { spinner.text = stage; },
+      });
+
+      const elapsed = Date.now() - startTime;
+      let fileSize;
+      try {
+        fileSize = (await fs.stat(result.outputPath)).size;
+      } catch {}
+
+      spinner.succeed();
+      printResult({
+        outputPath: result.outputPath,
+        pageCount: result.pageCount,
+        preset: result.preset,
+        elapsed: elapsed,
+        fileSize,
+      });
+    } catch (err) {
+      spinner.fail();
+      handleCliError(err);
+    }
   });
 
 program.parseAsync(process.argv).catch(handleCliError);
