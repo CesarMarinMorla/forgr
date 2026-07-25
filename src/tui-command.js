@@ -1,11 +1,7 @@
-import { existsSync } from 'fs';
-import fs from 'fs-extra';
 import { Command } from 'commander';
-import ora from 'ora';
-import { run } from './pipeline.js';
 import { listPresets } from './presets.js';
-import { launchTui, showResultScreen, classifyPreset } from './tui.js';
-import { buildWriteKeys, handleCliError } from './utils.js';
+import { launchTui } from './tui.js';
+import { handleCliError } from './utils.js';
 
 const program = new Command();
 
@@ -16,69 +12,14 @@ program
   .option('-o, --output <path>', 'Output PDF path (default: same directory as input)')
   .option('--toc', 'Force generate table of contents')
   .option('--no-toc', 'Skip table of contents')
-  .option('--write', 'Save CLI settings into the file\'s front-matter')
   .action(async (input, options) => {
     const presets = listPresets();
 
-    let chosen;
     try {
-      chosen = await launchTui(presets);
+      await launchTui(presets, input, { output: options.output, toc: options.toc });
     } catch (err) {
       console.error(`\u2717 Error: ${err.message}`);
       process.exit(1);
-    }
-
-    if (!chosen) {
-      console.log('Aborted.');
-      process.exit(0);
-    }
-
-    const decision = classifyPreset(chosen);
-
-    if (decision.action === 'abort') {
-      console.log('Aborted.');
-      process.exit(0);
-    }
-
-    if (decision.action === 'unsupported-user') {
-      console.log('');
-      console.log(`  User preset "${decision.name}" was selected, but rendering custom presets`);
-      console.log('  arrives with config support in Milestone 5.');
-      console.log('  Pick a built-in preset to render a PDF now.');
-      console.log('');
-      process.exit(0);
-    }
-
-    const spinner = ora(`Rendering with ${decision.name}...`).start();
-    const startTime = Date.now();
-
-    try {
-      const cliOptions = {
-        output: options.output,
-        toc: options.toc,
-        preset: decision.name,
-      };
-
-      const writeKeys = buildWriteKeys(options);
-      writeKeys.preset = decision.name;
-
-      const result = await run(input, cliOptions, {
-        write: options.write,
-        writeKeys: options.write ? writeKeys : undefined,
-        onProgress: (stage) => { spinner.text = stage; },
-      });
-
-      const elapsed = Date.now() - startTime;
-      let fileSize;
-      try {
-        fileSize = (await fs.stat(result.outputPath)).size;
-      } catch {}
-
-      spinner.succeed();
-      showResultScreen({ ...result, elapsed, fileSize });
-    } catch (err) {
-      spinner.fail();
-      handleCliError(err);
     }
   });
 

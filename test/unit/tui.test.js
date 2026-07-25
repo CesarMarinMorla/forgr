@@ -8,7 +8,7 @@ test('launchTui rejects when stdin is not a TTY', async () => {
   const original = process.stdin.isTTY;
   process.stdin.isTTY = false;
   try {
-    await assert.rejects(() => launchTui(presets), /terminal/);
+    await assert.rejects(() => launchTui(presets, 'test.md', {}), /terminal/);
   } finally {
     process.stdin.isTTY = original;
   }
