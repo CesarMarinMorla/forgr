@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { render, Box, Text, useInput } from 'ink';
+import { execFile } from 'child_process';
 import { stat } from 'fs/promises';
 import { PRESET_COLORS } from './presets.js';
 import { formatElapsed, formatFileSize } from './utils.js';
@@ -135,6 +136,12 @@ function ResultScreen({ result, error, isError, onBack, onQuit }) {
       onBack();
     } else if (input === 'q' || key.escape) {
       onQuit();
+    } else if (input === 'o') {
+      const outputPath = result?.outputPath;
+      if (outputPath) {
+        const cmd = process.platform === 'darwin' ? 'open' : 'xdg-open';
+        execFile(cmd, [outputPath], () => {});
+      }
     }
   });
 
@@ -198,6 +205,8 @@ function ResultScreen({ result, error, isError, onBack, onQuit }) {
     { marginTop: 1 },
     React.createElement(Text, { color: TUI_ACCENT }, 'Enter'),
     React.createElement(Text, { dimColor: true }, ' render again \u00B7 '),
+    React.createElement(Text, { color: TUI_ACCENT }, 'o'),
+    React.createElement(Text, { dimColor: true }, ' open \u00B7 '),
     React.createElement(Text, { color: TUI_ACCENT }, 'q'),
     React.createElement(Text, { dimColor: true }, ' quit')
   );
