@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { render, Box, Text, useInput } from 'ink';
 import { execFile } from 'child_process';
-import { stat } from 'fs/promises';
+import { stat, readFile, writeFile } from 'fs/promises';
 import path from 'path';
 import { PRESET_COLORS } from './presets.js';
 import { formatElapsed, formatFileSize } from './utils.js';
 import { DEFAULTS } from './config.js';
+import { parseFrontMatter, writeForgrFrontMatter } from './frontmatter.js';
 import { run } from './pipeline.js';
 
 const TUI_ACCENT = '#2DD4BF';
@@ -225,7 +226,7 @@ function RenderingScreen({ preset, progress }) {
   );
 }
 
-function ResultScreen({ result, error, isError, onBack, onQuit }) {
+function ResultScreen({ result, error, isError, onSave, saveStatus, onBack, onQuit }) {
   useInput((input, key) => {
     if (key.return) {
       onBack();
@@ -237,6 +238,8 @@ function ResultScreen({ result, error, isError, onBack, onQuit }) {
         const cmd = process.platform === 'darwin' ? 'open' : 'xdg-open';
         execFile(cmd, [outputPath], () => {});
       }
+    } else if (input === 's' && !isError && !saveStatus) {
+      onSave();
     }
   });
 
@@ -295,11 +298,21 @@ function ResultScreen({ result, error, isError, onBack, onQuit }) {
     React.createElement(Text, { dimColor: true }, details)
   );
 
+  const saveMsg = saveStatus === 'saving'
+    ? React.createElement(Text, { dimColor: true }, '  saving settings...')
+    : saveStatus === 'saved'
+    ? React.createElement(Text, { color: 'green' }, '  settings saved to front-matter')
+    : saveStatus === 'error'
+    ? React.createElement(Text, { color: 'red' }, '  failed to save settings')
+    : null;
+
   const footer = React.createElement(
     Box,
     { marginTop: 1 },
     React.createElement(Text, { color: TUI_ACCENT }, 'Enter'),
     React.createElement(Text, { dimColor: true }, ' render again \u00B7 '),
+    React.createElement(Text, { color: TUI_ACCENT }, 's'),
+    React.createElement(Text, { dimColor: true }, ' save \u00B7 '),
     React.createElement(Text, { color: TUI_ACCENT }, 'o'),
     React.createElement(Text, { dimColor: true }, ' open \u00B7 '),
     React.createElement(Text, { color: TUI_ACCENT }, 'q'),
@@ -311,6 +324,7 @@ function ResultScreen({ result, error, isError, onBack, onQuit }) {
     { flexDirection: 'column', paddingX: 1, width: '100%' },
     header,
     info,
+    saveMsg,
     footer
   );
 }
@@ -334,7 +348,21 @@ function TuiApp({ presets, inputPath }) {
   const [error, setError] = useState(null);
   const [progress, setProgress] = useState('');
   const [notification, setNotification] = useState('');
+  const [saveStatus, setSaveStatus] = useState(null);
   const startTimeRef = useRef(null);
+
+  const handleSave = async () => {
+    setSaveStatus('saving');
+    try {
+      const content = await readFile(inputPath, 'utf8');
+      const { rawData, body } = parseFrontMatter(content);
+      const updated = writeForgrFrontMatter(body, rawData, settings);
+      await writeFile(inputPath, updated, 'utf8');
+      setSaveStatus('saved');
+    } catch {
+      setSaveStatus('error');
+    }
+  };
 
   const outputPath = path.resolve(
     path.dirname(inputPath),
@@ -397,10 +425,13 @@ function TuiApp({ presets, inputPath }) {
         result,
         error,
         isError: !!error,
+        onSave: handleSave,
+        saveStatus,
         onBack: () => {
           setError(null);
           setResult(null);
           setProgress('');
+          setSaveStatus(null);
           setScreen('picker');
         },
         onQuit: () => process.exit(0),
