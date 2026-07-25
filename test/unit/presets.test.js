@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, writeFileSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { BUILTIN_PRESETS, scanUserPresets, listPresets } from '../../src/presets.js';
+import { BUILTIN_PRESETS, PRESET_COLORS, scanUserPresets, listPresets } from '../../src/presets.js';
 
 test('BUILTIN_PRESETS lists the five shipped presets', () => {
   const names = BUILTIN_PRESETS.map((p) => p.name);
@@ -12,6 +12,13 @@ test('BUILTIN_PRESETS lists the five shipped presets', () => {
     assert.equal(p.source, 'builtin');
     assert.equal(typeof p.description, 'string');
     assert.ok(p.description.length > 0);
+  }
+});
+
+test('PRESET_COLORS has an entry for every built-in preset', () => {
+  for (const p of BUILTIN_PRESETS) {
+    assert.ok(PRESET_COLORS[p.name], `missing color for ${p.name}`);
+    assert.match(PRESET_COLORS[p.name], /^#[0-9A-Fa-f]{6}$/);
   }
 });
 

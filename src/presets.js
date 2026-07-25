@@ -59,6 +59,14 @@ export function scanUserPresets(dir = USER_PRESETS_DIR) {
   return presets;
 }
 
+export const PRESET_COLORS = {
+  terminal: '#2DD4BF',
+  minimal: '#888888',
+  technical: '#C2410C',
+  academic: '#3D6B55',
+  newsletter: '#C85A48',
+};
+
 export function listPresets(dir = USER_PRESETS_DIR) {
   return [...BUILTIN_PRESETS, ...scanUserPresets(dir)];
 }
