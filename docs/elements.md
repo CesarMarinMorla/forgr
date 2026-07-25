@@ -27,11 +27,11 @@
 - [x] Raw HTML passthrough
 - [x] Auto-linking bare URLs
 - [x] Doc-meta header (label + timestamp)
-- [x] Page number footers (`pageNumber` / `totalPages`)
+- [x] Page number footers (configurable: `page-numbers`, `page-x-of-y`, `none`)
 
 - [x] Table of Contents (auto-generated from headings, opt-in/opt-out flags, 8000-word / 3-page threshold)
 - [x] Section numbering (CSS counters, per-preset opt-in)
-- [ ] Cover / title page
+- [x] Cover / title page
 - [ ] Running page headers (section name)
 - [ ] Footnotes (markdown-it-footnote)
 - [ ] Task / checklist lists (`- [ ]` / `- [x]`)

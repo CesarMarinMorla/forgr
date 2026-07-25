@@ -59,7 +59,16 @@ Node.js + Playwright. A single browser launch handles markdown rendering, Mermai
   - `-o, --output <path>` — output path (default: same dir, `<basename>.pdf`)
   - `-p, --preset <name>` — preset (default `terminal`)
   - `--toc` / `--no-toc` — force TOC on/off
-  - `--write` — persist `preset`/`toc` into the file's front-matter (only these two keys are writeable)
+  - `--doc-meta` / `--no-doc-meta` — show/hide doc-meta header
+  - `--date-format <iso|locale>` — date display format
+  - `--date-locale <locale>` — locale for date formatting (e.g. `en-US`, `es-ES`)
+  - `--footer <page-numbers|page-x-of-y|none>` — footer style
+  - `--cover` — enable cover page
+  - `--cover-title <text>` — cover title (default: document title)
+  - `--cover-author <text>` — cover author (default: document author)
+  - `--cover-date <text>` — cover date (default: document date)
+  - `--section-numbering` / `--no-section-numbering` — enable/disable section numbering
+  - `--write` — persist all rendering options into the file's front-matter
 - `uninstall` — remove the Chromium cache at `~/.forgr/browsers`.
 - `doctor` — diagnose the install.
   - `-f, --fix` — auto-fix where possible (download Chromium, remove malformed user presets)
@@ -69,7 +78,7 @@ Node.js + Playwright. A single browser launch handles markdown rendering, Mermai
 
 ### `forgr-tui`
 
-Interactive preset picker (Ink/React). Lists built-in and user presets; selecting a built-in renders immediately. Selecting a user preset currently prints a "coming in Milestone 5" message and exits.
+Fully interactive preset picker and settings form (Ink/React). No CLI flags — all rendering options are configured in the TUI after selecting a preset Lists built-in and user presets; selecting a built-in opens a settings screen (TOC, doc-meta, date format, footer, cover, section numbering), then renders. Selecting a user preset currently prints a "coming in Milestone 5" message and exits. Flow: Picker → Settings → Rendering → Result.
 
 ## Chromium
 
@@ -145,7 +154,7 @@ Keys live at the top of the `.md` file. Shared keys (`title`, `date`, `author`) 
 | `paperFormat` | `A4` / `Letter` | `A4` |
 | `margins` | object | all `2cm` |
 
-`--write` persists only the `preset` and `toc` flags. Files without front-matter render with all defaults. Unrecognized keys are ignored (Obsidian/Jekyll/Hugo safe).
+`--write` persists all rendering options (preset, toc, docMeta, dateFormat, dateLocale, cover settings, footer, sectionNumbering). Files without front-matter render with all defaults. Unrecognized keys are ignored (Obsidian/Jekyll/Hugo safe).
 
 ## Markdown Rendering
 
@@ -156,7 +165,7 @@ Keys live at the top of the `.md` file. Shared keys (`title`, `date`, `author`) 
 
 ## Testing
 
-`npm test` runs 92 tests across `test/unit/` (pure modules), `test/integration/` (end-to-end across presets/fixtures), and `test/mermaid/` (per-preset diagram rendering). `npm run test:unit`, `test:integration`, `test:mermaid` scope individually. Integration tests accept `FORGR_PRESET` to validate one preset at a time.
+`npm test` runs 108 tests across `test/unit/` (pure modules), `test/integration/` (end-to-end across presets/fixtures), and `test/mermaid/` (per-preset diagram rendering). `npm run test:unit`, `test:integration`, `test:mermaid` scope individually. Integration tests accept `FORGR_PRESET` to validate one preset at a time.
 
 ## Key Decisions (locked)
 

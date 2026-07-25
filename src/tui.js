@@ -2,12 +2,23 @@ import React, { useState, useEffect, useRef } from 'react';
 import { render, Box, Text, useInput } from 'ink';
 import { execFile } from 'child_process';
 import { stat } from 'fs/promises';
+import path from 'path';
 import { PRESET_COLORS } from './presets.js';
 import { formatElapsed, formatFileSize } from './utils.js';
+import { DEFAULTS } from './config.js';
 import { run } from './pipeline.js';
 
 const TUI_ACCENT = '#2DD4BF';
 const SPINNER_CHARS = '\u280B\u2839\u2879\u2878\u283C\u2834\u2826\u2827\u2807\u280F';
+
+const SETTINGS = [
+  { key: 'toc', label: 'Table of contents', values: ['auto', true, false], display: v => v === true ? 'on' : v === false ? 'off' : 'auto' },
+  { key: 'docMeta', label: 'Doc-meta header', values: [true, false], display: v => v ? 'yes' : 'no' },
+  { key: 'dateFormat', label: 'Date format', values: ['iso', 'locale'] },
+  { key: 'footer', label: 'Footer', values: ['page-numbers', 'page-x-of-y', 'none'] },
+  { key: 'cover', label: 'Cover page', values: [true, false], display: v => v ? 'yes' : 'no' },
+  { key: 'sectionNumbering', label: 'Section numbering', values: [true, false], display: v => v ? 'yes' : 'no' },
+];
 
 function Swatch({ color }) {
   return React.createElement(Text, { color }, ' \u2588\u2588');
@@ -89,6 +100,86 @@ function PresetPicker({ presets, notification, onSelect }) {
     React.createElement(Box, { marginBottom: 1 }, title),
     React.createElement(Box, { flexDirection: 'column' }, ...rows),
     notif,
+    React.createElement(Box, { marginTop: 1 }, help)
+  );
+}
+
+function SettingsScreen({ settings, onChange, outputPath, preset, onRender, onBack }) {
+  const [focus, setFocus] = useState(0);
+
+  useInput((input, key) => {
+    if (key.upArrow) {
+      setFocus(i => Math.max(0, i - 1));
+    } else if (key.downArrow) {
+      setFocus(i => Math.min(SETTINGS.length - 1, i + 1));
+    } else if (key.leftArrow) {
+      const def = SETTINGS[focus];
+      const val = settings[def.key];
+      const idx = def.values.indexOf(val);
+      if (idx > 0) onChange(def.key, def.values[idx - 1]);
+    } else if (key.rightArrow) {
+      const def = SETTINGS[focus];
+      const val = settings[def.key];
+      const idx = def.values.indexOf(val);
+      if (idx < def.values.length - 1) onChange(def.key, def.values[idx + 1]);
+    } else if (key.return) {
+      onRender();
+    } else if (input === 'q' || key.escape) {
+      onBack();
+    }
+  });
+
+  const title = React.createElement(
+    Text,
+    { color: TUI_ACCENT, bold: true },
+    `forgr \u2014 settings (${preset})`
+  );
+
+  const outputLine = React.createElement(
+    Box,
+    null,
+    React.createElement(Text, { dimColor: true }, '  Output: '),
+    React.createElement(Text, null, outputPath)
+  );
+
+  const rows = SETTINGS.map((def, i) => {
+    const isFocused = i === focus;
+    const val = settings[def.key];
+    const displayVal = (def.display || String)(val);
+    const marker = React.createElement(Text, { color: isFocused ? TUI_ACCENT : undefined }, isFocused ? '\u276F ' : '  ');
+    const label = React.createElement(Text, null, ` ${def.label}:`);
+    const value = React.createElement(Text, { color: TUI_ACCENT }, ` [${displayVal}]`);
+    const hint = isFocused ? React.createElement(Text, { dimColor: true }, '  \u25C0 \u25B6') : null;
+
+    return React.createElement(
+      Box,
+      { key: def.key },
+      marker,
+      label,
+      value,
+      hint
+    );
+  });
+
+  const help = React.createElement(
+    Box,
+    null,
+    React.createElement(Text, { color: TUI_ACCENT }, '\u2191/\u2193'),
+    React.createElement(Text, { dimColor: true }, ' navigate \u00B7 '),
+    React.createElement(Text, { color: TUI_ACCENT }, '\u2190/\u2192'),
+    React.createElement(Text, { dimColor: true }, ' change \u00B7 '),
+    React.createElement(Text, { color: TUI_ACCENT }, 'enter'),
+    React.createElement(Text, { dimColor: true }, ' render \u00B7 '),
+    React.createElement(Text, { color: TUI_ACCENT }, 'q'),
+    React.createElement(Text, { dimColor: true }, ' back')
+  );
+
+  return React.createElement(
+    Box,
+    { flexDirection: 'column', paddingX: 1 },
+    React.createElement(Box, { marginBottom: 1 }, title),
+    outputLine,
+    React.createElement(Box, { marginTop: 1, flexDirection: 'column' }, ...rows),
     React.createElement(Box, { marginTop: 1 }, help)
   );
 }
@@ -220,14 +311,31 @@ function ResultScreen({ result, error, isError, onBack, onQuit }) {
   );
 }
 
-function TuiApp({ presets, inputPath, options }) {
+function defaultSettings() {
+  return {
+    toc: DEFAULTS.toc,
+    docMeta: DEFAULTS.docMeta,
+    dateFormat: DEFAULTS.dateFormat,
+    footer: DEFAULTS.footer,
+    cover: DEFAULTS.cover,
+    sectionNumbering: DEFAULTS.sectionNumbering,
+  };
+}
+
+function TuiApp({ presets, inputPath }) {
   const [screen, setScreen] = useState('picker');
   const [selectedPreset, setSelectedPreset] = useState(null);
+  const [settings, setSettings] = useState(defaultSettings);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [progress, setProgress] = useState('');
   const [notification, setNotification] = useState('');
   const startTimeRef = useRef(null);
+
+  const outputPath = path.resolve(
+    path.dirname(inputPath),
+    path.basename(inputPath, path.extname(inputPath)) + '.pdf'
+  );
 
   useEffect(() => {
     if (screen !== 'rendering' || !selectedPreset) return;
@@ -235,7 +343,7 @@ function TuiApp({ presets, inputPath, options }) {
 
     (async () => {
       try {
-        const cliOptions = { ...options, preset: selectedPreset };
+        const cliOptions = { ...settings, preset: selectedPreset };
         const res = await run(inputPath, cliOptions, {
           onProgress: (stage) => {
             if (!cancelled) setProgress(stage);
@@ -260,9 +368,24 @@ function TuiApp({ presets, inputPath, options }) {
     })();
 
     return () => { cancelled = true; };
-  }, [screen, selectedPreset, inputPath, options]);
+  }, [screen, selectedPreset, settings, inputPath]);
 
   switch (screen) {
+    case 'settings':
+      return React.createElement(SettingsScreen, {
+        settings,
+        onChange: (key, value) => setSettings(prev => ({ ...prev, [key]: value })),
+        outputPath,
+        preset: selectedPreset,
+        onRender: () => {
+          startTimeRef.current = Date.now();
+          setProgress('Reading file...');
+          setScreen('rendering');
+        },
+        onBack: () => {
+          setScreen('picker');
+        },
+      });
     case 'rendering':
       return React.createElement(RenderingScreen, { preset: selectedPreset, progress });
     case 'result':
@@ -290,21 +413,19 @@ function TuiApp({ presets, inputPath, options }) {
           }
           setNotification('');
           setSelectedPreset(preset.name);
-          startTimeRef.current = Date.now();
-          setProgress('Reading file...');
-          setScreen('rendering');
+          setScreen('settings');
         },
       });
   }
 }
 
-export function launchTui(presets, inputPath, options = {}) {
+export function launchTui(presets, inputPath) {
   if (!process.stdin.isTTY) {
     return Promise.reject(new Error('interactive mode requires a terminal (stdin is not a TTY)'));
   }
 
   const { waitUntilExit } = render(
-    React.createElement(TuiApp, { presets, inputPath, options })
+    React.createElement(TuiApp, { presets, inputPath })
   );
   return waitUntilExit;
 }

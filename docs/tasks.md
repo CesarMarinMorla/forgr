@@ -10,7 +10,8 @@
 | 2.75 | TUI & CLI polish | Done |
 | 3 | TUI preset picker (v0.6.0) | Done |
 | 3.5 | Front-matter processing | Done |
-| 4 | Rendering options (doc-meta, footer, cover, section numbering) | Pending |
+| 4 | Rendering options (doc-meta, footer, cover, section numbering) | Done |
+| 4.5 | TUI settings form (remove CLI flags, interactive options) | Done |
 | 5 | Watch mode & user presets | Pending |
 | 6 | Extended format support (LaTeX, Jekyll/Liquid preprocessing) | Later |
 | 7 | `forgr doctor` diagnostic | Done |
@@ -166,6 +167,11 @@
 - [x] Confirmation animation before generation kicks off
 - [x] Result screen after render: file path, page count, preset, time — "done" state, q quits
 - [x] Consistent accent color for TUI chrome (separate from document presets)
+- [x] Persistent state machine: picker → rendering → result → picker (Enter renders again)
+- [x] Ink-native spinner animation during render (replaces ora in TUI path)
+- [x] Colored key hints in footer (action keys in teal accent)
+- [x] `o` key opens rendered PDF in default OS viewer
+- [x] User preset selection shows inline notification, does not exit
 
 ### Error format (both paths)
 
@@ -222,34 +228,48 @@ Launched via the `forgr-tui` command (separate bin), not an `--interactive` flag
 
 ---
 
-## Milestone 4 — Rendering options (Pending)
+## Milestone 4 — Rendering options (Done)
 
-Decoupled from the TUI. Each option works as a CLI flag and front-matter key first; TUI controls can be added later.
+All five rendering options implemented: doc-meta toggle, date format (iso/locale), footer style switching, cover page, and section numbering. Each works as CLI flag, front-matter key, and `--write` target.
 
 ### Doc-meta header
 
-- [ ] `--doc-meta` / `--no-doc-meta` flag + `forgr.docMeta` front-matter key
-- [ ] `--date-format <iso|locale>` flag + `forgr.dateFormat` key
-- [ ] Template conditionally shows/hides the header block
-- [ ] Locale-aware date formatting when `dateFormat: locale`
+- [x] `--doc-meta` / `--no-doc-meta` flag + `forgr.docMeta` front-matter key
+- [x] `--date-format <iso|locale>` flag + `forgr.dateFormat` key
+- [x] `--date-locale <locale>` flag + `forgr.dateLocale` key
+- [x] Template conditionally shows/hides the header block
+- [x] Locale-aware date formatting when `dateFormat: locale`
 
 ### Footer
 
-- [ ] `--footer <page-numbers|page-x-of-y|none>` flag + `forgr.footer` front-matter key
-- [ ] Footer template switches between `1 / 10` and `Page 1 of 10` and empty
-- [ ] `displayHeaderFooter` and `footerTemplate` driven by config, not hardcoded
+- [x] `--footer <page-numbers|page-x-of-y|none>` flag + `forgr.footer` front-matter key
+- [x] Footer template switches between `page-numbers` and `page-x-of-y` and `none`
+- [x] `displayHeaderFooter` and `footerTemplate` driven by config, not hardcoded
 
 ### Cover page
 
-- [ ] `--cover` flag + `forgr.cover` front-matter key
-- [ ] `--cover-title`, `--cover-author`, `--cover-date` flags + front-matter keys
-- [ ] Cover template partial in `base.html`
-- [ ] Cover renders as separate first page before body
+- [x] `--cover` flag + `forgr.cover` front-matter key
+- [x] `--cover-title`, `--cover-author`, `--cover-date` flags + front-matter keys
+- [x] Cover template partial in `base.html`
+- [x] Cover renders as separate first page before body
 
 ### Section numbering
 
-- [ ] `--section-numbering` / `--no-section-numbering` flag + `forgr.sectionNumbering` key
-- [ ] CSS counters in presets (off by default)
+- [x] `--section-numbering` / `--no-section-numbering` flag + `forgr.sectionNumbering` key
+- [x] CSS counters in base.html (off by default)
+
+---
+
+## Milestone 4.5 — TUI settings form (Done)
+
+All CLI flags removed from `forgr-tui`. After selecting a preset, the TUI shows an interactive settings screen where all rendering options are configured with arrow keys before rendering.
+
+- [x] Remove `--output`, `--toc`, `--no-toc` flags from `tui-command.js`
+- [x] Add SettingsScreen component with arrow-driven value cycling
+- [x] Settings: TOC (auto/on/off), doc-meta (yes/no), date format (iso/locale), footer (page-numbers/page-x-of-y/none), cover (yes/no), section numbering (yes/no)
+- [x] Flow: Picker → Settings → Rendering → Result
+- [x] Settings persist across renders (going back to picker and re-selecting)
+- [x] Output path shown as read-only (default: same dir as input)
 
 ---
 

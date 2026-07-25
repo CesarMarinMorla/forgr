@@ -83,7 +83,7 @@ CLI flag  >  existing file  >  built-in DEFAULTS
 
 ### What stays read-only
 
-The following settings cannot be saved via `--write` because forgr does not write to the user's file without an explicit flag:
+No settings are saved via `--write` unless the flag is explicitly passed:
 
 ```sh
 forgr doc.md --preset academic       # reads front-matter, ignores --write
