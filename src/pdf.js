@@ -123,6 +123,17 @@ export async function computeHeadingPages(page, paperFormat) {
   }, pageHeight);
 }
 
+export function buildFooterTemplates(footer, render) {
+  const displayHeaderFooter = footer !== 'none';
+  let footerTemplate = '';
+  if (footer === 'page-x-of-y') {
+    footerTemplate = '<div style="width:100%; font-family:Menlo,monospace; font-size:7px; color:#666; text-align:center; padding:0 2cm;"><span class="pageNumber"></span> / <span class="totalPages"></span></div>';
+  } else if (footer === 'page-numbers') {
+    footerTemplate = '<div style="width:100%; font-family:Menlo,monospace; font-size:7px; color:#666; text-align:center; padding:0 2cm;"><span class="pageNumber"></span></div>';
+  }
+  return { displayHeaderFooter, headerTemplate: render.headerTemplate, footerTemplate };
+}
+
 export function generatePdfOptions(paperFormat, margins, render) {
   return {
     format: paperFormat,
@@ -135,7 +146,7 @@ export function generatePdfOptions(paperFormat, margins, render) {
 }
 
 export async function generatePdf(html, outputPath, opts = {}) {
-  const { captureHeadings, preset, paperFormat, margins, onProgress } = opts;
+  const { captureHeadings, preset, paperFormat, margins, footer, onProgress } = opts;
 
   assertWritableDir(path.dirname(outputPath));
   await ensureChromium({ onProgress });
@@ -163,7 +174,10 @@ export async function generatePdf(html, outputPath, opts = {}) {
 
     const headingPages = captureHeadings ? await computeHeadingPages(page, paperFormat) : [];
     if (onProgress) onProgress('Generating PDF...');
-    const pdfBuffer = await page.pdf(generatePdfOptions(paperFormat, margins, RENDER_DEFAULTS));
+    const renderOpts = footer
+      ? { ...RENDER_DEFAULTS, ...buildFooterTemplates(footer, RENDER_DEFAULTS) }
+      : RENDER_DEFAULTS;
+    const pdfBuffer = await page.pdf(generatePdfOptions(paperFormat, margins, renderOpts));
     const pageCount = countPdfPages(pdfBuffer);
     if (onProgress) onProgress('Writing file...');
     await fs.writeFile(outputPath, pdfBuffer);

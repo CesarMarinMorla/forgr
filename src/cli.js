@@ -40,12 +40,32 @@ program
   .option('-p, --preset <name>', 'Preset to use')
   .option('--toc', 'Force generate table of contents')
   .option('--no-toc', 'Skip table of contents')
+  .option('--cover', 'Add a cover page')
+  .option('--cover-title <text>', 'Cover page title (default: document title)')
+  .option('--cover-author <text>', 'Cover page author (default: document author)')
+  .option('--cover-date <text>', 'Cover page date (default: document date)')
+  .option('--section-numbering', 'Enable section numbering on headings')
+  .option('--no-section-numbering', 'Disable section numbering')
+  .option('--date-format <format>', 'Date format: iso | locale')
+  .option('--date-locale <locale>', 'Locale for date formatting (e.g. en-US, es-ES)')
+  .option('--doc-meta', 'Show document meta header (title, date, author)')
+  .option('--no-doc-meta', 'Skip document meta header')
+  .option('--footer <style>', 'Footer style: page-numbers | page-x-of-y | none')
   .option('--write', 'Save CLI settings into the file\'s front-matter')
   .action(async (input, options) => {
     const cliOptions = {
       preset: options.preset,
       output: options.output,
       toc: options.toc,
+      dateFormat: options.dateFormat,
+      dateLocale: options.dateLocale,
+      docMeta: options.docMeta,
+      cover: options.cover,
+      coverTitle: options.coverTitle,
+      coverAuthor: options.coverAuthor,
+      coverDate: options.coverDate,
+      sectionNumbering: options.sectionNumbering,
+      footer: options.footer,
     };
 
     const writeKeys = buildWriteKeys(options);

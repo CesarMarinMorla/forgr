@@ -28,15 +28,15 @@ function buildConfig(cliOptions, frontMatter) {
     tocTitle: frontMatter.tocTitle ?? DEFAULTS.tocTitle,
     tocWordThreshold: DEFAULTS.tocWordThreshold,
     minPagesForToc: DEFAULTS.minPagesForToc,
-    docMeta: frontMatter.docMeta ?? DEFAULTS.docMeta,
-    dateFormat: frontMatter.dateFormat ?? DEFAULTS.dateFormat,
-    dateLocale: frontMatter.dateLocale ?? DEFAULTS.dateLocale,
-    cover: frontMatter.cover ?? DEFAULTS.cover,
-    coverTitle: frontMatter.coverTitle ?? DEFAULTS.coverTitle,
-    coverAuthor: frontMatter.coverAuthor ?? DEFAULTS.coverAuthor,
-    coverDate: frontMatter.coverDate ?? DEFAULTS.coverDate,
-    footer: frontMatter.footer ?? DEFAULTS.footer,
-    sectionNumbering: frontMatter.sectionNumbering ?? DEFAULTS.sectionNumbering,
+    docMeta: cliOptions.docMeta ?? frontMatter.docMeta ?? DEFAULTS.docMeta,
+    dateFormat: cliOptions.dateFormat ?? frontMatter.dateFormat ?? DEFAULTS.dateFormat,
+    dateLocale: cliOptions.dateLocale ?? frontMatter.dateLocale ?? DEFAULTS.dateLocale,
+    cover: cliOptions.cover ?? frontMatter.cover ?? DEFAULTS.cover,
+    coverTitle: cliOptions.coverTitle ?? frontMatter.coverTitle ?? DEFAULTS.coverTitle,
+    coverAuthor: cliOptions.coverAuthor ?? frontMatter.coverAuthor ?? DEFAULTS.coverAuthor,
+    coverDate: cliOptions.coverDate ?? frontMatter.coverDate ?? DEFAULTS.coverDate,
+    footer: cliOptions.footer ?? frontMatter.footer ?? DEFAULTS.footer,
+    sectionNumbering: cliOptions.sectionNumbering ?? frontMatter.sectionNumbering ?? DEFAULTS.sectionNumbering,
     paperFormat: frontMatter.paperFormat ?? DEFAULTS.paperFormat,
     margins: frontMatter.margins ?? DEFAULTS.margins,
     outputPath: cliOptions.outputPath ?? '',
@@ -48,16 +48,31 @@ function buildConfig(cliOptions, frontMatter) {
   };
 }
 
-function formatDate(dateStr, format) {
-  if (dateStr) return dateStr;
-  return new Date().toISOString().slice(0, 10);
+function formatDate(dateStr, format, locale) {
+  if (format === 'locale') {
+    function toLocale(d) {
+      return locale ? d.toLocaleDateString(locale) : d.toLocaleDateString();
+    }
+    if (dateStr) {
+      const d = new Date(dateStr);
+      if (!isNaN(d)) return toLocale(d);
+    }
+    return toLocale(new Date());
+  }
+  return dateStr || new Date().toISOString().slice(0, 10);
 }
 
 function templateContext(body, config) {
   return {
     body,
     preset: config.preset,
-    timestamp: formatDate(config.meta.date, config.dateFormat),
+    docMeta: config.docMeta,
+    cover: config.cover,
+    coverTitle: config.coverTitle || config.meta.title || null,
+    coverAuthor: config.coverAuthor || config.meta.author || null,
+    coverDate: config.coverDate || formatDate(config.meta.date, config.dateFormat, config.dateLocale),
+    sectionNumbering: config.sectionNumbering,
+    timestamp: formatDate(config.meta.date, config.dateFormat, config.dateLocale),
     title: config.meta.title || null,
     author: config.meta.author || null,
   };

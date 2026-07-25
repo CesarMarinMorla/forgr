@@ -6,7 +6,7 @@ const C = '\x1b[36m';
 const D = '\x1b[2m';
 const N = '\x1b[0m';
 
-export const WRITEABLE_KEYS = ['preset', 'toc'];
+export const WRITEABLE_KEYS = ['preset', 'toc', 'docMeta', 'dateFormat', 'dateLocale', 'cover', 'coverTitle', 'coverAuthor', 'coverDate', 'footer', 'sectionNumbering'];
 
 export function buildWriteKeys(options) {
   const keys = {};

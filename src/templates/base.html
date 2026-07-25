@@ -31,15 +31,45 @@
   </style>
 </head>
 <body>
+  {{#if cover}}
+  <section class="cover">
+    <div class="cover__content">
+      {{#if coverTitle}}<h1 class="cover__title">{{coverTitle}}</h1>{{/if}}
+      {{#if coverAuthor}}<p class="cover__author">{{coverAuthor}}</p>{{/if}}
+      {{#if coverDate}}<p class="cover__date">{{coverDate}}</p>{{/if}}
+    </div>
+  </section>
+  {{/if}}
+  {{#if docMeta}}
   <header class="doc-meta">
     {{#if title}}<span class="doc-meta__title">{{title}}</span>{{/if}}
     <span class="doc-meta__dot"></span>
     <span class="doc-meta__timestamp">{{timestamp}}</span>
     {{#if author}}<span class="doc-meta__author">{{author}}</span>{{/if}}
   </header>
+  {{/if}}
   <main>
     {{{body}}}
   </main>
+  {{#if cover}}
+  <style>
+    .cover { display: flex; align-items: center; justify-content: center; min-height: 100vh; text-align: center; page-break-after: always; }
+    .cover__title { font-size: 2.4em; margin-bottom: 0.5em; }
+    .cover__author { font-size: 1.2em; color: #666; }
+    .cover__date { font-size: 1em; color: #666; }
+  </style>
+  {{/if}}
+  {{#if sectionNumbering}}
+  <style>
+    main { counter-reset: h2 0 h3 0 h4 0 h5 0 h6 0; }
+    h2::before { counter-increment: h2; counter-reset: h3 h4 h5 h6; content: counter(h2) ". "; }
+    h3::before { counter-increment: h3; counter-reset: h4 h5 h6; content: counter(h2) "." counter(h3) ". "; }
+    h4::before { counter-increment: h4; counter-reset: h5 h6; content: counter(h2) "." counter(h3) "." counter(h4) ". "; }
+    h5::before { counter-increment: h5; counter-reset: h6; content: counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) ". "; }
+    h6::before { counter-increment: h6; content: counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) "." counter(h6) ". "; }
+    h2, h3, h4, h5, h6 { counter-increment: none; }
+  </style>
+  {{/if}}
   <style>
     .mermaid { margin: 1.4em auto; max-width: 100%; text-align: center; break-inside: avoid; break-before: avoid; }
     .mermaid svg { max-width: 100%; height: auto; }

@@ -6,8 +6,8 @@ import {
 } from '../../src/utils.js';
 import { ChromiumNotFoundError, PresetNotFoundError } from '../../src/errors.js';
 
-test('WRITEABLE_KEYS is preset and toc', () => {
-  assert.deepEqual(WRITEABLE_KEYS, ['preset', 'toc']);
+test('WRITEABLE_KEYS includes all render options', () => {
+  assert.deepEqual(WRITEABLE_KEYS, ['preset', 'toc', 'docMeta', 'dateFormat', 'dateLocale', 'cover', 'coverTitle', 'coverAuthor', 'coverDate', 'footer', 'sectionNumbering']);
 });
 
 test('buildWriteKeys: returns empty object when no keys match', () => {
