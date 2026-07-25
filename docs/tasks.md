@@ -12,6 +12,7 @@
 | 3.5 | Front-matter processing | Done |
 | 4 | Rendering options (doc-meta, footer, cover, section numbering) | Done |
 | 4.5 | TUI settings form (remove CLI flags, interactive options) | Done |
+| 4.75 | File picker & batch rendering (multi-file, zero CLI args, save) | Done |
 | 5 | Watch mode & user presets | Pending |
 | 6 | Extended format support (LaTeX, Jekyll/Liquid preprocessing) | Later |
 | 7 | `forgr doctor` diagnostic | Done |
@@ -270,6 +271,40 @@ All CLI flags removed from `forgr-tui`. After selecting a preset, the TUI shows 
 - [x] Flow: Picker → Settings → Rendering → Result
 - [x] Settings persist across renders (going back to picker and re-selecting)
 - [x] Output path shown as read-only (default: same dir as input)
+
+---
+
+## Milestone 4.75 — File picker & batch rendering (Done)
+
+No CLI arguments. `forgr-tui` scans the current directory for `.md` files, lets the user select one or more, and configures rendering settings interactively.
+
+### FilePicker
+
+- [x] Scan cwd for `*.md` files, sort alphabetically
+- [x] 0 files: show empty message, `q` to quit
+- [x] 1 file: auto-select, skip directly to PresetPicker
+- [x] 2+ files: interactive list with space to toggle, enter to confirm
+- [x] Checkmark prefix for selected files, accent-colored
+- [x] Arrow navigation with wrapping
+
+### Batch rendering
+
+- [x] Render loop iterates through all selected files sequentially
+- [x] RenderingScreen shows `[N/M] filename` + pipeline stage + completed files
+- [x] One file failure does not stop the batch — errors collected per-file
+- [x] BatchResultScreen shows per-file success/failure with details
+- [x] Result list truncation at 6 files with `... N more`
+- [x] Summary line: preset + total elapsed time
+
+### Save to front-matter
+
+- [x] `s` key on result screen saves current settings to all selected files
+- [x] Per-file read/merge/write via `writeForgrFrontMatter()`
+- [x] Shows in-progress, success, and error states
+
+### Remaining CLI surface
+
+- [x] `forgr-tui` takes no arguments and no flags — zero CLI surface
 
 ---
 

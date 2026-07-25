@@ -49,7 +49,7 @@ Node.js + Playwright. A single browser launch handles markdown rendering, Mermai
 | `utils.js` | `WRITEABLE_KEYS`, `buildWriteKeys()`, output/error helpers |
 | `doctor.js` | `forgr doctor` health checks |
 | `browsers-path.js` | Chromium path management + install command |
-| `tui.js` | Ink/React interactive preset picker |
+| `tui.js` | Ink/React interactive file picker, preset picker, settings form, and batch renderer |
 
 ## CLI Surface
 
@@ -78,7 +78,13 @@ Node.js + Playwright. A single browser launch handles markdown rendering, Mermai
 
 ### `forgr-tui`
 
-Fully interactive preset picker and settings form (Ink/React). No CLI flags — all rendering options are configured in the TUI after selecting a preset Lists built-in and user presets; selecting a built-in opens a settings screen (TOC, doc-meta, date format, footer, cover, section numbering), then renders. Selecting a user preset currently prints a "coming in Milestone 5" message and exits. Flow: Picker → Settings → Rendering → Result.
+Fully interactive batch converter (Ink/React). No CLI arguments or flags — zero CLI surface.
+
+Scans the current directory for `.md` files. If none found, prints a message and exits. If one file found, auto-selects it. If multiple, shows an interactive file picker (space to toggle, enter to confirm).
+
+After file selection, the TUI flows through PresetPicker → SettingsScreen (TOC, doc-meta, date format, footer, cover, section numbering) → batch render. Selected files are rendered one at a time with per-file progress shown. A file failure does not stop the batch.
+
+The result screen shows per-file success/failure, truncated to 6 visible files with `... N more`. `s` saves the current settings to all files' front-matter via `writeForgrFrontMatter()`. `o` opens the folder in the system file manager. `Enter` goes back to the file picker. Selecting a user preset prints a "coming in Milestone 5" message.
 
 ## Chromium
 
