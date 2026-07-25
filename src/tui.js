@@ -100,7 +100,7 @@ function PresetPicker({ presets, notification, onSelect }) {
 
   return React.createElement(
     Box,
-    { flexDirection: 'column', paddingX: 1 },
+    { flexDirection: 'column', paddingX: 1, width: '100%' },
     React.createElement(Box, { marginBottom: 1 }, title),
     React.createElement(Box, { flexDirection: 'column' }, ...rows),
     notif,
@@ -180,7 +180,7 @@ function SettingsScreen({ settings, onChange, outputPath, preset, onRender, onBa
 
   return React.createElement(
     Box,
-    { flexDirection: 'column', paddingX: 1 },
+    { flexDirection: 'column', paddingX: 1, width: '100%' },
     React.createElement(Box, { marginBottom: 1 }, title),
     outputLine,
     React.createElement(Box, { marginTop: 1, flexDirection: 'column' }, ...rows),
@@ -219,7 +219,7 @@ function RenderingScreen({ preset, progress }) {
 
   return React.createElement(
     Box,
-    { flexDirection: 'column', paddingX: 1 },
+    { flexDirection: 'column', paddingX: 1, width: '100%' },
     React.createElement(Box, null, spinner, label),
     prog
   );
@@ -265,7 +265,7 @@ function ResultScreen({ result, error, isError, onBack, onQuit }) {
 
     return React.createElement(
       Box,
-      { flexDirection: 'column', paddingX: 1 },
+      { flexDirection: 'column', paddingX: 1, width: '100%' },
       errBox,
       errMsg,
       footer
@@ -308,7 +308,7 @@ function ResultScreen({ result, error, isError, onBack, onQuit }) {
 
   return React.createElement(
     Box,
-    { flexDirection: 'column', paddingX: 1 },
+    { flexDirection: 'column', paddingX: 1, width: '100%' },
     header,
     info,
     footer
