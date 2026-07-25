@@ -19,23 +19,31 @@ const RENDER_DEFAULTS = {
   viewport: { width: 720, height: 720 },
 };
 
-async function ensureChromium() {
+async function ensureChromium({ onProgress } = {}) {
   const execPath = getHeadlessShellPath();
   if (execPath && existsSync(execPath)) return;
 
-  console.log('');
-  console.log('  Downloading Chromium for PDF rendering (one-time, ~100MB)...');
-  console.log('');
+  if (onProgress) {
+    onProgress('Downloading Chromium (one-time, ~100MB)...');
+  } else {
+    console.log('');
+    console.log('  Downloading Chromium for PDF rendering (one-time, ~100MB)...');
+    console.log('');
+  }
 
   try {
     execSync(getChromiumInstallCmd(), {
-      stdio: 'inherit',
+      stdio: onProgress ? 'pipe' : 'inherit',
       env: { ...process.env, PLAYWRIGHT_BROWSERS_PATH: BROWSERS_PATH },
     });
     await removeFfmpeg();
-    console.log('');
-    console.log('  \u2713 Chromium downloaded successfully.');
-    console.log('');
+    if (onProgress) {
+      onProgress('Downloaded Chromium');
+    } else {
+      console.log('');
+      console.log('  \u2713 Chromium downloaded successfully.');
+      console.log('');
+    }
    } catch {
     throw new ChromiumNotFoundError();
   }
@@ -129,9 +137,8 @@ export function generatePdfOptions(paperFormat, margins, render) {
 export async function generatePdf(html, outputPath, opts = {}) {
   const { captureHeadings, preset, paperFormat, margins, onProgress } = opts;
 
-  if (onProgress) onProgress('Checking Chromium...');
   assertWritableDir(path.dirname(outputPath));
-  await ensureChromium();
+  await ensureChromium({ onProgress });
 
   let browser;
   try {

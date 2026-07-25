@@ -158,7 +158,7 @@
 - [x] Colored prefixes: ✓ success, ✗ error, ℹ info
 - [x] Inline spinner during PDF generation (replaces silent gap)
 - [x] Completion summary: page count, word count, file size, preset, elapsed
-- [ ] Chromium download as single-line progress (no Playwright noise)
+- [x] Chromium download as single-line progress (no Playwright noise)
 
 ### TUI (Ink)
 
