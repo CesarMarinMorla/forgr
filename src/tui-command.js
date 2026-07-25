@@ -1,9 +1,11 @@
 import { existsSync } from 'fs';
+import fs from 'fs-extra';
 import { Command } from 'commander';
+import ora from 'ora';
 import { run } from './pipeline.js';
 import { listPresets } from './presets.js';
-import { launchTui, classifyPreset } from './tui.js';
-import { buildWriteKeys, printOutputMsg, handleCliError } from './utils.js';
+import { launchTui, showResultScreen, classifyPreset } from './tui.js';
+import { buildWriteKeys, handleCliError } from './utils.js';
 
 const program = new Command();
 
@@ -22,7 +24,7 @@ program
     try {
       chosen = await launchTui(presets);
     } catch (err) {
-      console.error(`Error: ${err.message}`);
+      console.error(`\u2717 Error: ${err.message}`);
       process.exit(1);
     }
 
@@ -47,6 +49,9 @@ program
       process.exit(0);
     }
 
+    const spinner = ora(`Rendering with ${decision.name}...`).start();
+    const startTime = Date.now();
+
     try {
       const cliOptions = {
         output: options.output,
@@ -57,14 +62,23 @@ program
       const writeKeys = buildWriteKeys(options);
       writeKeys.preset = decision.name;
 
-      const outputPath = await run(input, cliOptions, {
+      const result = await run(input, cliOptions, {
         write: options.write,
         writeKeys: options.write ? writeKeys : undefined,
+        onProgress: (stage) => { spinner.text = stage; },
       });
-      printOutputMsg(outputPath);
+
+      const elapsed = Date.now() - startTime;
+      let fileSize;
+      try {
+        fileSize = (await fs.stat(result.outputPath)).size;
+      } catch {}
+
+      spinner.succeed();
+      showResultScreen({ ...result, elapsed, fileSize });
     } catch (err) {
-      console.error(`Error: ${err.message}`);
-      process.exit(1);
+      spinner.fail();
+      handleCliError(err);
     }
   });
 
