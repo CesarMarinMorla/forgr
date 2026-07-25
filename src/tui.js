@@ -55,15 +55,11 @@ function PresetPicker({ presets, notification, onSelect }) {
       ? React.createElement(Text, { dimColor: true }, ' (user)')
       : null;
     const descNode = isSelected
-      ? React.createElement(
-          Box,
-          null,
-          React.createElement(Text, { dimColor: true }, `  ${p.description}`)
-        )
+      ? React.createElement(Text, { dimColor: true }, `       ${p.description}`)
       : null;
     return React.createElement(
       Box,
-      { key: p.name, flexDirection: 'column', gap: 1, marginBottom: 1 },
+      { key: p.name, flexDirection: 'column' },
       React.createElement(
         Box,
         { flexDirection: 'row', alignItems: 'center', gap: 1 },
