@@ -45,7 +45,7 @@ YAML frontmatter
 : Key-value metadata at the top of a markdown file, delimited by `---`.
 
 ReportLab Platypus
-: High-level PDF layout API used by MarkForge for flowing document content.
+: High-level PDF layout API used by Forgr for flowing document content.
 
 ## Markdown Images
 

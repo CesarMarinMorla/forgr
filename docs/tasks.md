@@ -91,7 +91,7 @@
 ## Presets — all 5 complete (terminal, minimal, technical, academic, newsletter)
 
 ### minimal.css — black-on-white from source template
-- [x] Adapt MarkForge minimal.css: system sans, one gray (#666), hairline rules, no accent
+- [x] Adapt forgr minimal.css: system sans, one gray (#666), hairline rules, no accent
 - [x] Remove @page margin/size (forgr handles via pdf.js)
 - [x] Add @page background for full-page white
 - [x] Style .doc-meta: restrained (no dot, mono timestamp, thin rule)

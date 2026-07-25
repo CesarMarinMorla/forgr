@@ -1,10 +1,10 @@
-> This document tests every feature of the <<Parch>> PDF engine. All content is synthetic and contains no personal or private information.
+> This document tests every feature of the <<Forgr>> PDF engine. All content is synthetic and contains no personal or private information.
 
 ## 1. Text Formatting
 
 This section covers **bold text**, *italic text*, and ***bold italic*** combinations. Inline `code` spans are rendered in a monospace font (Menlo on macOS, Courier fallback) with a rounded light gray background.  Applications using <<ReportLab>> include this PDF engine.
 
-Links are rendered with an accent color underline: [MarkForge Engine](https://example.com/markforge) and [ReportLab](https://www.reportlab.com/).
+Links are rendered with an accent color underline: [Forgr Engine](https://example.com/forgr) and [ReportLab](https://www.reportlab.com/).
 
 Accented characters: á é í ó ú ñ ü Á É Í Ó Ú Ñ. Unicode symbols: © ® ™ ¶ • § ∞ ≈ ≠ ≤ ≥ ± ← ↑ → ↓ ↔ ↕ ⇒ ⇔ ∑ ∫ √ π.
 
