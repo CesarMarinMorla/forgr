@@ -7,7 +7,9 @@ import { renderMarkdown } from './markdown.js';
 import { renderTemplate } from './template.js';
 import { generatePdf } from './pdf.js';
 import { DEFAULTS } from './config.js';
+import { BUILTIN_PRESETS } from './presets.js';
 import { warnUnimplemented } from './unimplemented.js';
+import { PresetNotFoundError } from './errors.js';
 
 function wordCount(str) {
   return str.split(/\s+/).filter(Boolean).length;
@@ -61,16 +63,19 @@ function templateContext(body, config) {
   };
 }
 
-async function renderStage(markdownBody, config, absInput, outputPath, withToc, headingPages) {
+async function renderStage(markdownBody, config, absInput, outputPath, withToc, headingPages, onProgress) {
   const baseDir = path.dirname(absInput);
+  if (onProgress) onProgress('Rendering markdown...');
   const { body, tocHtml } = renderMarkdown(markdownBody, { toc: withToc, headingPages, baseDir });
+  if (onProgress) onProgress('Rendering template...');
   const html = await renderTemplate(templateContext(tocHtml + body, config));
-  return generatePdf(html, outputPath, { captureHeadings: !withToc, ...config });
+  return generatePdf(html, outputPath, { captureHeadings: !withToc, onProgress, ...config });
 }
 
-export async function run(inputPath, cliOptions = {}, { write, writeKeys } = {}) {
+export async function run(inputPath, cliOptions = {}, { write, writeKeys, onProgress } = {}) {
   const absInput = path.resolve(inputPath);
 
+  if (onProgress) onProgress('Reading file...');
   if (!await fs.pathExists(absInput)) {
     throw new Error(`file not found: ${absInput}`);
   }
@@ -86,9 +91,14 @@ export async function run(inputPath, cliOptions = {}, { write, writeKeys } = {})
     throw new Error(`could not read ${absInput}: ${err.message}`);
   }
 
+  if (onProgress) onProgress('Parsing front-matter...');
   const { frontMatter, rawData, body: markdownBody } = parseFrontMatter(markdown);
   const config = buildConfig(cliOptions, frontMatter);
   config.outputPath = outputPath;
+
+  if (!BUILTIN_PRESETS.some(p => p.name === config.preset)) {
+    throw new PresetNotFoundError(config.preset, BUILTIN_PRESETS.map(p => p.name));
+  }
 
   warnUnimplemented(config);
 
@@ -99,9 +109,10 @@ export async function run(inputPath, cliOptions = {}, { write, writeKeys } = {})
 
   const needsTocByLength = resolveToc(config, wordCount(markdownBody));
 
+  if (onProgress) onProgress('Rendering...');
   let result;
   try {
-    result = await renderStage(markdownBody, config, absInput, outputPath, false);
+    result = await renderStage(markdownBody, config, absInput, outputPath, false, null, onProgress);
   } catch (err) {
     throw new Error(`render failed: ${err.message}`);
   }
@@ -112,11 +123,11 @@ export async function run(inputPath, cliOptions = {}, { write, writeKeys } = {})
 
   if (needsToc) {
     try {
-      await renderStage(markdownBody, config, absInput, outputPath, true, headingPages);
+      result = await renderStage(markdownBody, config, absInput, outputPath, true, headingPages, onProgress);
     } catch (err) {
       throw new Error(`render failed: ${err.message}`);
     }
   }
 
-  return outputPath;
+  return { outputPath, pageCount, preset: config.preset };
 }

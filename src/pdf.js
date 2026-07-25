@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { BROWSERS_PATH, getChromiumInstallCmd, getHeadlessShellPath, removeFfmpeg } from './browsers-path.js';
 import { PRESET_MERMAID_THEMES } from './themes/index.js';
+import { ChromiumNotFoundError } from './errors.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MERMAID_DIST = path.resolve(__dirname, '..', 'node_modules', 'mermaid', 'dist', 'mermaid.min.js');
@@ -31,14 +32,12 @@ async function ensureChromium() {
       stdio: 'inherit',
       env: { ...process.env, PLAYWRIGHT_BROWSERS_PATH: BROWSERS_PATH },
     });
-    // Playwright unconditionally downloads FFmpeg alongside any browser install.
-    // forgr never uses FFmpeg — remove it to keep the install footprint minimal.
     await removeFfmpeg();
     console.log('');
-    console.log('  ✓ Chromium downloaded successfully.');
+    console.log('  \u2713 Chromium downloaded successfully.');
     console.log('');
    } catch {
-    throw new Error('failed to download Chromium. Try running: npm run install-chromium');
+    throw new ChromiumNotFoundError();
   }
 }
 
@@ -128,13 +127,15 @@ export function generatePdfOptions(paperFormat, margins, render) {
 }
 
 export async function generatePdf(html, outputPath, opts = {}) {
-  const { captureHeadings, preset, paperFormat, margins } = opts;
+  const { captureHeadings, preset, paperFormat, margins, onProgress } = opts;
 
+  if (onProgress) onProgress('Checking Chromium...');
   assertWritableDir(path.dirname(outputPath));
   await ensureChromium();
 
   let browser;
   try {
+    if (onProgress) onProgress('Launching browser...');
     browser = await launchBrowser(getHeadlessShellPath());
     const page = await browser.newPage();
 
@@ -142,17 +143,22 @@ export async function generatePdf(html, outputPath, opts = {}) {
       await page.setViewportSize(RENDER_DEFAULTS.viewport);
     }
 
+    if (onProgress) onProgress('Rendering page...');
     await page.setContent(html, { waitUntil: 'domcontentloaded' });
 
     if (await hasMermaidDiagrams(page)) {
+      if (onProgress) onProgress('Rendering mermaid diagrams...');
       await renderMermaid(page, preset);
     }
 
+    if (onProgress) onProgress('Waiting for fonts...');
     await page.evaluate(() => document.fonts.ready);
 
     const headingPages = captureHeadings ? await computeHeadingPages(page, paperFormat) : [];
+    if (onProgress) onProgress('Generating PDF...');
     const pdfBuffer = await page.pdf(generatePdfOptions(paperFormat, margins, RENDER_DEFAULTS));
     const pageCount = countPdfPages(pdfBuffer);
+    if (onProgress) onProgress('Writing file...');
     await fs.writeFile(outputPath, pdfBuffer);
 
     return { pageCount, headingPages };
