@@ -63,9 +63,14 @@ function PresetPicker({ presets, notification, onSelect }) {
   );
 
   const help = React.createElement(
-    Text,
-    { dimColor: true },
-    '\u2191/\u2193 navigate \u00B7 enter select \u00B7 q quit'
+    Box,
+    null,
+    React.createElement(Text, { color: TUI_ACCENT }, '\u2191/\u2193'),
+    React.createElement(Text, { dimColor: true }, ' navigate \u00B7 '),
+    React.createElement(Text, { color: TUI_ACCENT }, 'enter'),
+    React.createElement(Text, { dimColor: true }, ' select \u00B7 '),
+    React.createElement(Text, { color: TUI_ACCENT }, 'q'),
+    React.createElement(Text, { dimColor: true }, ' quit')
   );
 
   const notif = notification
@@ -150,7 +155,10 @@ function ResultScreen({ result, error, isError, onBack, onQuit }) {
     const footer = React.createElement(
       Box,
       { marginTop: 1 },
-      React.createElement(Text, { dimColor: true }, 'Enter try again \u00B7 q quit')
+      React.createElement(Text, { color: TUI_ACCENT }, 'Enter'),
+      React.createElement(Text, { dimColor: true }, ' try again \u00B7 '),
+      React.createElement(Text, { color: TUI_ACCENT }, 'q'),
+      React.createElement(Text, { dimColor: true }, ' quit')
     );
 
     return React.createElement(
@@ -188,7 +196,10 @@ function ResultScreen({ result, error, isError, onBack, onQuit }) {
   const footer = React.createElement(
     Box,
     { marginTop: 1 },
-    React.createElement(Text, { dimColor: true }, 'Enter render again \u00B7 q quit')
+    React.createElement(Text, { color: TUI_ACCENT }, 'Enter'),
+    React.createElement(Text, { dimColor: true }, ' render again \u00B7 '),
+    React.createElement(Text, { color: TUI_ACCENT }, 'q'),
+    React.createElement(Text, { dimColor: true }, ' quit')
   );
 
   return React.createElement(
