@@ -96,6 +96,7 @@ export async function run(inputPath, cliOptions = {}, { write, writeKeys, onProg
   const config = buildConfig(cliOptions, frontMatter);
   config.outputPath = outputPath;
 
+  if (onProgress) onProgress('Checking preset...');
   if (!BUILTIN_PRESETS.some(p => p.name === config.preset)) {
     throw new PresetNotFoundError(config.preset, BUILTIN_PRESETS.map(p => p.name));
   }
