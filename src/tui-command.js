@@ -8,11 +8,12 @@ const program = new Command();
 program
   .name('forgr-tui')
   .description('Interactive preset picker and batch converter')
-  .action(async () => {
+  .argument('[file]', 'markdown file to process (default: scan current directory)')
+  .action(async (file) => {
     const presets = listPresets();
 
     try {
-      await launchTui(presets);
+      await launchTui(presets, file);
     } catch (err) {
       console.error(`\u2717 Error: ${err.message}`);
       process.exit(1);

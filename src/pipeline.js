@@ -35,6 +35,7 @@ function buildConfig(cliOptions, frontMatter) {
     coverTitle: cliOptions.coverTitle ?? frontMatter.coverTitle ?? DEFAULTS.coverTitle,
     coverAuthor: cliOptions.coverAuthor ?? frontMatter.coverAuthor ?? DEFAULTS.coverAuthor,
     coverDate: cliOptions.coverDate ?? frontMatter.coverDate ?? DEFAULTS.coverDate,
+    coverDateText: cliOptions.coverDateText ?? frontMatter.coverDateText ?? DEFAULTS.coverDateText,
     footer: cliOptions.footer ?? frontMatter.footer ?? DEFAULTS.footer,
     sectionNumbering: cliOptions.sectionNumbering ?? frontMatter.sectionNumbering ?? DEFAULTS.sectionNumbering,
     paperFormat: frontMatter.paperFormat ?? DEFAULTS.paperFormat,
@@ -70,7 +71,13 @@ function templateContext(body, config) {
     cover: config.cover,
     coverTitle: config.coverTitle || config.meta.title || null,
     coverAuthor: config.coverAuthor || config.meta.author || null,
-    coverDate: config.coverDate || formatDate(config.meta.date, config.dateFormat, config.dateLocale),
+    coverDate: config.coverDate === 'auto'
+      ? formatDate(config.meta.date, config.dateFormat, config.dateLocale)
+      : config.coverDate === 'none'
+        ? null
+        : config.coverDate === 'custom' && config.coverDateText
+          ? config.coverDateText
+          : null,
     sectionNumbering: config.sectionNumbering,
     timestamp: formatDate(config.meta.date, config.dateFormat, config.dateLocale),
     title: config.meta.title || null,

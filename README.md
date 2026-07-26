@@ -15,7 +15,12 @@
 - **Five presets**: `terminal`, `minimal`, `technical`, `academic`, `newsletter`, each a standalone CSS theme built from the ground up.
 - **Diagrams**: native [Mermaid](https://mermaid.js.org) rendering (flowchart, sequence, state, class) with per-preset color theming.
 - **Images**: local images are inlined automatically as base64 data URIs, so they resolve without a base URL.
-- **Table of contents**: generated automatically for longer documents (>= 8000 words or 3+ pages).
+- **Table of contents**: generated automatically for longer documents (>= 8000 words or 3+ pages), or forced on/off.
+- **Cover page**: optional cover page with title, author, and date, auto-fallbacking to document metadata.
+- **Footer**: choose between page numbers, page X of Y, or no footer.
+- **Section numbering**: auto-number headings with CSS counters.
+- **Doc-meta header**: show/hide a document-info header (dot, label, timestamp).
+- **Interactive TUI**: `forgr-tui` provides a full terminal UI for preset picking, settings, and batch rendering — no CLI flags needed.
 - **No install friction**: Chromium downloads on your first run, not during `npm install`.
 
 ---
@@ -105,6 +110,15 @@ forgr short-note.md --no-toc
 | `--output <path>` | Write the PDF to a specific path instead of next to the input file. |
 | `--preset <name>` | Apply a preset: `terminal` (default), `minimal`, `technical`, `academic`, `newsletter`. |
 | `--toc` / `--no-toc` | Force the table of contents on or off. Without either, it is decided automatically. |
+| `--doc-meta` / `--no-doc-meta` | Show or hide the document-meta header. |
+| `--date-format <iso\|locale>` | Date display format (`iso`: `2025-01-15`, `locale`: `Jan 15, 2025`). |
+| `--date-locale <locale>` | Locale for date formatting (e.g. `en-US`, `es-ES`). |
+| `--footer <page-numbers\|page-x-of-y\|none>` | Footer style. |
+| `--cover` | Enable a cover page (falls back to document title/author/date). |
+| `--cover-title <text>` | Cover page title (default: document title). |
+| `--cover-author <text>` | Cover page author (default: document author). |
+| `--cover-date <text>` | Cover page date (default: document date). |
+| `--section-numbering` / `--no-section-numbering` | Enable or disable heading section numbering. |
 | `--write` | Persist CLI flags into the file's front-matter for repeatable builds. |
 | `convert <input>` | Convert a Markdown file to PDF (default command). |
 | `doctor` | Diagnose installation and fix common issues. |
@@ -129,13 +143,17 @@ forgr:
   coverTitle: "My Document"
   coverAuthor: "Jane Doe"
   coverDate: "2025-01-15"
-  footer: true
+  footer: page-numbers
   sectionNumbering: true
-  paperFormat: a4
-  margins: moderate
   docMeta: true
-  dateFormat: YYYY-MM-DD
+  dateFormat: iso
   dateLocale: en-US
+  paperFormat: A4
+  margins:
+    top: 2cm
+    bottom: 2cm
+    left: 2cm
+    right: 2cm
 ---
 ```
 
@@ -153,15 +171,30 @@ This saves `preset: academic` into the file's front-matter (omitting values that
 
 ### Interactive preset picker
 
-`forgr-tui` launches a terminal UI that lists every preset (built-in plus any you
-define in `~/.config/forgr/presets/*.json`) and renders the PDF with the one you
-pick. User presets are shown for discovery; rendering custom presets lands with
-config support in a later milestone.
+`forgr-tui` launches a full terminal UI that scans the current directory for
+`.md` files and guides you through preset selection, rendering options, and
+batch conversion.
 
 ```bash
-forgr-tui report.md
-forgr-tui report.md -o out.pdf --no-toc
+forgr-tui                    # scan current directory for .md files
+forgr-tui report.md          # process a specific file (skips file picker)
 ```
+
+**Flow:**
+
+1. **File picker** — if 2+ `.md` files found, select which to render (space to
+   toggle, enter to confirm). If 0 files, exits with a message. If 1 file,
+   auto-selects it. Pass a file argument to skip this step entirely.
+2. **Preset picker** — choose from the five built-in presets (user presets
+   shown for discovery; rendering them lands in a later milestone).
+3. **Settings screen** — configure TOC (auto/on/off), doc-meta header, date
+   format, footer style, cover page, and section numbering. Arrow keys to
+   navigate, Enter to render.
+4. **Batch render** — files render one at a time with per-file progress. A
+   failure does not stop the batch.
+5. **Result screen** — per-file success/failure, truncated to 6 visible files
+   with `... N more`. Press `s` to save the current settings to all files'
+   front-matter, `o` to open the folder, Enter to go back.
 
 ---
 
@@ -206,10 +239,10 @@ npm uninstall -g forgr
 ## Development
 
 ```bash
-npm test                  # full suite (unit + integration)
-npm run test:unit         # unit tests (71)
-npm run test:integration  # integration tests (14)
-npm run test:mermaid      # mermaid-specific tests (7)
+npm test                  # full suite (108 tests — unit + integration + comprehensive)
+npm run test:unit         # unit tests only
+npm run test:integration  # integration tests only
+npm run test:mermaid      # mermaid-specific tests only
 ```
 
 Integration tests accept a `FORGR_PRESET` environment variable (`terminal`, `minimal`, `technical`, `academic`, `newsletter`) to validate one preset at a time.

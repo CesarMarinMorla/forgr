@@ -12,7 +12,7 @@
 | 3.5 | Front-matter processing | Done |
 | 4 | Rendering options (doc-meta, footer, cover, section numbering) | Done |
 | 4.5 | TUI settings form (remove CLI flags, interactive options) | Done |
-| 4.75 | File picker & batch rendering (multi-file, zero CLI args, save) | Done |
+| 4.75 | File picker & batch rendering (multi-file, optional file argument, save) | Done |
 | 5 | Watch mode & user presets | Pending |
 | 6 | Extended format support (LaTeX, Jekyll/Liquid preprocessing) | Later |
 | 7 | `forgr doctor` diagnostic | Done |
@@ -268,6 +268,7 @@ All CLI flags removed from `forgr-tui`. After selecting a preset, the TUI shows 
 - [x] Remove `--output`, `--toc`, `--no-toc` flags from `tui-command.js`
 - [x] Add SettingsScreen component with arrow-driven value cycling
 - [x] Settings: TOC (auto/on/off), doc-meta (yes/no), date format (iso/locale), footer (page-numbers/page-x-of-y/none), cover (yes/no), section numbering (yes/no)
+- [ ] Cover content fields: `coverTitle`, `coverAuthor`, `coverDate` not yet exposed in settings screen (only cover toggle exists)
 - [x] Flow: Picker → Settings → Rendering → Result
 - [x] Settings persist across renders (going back to picker and re-selecting)
 - [x] Output path shown as read-only (default: same dir as input)
@@ -276,7 +277,7 @@ All CLI flags removed from `forgr-tui`. After selecting a preset, the TUI shows 
 
 ## Milestone 4.75 — File picker & batch rendering (Done)
 
-No CLI arguments. `forgr-tui` scans the current directory for `.md` files, lets the user select one or more, and configures rendering settings interactively.
+Optional `[file]` argument — when a file is passed it works as if that file was the only `.md` in cwd; skips file picker. When omitted, scans cwd for `.md` files, lets the user select one or more, and configures rendering settings interactively.
 
 ### FilePicker
 
@@ -304,7 +305,8 @@ No CLI arguments. `forgr-tui` scans the current directory for `.md` files, lets 
 
 ### Remaining CLI surface
 
-- [x] `forgr-tui` takes no arguments and no flags — zero CLI surface
+- [x] `forgr-tui` accepts no flags — zero CLI flags
+- [x] `forgr-tui` accepts optional `[file]` argument: single markdown file bypasses file picker, error on not-found
 
 ---
 

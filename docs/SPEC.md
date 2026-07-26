@@ -6,7 +6,7 @@
 
 Forgr is a CLI tool that converts Markdown into polished PDFs. The visual target is the "Artifacts" document style: clean sans-serif headers, generous whitespace, a single accent colour, subtle code blocks, and optional Mermaid diagrams.
 
-The core command is `forgr file.md` -> `file.pdf` with zero configuration. A companion `forgr-tui` command opens an interactive preset picker.
+The core command is `forgr file.md` -> `file.pdf` with zero configuration. A companion `forgr-tui` command opens an interactive preset picker with an optional file argument.
 
 ## Design Goals
 
@@ -78,13 +78,15 @@ Node.js + Playwright. A single browser launch handles markdown rendering, Mermai
 
 ### `forgr-tui`
 
-Fully interactive batch converter (Ink/React). No CLI arguments or flags — zero CLI surface.
+Fully interactive batch converter (Ink/React). No CLI flags.
 
-Scans the current directory for `.md` files. If none found, prints a message and exits. If one file found, auto-selects it. If multiple, shows an interactive file picker (space to toggle, enter to confirm).
+- `[file]` (optional) — process a single markdown file directly, skipping the file-picker step. Equivalent to having exactly one `.md` file in the current directory. Errors if the file does not exist or is a directory.
+
+When no argument is passed, scans cwd for `.md` files. If none found, prints a message and exits. If one found, auto-selects it. If multiple, shows an interactive file picker (space to toggle, enter to confirm).
 
 After file selection, the TUI flows through PresetPicker → SettingsScreen (TOC, doc-meta, date format, footer, cover, section numbering) → batch render. Selected files are rendered one at a time with per-file progress shown. A file failure does not stop the batch.
 
-The result screen shows per-file success/failure, truncated to 6 visible files with `... N more`. `s` saves the current settings to all files' front-matter via `writeForgrFrontMatter()`. `o` opens the folder in the system file manager. `Enter` goes back to the file picker. Selecting a user preset prints a "coming in Milestone 5" message.
+The result screen shows per-file success/failure, truncated to 6 visible files with `... N more`. `s` saves the current settings to all files' front-matter via `writeForgrFrontMatter()`. `o` opens the folder in the system file manager. `Enter` goes back to the preset picker. Selecting a user preset prints a "coming in Milestone 5" message.
 
 ## Chromium
 

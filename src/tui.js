@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { render, Box, Text, useInput } from 'ink';
-import { readdirSync, statSync } from 'fs';
+import { existsSync, readdirSync, statSync } from 'fs';
 import { execFile } from 'child_process';
 import { stat, readFile, writeFile } from 'fs/promises';
 import path from 'path';
@@ -11,6 +11,7 @@ import { parseFrontMatter, writeForgrFrontMatter } from './frontmatter.js';
 import { run } from './pipeline.js';
 
 const TUI_ACCENT = '#2DD4BF';
+const TUI_TEXT_ACCENT = '#EAB308';
 const SPINNER_CHARS = '\u280B\u2839\u2879\u2878\u283C\u2834\u2826\u2827\u2807\u280F';
 
 function getMarkdownFiles(dir) {
@@ -32,8 +33,9 @@ const SETTINGS = [
   { key: 'docMeta', label: 'Doc-meta header', values: [true, false], display: v => v ? 'yes' : 'no' },
   { key: 'dateFormat', label: 'Date format', values: ['iso', 'locale'] },
   { key: 'footer', label: 'Footer', values: ['page-numbers', 'page-x-of-y', 'none'] },
-  { key: 'cover', label: 'Cover page', values: [true, false], display: v => v ? 'yes' : 'no' },
-  { key: 'sectionNumbering', label: 'Section numbering', values: [true, false], display: v => v ? 'yes' : 'no' },
+  { key: 'cover', label: 'Cover page', values: [false, true], display: v => v ? 'yes' : 'no' },
+  { key: 'coverDate', label: 'Cover date', values: ['auto', 'custom', 'none'] },
+  { key: 'sectionNumbering', label: 'Section numbering', values: [false, true], display: v => v ? 'yes' : 'no' },
 ];
 
 function Swatch({ color }) {
@@ -121,7 +123,7 @@ function FilePicker({ files, onSelect, onQuit }) {
   );
 }
 
-function PresetPicker({ presets, notification, onSelect }) {
+function PresetPicker({ presets, notification, onSelect, fileLabel }) {
   const [index, setIndex] = useState(0);
 
   useInput((input, key) => {
@@ -199,32 +201,70 @@ function PresetPicker({ presets, notification, onSelect }) {
     Box,
     { flexDirection: 'column', paddingX: 1, width: '100%' },
     React.createElement(Box, { marginBottom: 1 }, title),
+    fileLabel ? React.createElement(Box, { marginBottom: 1 }, React.createElement(Text, { dimColor: true }, `  ${fileLabel}`)) : null,
     React.createElement(Box, { flexDirection: 'column' }, ...rows),
     notif,
     React.createElement(Box, { marginTop: 1 }, help)
   );
 }
 
-function SettingsScreen({ settings, onChange, preset, fileCount, onRender, onBack }) {
+const COVER_FIELDS = [
+  { key: 'coverTitle', label: 'Cover title', type: 'text' },
+  { key: 'coverAuthor', label: 'Cover author', type: 'text' },
+  { key: 'coverDateText', label: 'Custom date', type: 'text' },
+];
+
+function SettingsScreen({ settings, onChange, preset, fileLabel, onRender, onBack }) {
   const [focus, setFocus] = useState(0);
+  const [editingField, setEditingField] = useState(null);
+  const [editBuffer, setEditBuffer] = useState('');
+
+  const visibleCover = settings.cover && settings.coverDate === 'custom'
+    ? [...COVER_FIELDS]
+    : settings.cover ? COVER_FIELDS.slice(0, 2) : [];
+  const allSettings = [...SETTINGS, ...visibleCover];
+
+  useEffect(() => {
+    setFocus(i => Math.min(i, allSettings.length - 1));
+  }, [allSettings.length]);
 
   useInput((input, key) => {
+    if (editingField) {
+      if (key.return) {
+        onChange(editingField, editBuffer);
+        setEditingField(null);
+        setEditBuffer('');
+      } else if (key.escape) {
+        setEditingField(null);
+        setEditBuffer('');
+      } else if (key.backspace || key.delete) {
+        setEditBuffer(prev => prev.slice(0, -1));
+      } else if (input && !key.ctrl && !key.meta && !key.escape) {
+        setEditBuffer(prev => prev + input);
+      }
+      return;
+    }
+
     if (key.upArrow) {
       setFocus(i => Math.max(0, i - 1));
     } else if (key.downArrow) {
-      setFocus(i => Math.min(SETTINGS.length - 1, i + 1));
-    } else if (key.leftArrow) {
-      const def = SETTINGS[focus];
-      const val = settings[def.key];
-      const idx = def.values.indexOf(val);
-      if (idx > 0) onChange(def.key, def.values[idx - 1]);
-    } else if (key.rightArrow) {
-      const def = SETTINGS[focus];
-      const val = settings[def.key];
-      const idx = def.values.indexOf(val);
-      if (idx < def.values.length - 1) onChange(def.key, def.values[idx + 1]);
+      setFocus(i => Math.min(allSettings.length - 1, i + 1));
+    } else if (key.leftArrow || key.rightArrow) {
+      const def = allSettings[focus];
+      if (def.type !== 'text') {
+        const val = settings[def.key];
+        const idx = def.values.indexOf(val);
+        if (key.leftArrow && idx > 0) onChange(def.key, def.values[idx - 1]);
+        else if (key.rightArrow && idx < def.values.length - 1) onChange(def.key, def.values[idx + 1]);
+      }
     } else if (key.return) {
       onRender();
+    } else if (input === 'e' && !editingField) {
+      const def = allSettings[focus];
+      if (def.type === 'text') {
+        setEditingField(def.key);
+        setEditBuffer(settings[def.key] || '');
+      }
     } else if (input === 'q' || key.escape) {
       onBack();
     }
@@ -239,18 +279,30 @@ function SettingsScreen({ settings, onChange, preset, fileCount, onRender, onBac
   const fileCountLine = React.createElement(
     Box,
     null,
-    React.createElement(Text, { dimColor: true }, '  Files: '),
-    React.createElement(Text, null, `${fileCount}`)
+    React.createElement(Text, { dimColor: true }, '  '),
+    React.createElement(Text, null, fileLabel)
   );
 
-  const rows = SETTINGS.map((def, i) => {
+  const rows = allSettings.map((def, i) => {
     const isFocused = i === focus;
-    const val = settings[def.key];
-    const displayVal = (def.display || String)(val);
-    const marker = React.createElement(Text, { color: isFocused ? TUI_ACCENT : undefined }, isFocused ? '\u276F ' : '  ');
+    const isEditing = def.type === 'text' && def.key === editingField;
+    const isText = def.type === 'text';
+    const accent = isText ? TUI_TEXT_ACCENT : TUI_ACCENT;
+    const val = isEditing ? editBuffer : settings[def.key];
+    const marker = React.createElement(Text, { color: isFocused ? accent : undefined }, isFocused ? '\u276F ' : '  ');
     const label = React.createElement(Text, null, ` ${def.label}:`);
-    const value = React.createElement(Text, { color: TUI_ACCENT }, ` [${displayVal}]`);
-    const hint = isFocused ? React.createElement(Text, { dimColor: true }, '  \u25C0 \u25B6') : null;
+
+    let value;
+    let hint;
+    if (isText) {
+      const display = isEditing ? `${val || ''}\u2588` : `[${val || '--'}]`;
+      value = React.createElement(Text, { color: isEditing ? 'white' : accent }, ` ${display}`);
+      hint = isFocused && !isEditing ? React.createElement(Text, { dimColor: true }, '  e edit') : null;
+    } else {
+      const displayVal = (def.display || String)(val);
+      value = React.createElement(Text, { color: accent }, ` [${displayVal}]`);
+      hint = isFocused ? React.createElement(Text, { dimColor: true }, '  \u25C0 \u25B6') : null;
+    }
 
     return React.createElement(
       Box,
@@ -262,18 +314,31 @@ function SettingsScreen({ settings, onChange, preset, fileCount, onRender, onBac
     );
   });
 
-  const help = React.createElement(
-    Box,
-    null,
-    React.createElement(Text, { color: TUI_ACCENT }, '\u2191/\u2193'),
-    React.createElement(Text, { dimColor: true }, ' navigate \u00B7 '),
-    React.createElement(Text, { color: TUI_ACCENT }, '\u2190/\u2192'),
-    React.createElement(Text, { dimColor: true }, ' change \u00B7 '),
-    React.createElement(Text, { color: TUI_ACCENT }, 'enter'),
-    React.createElement(Text, { dimColor: true }, ' render \u00B7 '),
-    React.createElement(Text, { color: TUI_ACCENT }, 'q'),
-    React.createElement(Text, { dimColor: true }, ' back')
-  );
+  const help = editingField
+    ? React.createElement(
+        Box,
+        null,
+        React.createElement(Text, { color: TUI_ACCENT }, '\u23CE'),
+        React.createElement(Text, { dimColor: true }, ' confirm \u00B7 '),
+        React.createElement(Text, { color: TUI_ACCENT }, 'Esc'),
+        React.createElement(Text, { dimColor: true }, ' cancel \u00B7 '),
+        React.createElement(Text, { color: TUI_ACCENT }, '\u232B'),
+        React.createElement(Text, { dimColor: true }, ' delete')
+      )
+    : React.createElement(
+        Box,
+        null,
+        React.createElement(Text, { color: TUI_ACCENT }, '\u2191/\u2193'),
+        React.createElement(Text, { dimColor: true }, ' navigate \u00B7 '),
+        React.createElement(Text, { color: TUI_ACCENT }, '\u2190/\u2192'),
+        React.createElement(Text, { dimColor: true }, ' change \u00B7 '),
+        React.createElement(Text, { color: TUI_ACCENT }, 'enter'),
+        React.createElement(Text, { dimColor: true }, ' render \u00B7 '),
+        React.createElement(Text, { color: TUI_TEXT_ACCENT }, 'e'),
+        React.createElement(Text, { dimColor: true }, ' edit \u00B7 '),
+        React.createElement(Text, { color: TUI_ACCENT }, 'q'),
+        React.createElement(Text, { dimColor: true }, ' back')
+      );
 
   return React.createElement(
     Box,
@@ -452,13 +517,17 @@ function defaultSettings() {
     dateFormat: DEFAULTS.dateFormat,
     footer: DEFAULTS.footer,
     cover: DEFAULTS.cover,
+    coverTitle: DEFAULTS.coverTitle,
+    coverAuthor: DEFAULTS.coverAuthor,
+    coverDate: DEFAULTS.coverDate,
+    coverDateText: DEFAULTS.coverDateText,
     sectionNumbering: DEFAULTS.sectionNumbering,
   };
 }
 
-function TuiApp({ presets }) {
-  const [screen, setScreen] = useState('files');
-  const [selectedFiles, setSelectedFiles] = useState([]);
+function TuiApp({ presets, inputFile }) {
+  const [screen, setScreen] = useState(() => inputFile ? 'picker' : 'files');
+  const [selectedFiles, setSelectedFiles] = useState(() => inputFile ? [path.resolve(inputFile)] : []);
   const [selectedPreset, setSelectedPreset] = useState(null);
   const [settings, setSettings] = useState(defaultSettings);
   const [results, setResults] = useState([]);
@@ -521,6 +590,9 @@ function TuiApp({ presets }) {
     return () => { cancelled = true; };
   }, [screen, selectedPreset, settings, selectedFiles]);
 
+  const fileLabel = selectedFiles.length === 1
+    ? `File: ${path.basename(selectedFiles[0])}`
+    : `Files: ${selectedFiles.length}`;
   switch (screen) {
     case 'files': {
       if (mdFiles.length === 0) {
@@ -554,6 +626,7 @@ function TuiApp({ presets }) {
       return React.createElement(PresetPicker, {
         presets,
         notification,
+        fileLabel,
         onSelect: (preset) => {
           if (!preset) { process.exit(0); return; }
           if (preset.source === 'user') {
@@ -570,7 +643,7 @@ function TuiApp({ presets }) {
         settings,
         onChange: (key, value) => setSettings(prev => ({ ...prev, [key]: value })),
         preset: selectedPreset,
-        fileCount: selectedFiles.length,
+        fileLabel,
         onRender: () => {
           startTimeRef.current = Date.now();
           setProgress('Reading file...');
@@ -613,13 +686,23 @@ function TuiApp({ presets }) {
   }
 }
 
-export function launchTui(presets) {
+export function launchTui(presets, inputFile) {
   if (!process.stdin.isTTY) {
     return Promise.reject(new Error('interactive mode requires a terminal (stdin is not a TTY)'));
   }
 
+  if (inputFile) {
+    const resolved = path.resolve(inputFile);
+    if (!existsSync(resolved)) {
+      return Promise.reject(new Error(`File not found: ${inputFile}`));
+    }
+    if (!statSync(resolved).isFile()) {
+      return Promise.reject(new Error(`Not a file: ${inputFile}`));
+    }
+  }
+
   const { waitUntilExit } = render(
-    React.createElement(TuiApp, { presets })
+    React.createElement(TuiApp, { presets, inputFile })
   );
   return waitUntilExit;
 }
