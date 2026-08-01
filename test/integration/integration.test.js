@@ -24,6 +24,7 @@ const FIXTURE_ASSERTIONS = {
   'lists.md': { minSize: 10000, minPages: 1 },
   'namespace-test.md': { minSize: 30000, minPages: 2 },
   'shared-test.md': { minSize: 30000, minPages: 2 },
+  'sizing.md': { minSize: 30000, minPages: 3 },
   'tables.md': { minSize: 10000, minPages: 1 },
 };
 
