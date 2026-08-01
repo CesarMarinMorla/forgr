@@ -13,6 +13,8 @@
 | 4 | Rendering options (doc-meta, footer, cover, section numbering) | Done |
 | 4.5 | TUI settings form (remove CLI flags, interactive options) | Done |
 | 4.75 | File picker & batch rendering (multi-file, optional file argument, save) | Done |
+| 2.8 | Mermaid sizing & placement (scale to fit, font re-render, page-break intelligence) | Done |
+| 2.81 | Content-aware mermaid sizing (phantom viewBox trim, 0.98 right-edge margin) | Done |
 | 5 | Watch mode & user presets | Pending |
 | 6 | Extended format support (LaTeX, Jekyll/Liquid preprocessing) | Later |
 | 7 | `forgr doctor` diagnostic | Done |
@@ -151,6 +153,47 @@
 - [x] Test modularization — all mermaid tests + fixtures moved to `test/mermaid/`
 - [ ] **Mermaid sizing & layout** — diagrams are currently rendered at default mermaid size, leading to inconsistent proportions. Need to research mermaid dimension options, test what works in Playwright/PDF context, and create intelligent sizing (fit content, cap max width, handle wide diagrams like gantt/timeline gracefully)
 
+## Milestone 2.8 — Mermaid sizing & placement (Done)
+
+- [x] `src/layout.js` — shared layout math (`contentSize`, `pageOf`, `diagramScale`, `toPx`, viewBox parsing), replaces the hardcoded `contentHeight` formula in `pdf.js`
+- [x] `renderMermaid()` scales each diagram to fit the content box: `min(1, contentWidth/W, 0.85×pageHeight/H)` via explicit px width/height (viewBox aspect ratio)
+- [x] Legibility floor at 0.65 scale — diagrams scaling below that are re-rendered with `fontSize` reduced to 70% (min 9) so text stays sharp, then the theme is restored for subsequent diagrams
+- [x] Per-preset `fontSize: 16` baseline in all 5 theme JSONs (`src/themes/`)
+- [x] `layoutMermaid()` placement pass — measures each diagram's start/end page and the preceding heading's page; adds `mermaid--new-page` (`break-before: page`) to crossing diagrams and `mermaid--keep-heading` to orphaned headings; iterates to stability (max 5 rounds), all in-page before `page.pdf()`
+- [x] `startOnLoad: false` pinned on mermaid initialize (both initial and re-render) to prevent auto-run races; script tag skipped when mermaid is already loaded
+- [x] `.mermaid--new-page` / `.mermaid--keep-heading` CSS in `base.html`
+- [x] Front-matter keys `forgr.mermaidMaxWidth` / `forgr.mermaidMaxHeight` (CSS length or px number), wired through `config.js`, `frontmatter.js`, `pipeline.js`
+- [x] `test/unit/layout.test.js` — 16 unit tests (content math, scale, viewBox parsing)
+- [x] `test/mermaid/sizing.test.js` — 7 browser tests (wide cap, tall cap, phantom trim, right-edge slack, font re-render path, placement convergence, floor threshold)
+- [x] `test/fixtures/sizing.md` — integration fixture with wide gantt, tall flowchart, and 8 heading+diagram sections forcing page boundaries (asserted at 3+ pages)
+- [x] 132 tests passing (103 unit + 15 integration + 14 mermaid)
+
+## Milestone 2.8.1 — Content-aware mermaid sizing (Done)
+
+Follow-up to M2.8. Reports from rendered PDFs surfaced three issues. Issues 1 and 2 are fixed; issue 3 is pending by owner decision.
+
+### Issue 1 — right-edge clip (fixed)
+
+The 6.3 flowchart in `comprehensive-academic` showed the rightmost node (PostgreSQL) clipped by a few px at the page margin.
+
+- Root cause: sizing scaled diagrams to exactly the content width (`contentWidth`, 643px on A4). Mermaid's viewBox clips a few user units of stroke on the top/left edges, and the rightmost content can land within ~6px of the page margin, so the cylinder node's stroke overshot and clipped.
+- Fix: default max width is now `contentWidth × MAX_WIDTH_RATIO` (0.98), giving ~13px of real slack. User-specified `forgr.mermaidMaxWidth` is respected exactly (no ratio applied).
+- Verification: `test/mermaid/sizing.test.js` "right edge keeps safety slack" asserts the box is at most 0.98 of content width.
+
+### Issue 2 — clipped box edges + phantom space / near-empty pages (fixed)
+
+Two reports under this banner: the 6.4 sequence diagram in `comprehensive-newsletter` was sent to a new page leaving a page ~90% blank, and later, after an incomplete fix, diagram edges were cut on all sides and the sequence diagram showed only one participant box.
+
+- Root cause A (near-empty page): sizing by mermaid's `viewBox` claimed vertical space that the drawn content does not fill. `SVGElement.getBBox()` ignores strokes and, queried on the first `<g>`, returns only one participant box (each sequence participant is its own `<g>`), so a trim based on it collapsed the diagram. The presets' `h1..h6 { break-after: avoid }` then orphaned a whole section onto a near-empty page.
+- Root cause B (edges cut on all sides): mermaid's own viewBox already clips ~8 user units of stroke on the top/left of the content.
+- Fix: content extent is now measured as the union of `getBoundingClientRect()` over all graphical children, mapped into viewBox units (getBoundingClientRect includes stroke). The SVG `viewBox` is re-trimmed to that extent plus a 1% padding, then the box is sized from it. The sequence diagram renders complete and unclipped at its true extent (e.g. 630×342 on A4).
+- Fix: `layoutMermaid()` no longer short-circuits per iteration, so all crossing diagrams get marked in one pass instead of exhausting the iteration cap.
+- Verification: `test/mermaid/sizing.test.js` "viewBox is trimmed to full content extent" asserts zero clipped children and a full-width viewBox.
+
+### Issue 3 — massive diagrams get the whole page (pending)
+
+Charts that are genuinely huge should claim the whole page. Deferred per owner. Not started.
+
 ---
 
 ## Milestone 2.75 — TUI & CLI Polish (Pending)
@@ -268,7 +311,7 @@ All CLI flags removed from `forgr-tui`. After selecting a preset, the TUI shows 
 - [x] Remove `--output`, `--toc`, `--no-toc` flags from `tui-command.js`
 - [x] Add SettingsScreen component with arrow-driven value cycling
 - [x] Settings: TOC (auto/on/off), doc-meta (yes/no), date format (iso/locale), footer (page-numbers/page-x-of-y/none), cover (yes/no), section numbering (yes/no)
-- [ ] Cover content fields: `coverTitle`, `coverAuthor`, `coverDate` not yet exposed in settings screen (only cover toggle exists)
+- [x] Cover content fields: `coverTitle`, `coverAuthor`, `coverDateText` added as editable text fields with `e` key; `coverDate` toggle (auto/custom/none) in SETTINGS
 - [x] Flow: Picker → Settings → Rendering → Result
 - [x] Settings persist across renders (going back to picker and re-selecting)
 - [x] Output path shown as read-only (default: same dir as input)
