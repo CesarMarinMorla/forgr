@@ -5,6 +5,7 @@ const FORGR_ONLY_KEYS = [
   'tocTitle', 'docMeta', 'dateFormat', 'dateLocale',
   'cover', 'coverTitle', 'coverAuthor', 'coverDate', 'coverDateText',
   'footer', 'sectionNumbering', 'paperFormat', 'margins',
+  'mermaidMaxWidth', 'mermaidMaxHeight',
 ];
 
 function normalizeTocFromYaml(val) {

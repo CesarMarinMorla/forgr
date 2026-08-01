@@ -40,6 +40,8 @@ function buildConfig(cliOptions, frontMatter) {
     sectionNumbering: cliOptions.sectionNumbering ?? frontMatter.sectionNumbering ?? DEFAULTS.sectionNumbering,
     paperFormat: frontMatter.paperFormat ?? DEFAULTS.paperFormat,
     margins: frontMatter.margins ?? DEFAULTS.margins,
+    mermaidMaxWidth: frontMatter.mermaidMaxWidth ?? DEFAULTS.mermaidMaxWidth,
+    mermaidMaxHeight: frontMatter.mermaidMaxHeight ?? DEFAULTS.mermaidMaxHeight,
     outputPath: cliOptions.outputPath ?? '',
     meta: {
       title: frontMatter.title,

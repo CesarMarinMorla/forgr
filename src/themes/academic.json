@@ -1,6 +1,7 @@
 {
   "theme": "base",
   "themeVariables": {
+    "fontSize": 16,
     "primaryColor": "#DCEBE3",
     "primaryTextColor": "#1A1A1A",
     "primaryBorderColor": "#3D6B55",
