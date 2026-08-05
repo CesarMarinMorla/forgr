@@ -8,10 +8,12 @@ const PAGE_SIZES = {
 const DEFAULT_MARGINS = { top: '2cm', bottom: '2cm', left: '2cm', right: '2cm' };
 
 export const MAX_DIAGRAM_HEIGHT_RATIO = 0.85;
+export const WHOLE_PAGE_RATIO = 0.92;
 export const MAX_WIDTH_RATIO = 0.98;
 export const LEGIBILITY_SCALE_FLOOR = 0.65;
 export const DIAGRAM_FONT_REDUCTION = 0.7;
 export const MIN_DIAGRAM_FONT = 9;
+export const MIN_READABLE_TEXT = 6;
 export const MAX_LAYOUT_ITERATIONS = 5;
 
 export function toMm(value) {
@@ -51,6 +53,20 @@ export function contentHeight(paperFormat, margins = DEFAULT_MARGINS) {
 
 export function pageOf(y, pageHeight) {
   return Math.floor(y / pageHeight) + 1;
+}
+
+export function diagramSizing({ width, height, maxWidth, maxHeight, wholePageHeight, floor }) {
+  if (!width || !height) return { target: 'content', scale: 1, mode: 'natural' };
+  const boxScale = Math.min(1, maxWidth / width, maxHeight / height);
+  if (boxScale >= 1) return { target: 'content', scale: 1, mode: 'natural' };
+  const heightScale = maxHeight / height;
+  if (heightScale >= floor) return { target: 'content', scale: boxScale, mode: 'fit' };
+  const pageScale = Math.min(1, maxWidth / width, wholePageHeight / height);
+  return {
+    target: 'page',
+    scale: pageScale,
+    mode: pageScale >= floor ? 'whole-page' : 'xl',
+  };
 }
 
 export function diagramScale({ width, height, maxWidth, maxHeight }) {
