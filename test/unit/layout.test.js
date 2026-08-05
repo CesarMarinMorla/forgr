@@ -5,10 +5,12 @@ import {
   contentHeight,
   pageOf,
   diagramScale,
+  diagramSizing,
   parseViewBox,
   toPx,
   toMm,
   MAX_DIAGRAM_HEIGHT_RATIO,
+  WHOLE_PAGE_RATIO,
 } from '../../src/layout.js';
 
 test('toPx: converts css units to px', () => {
@@ -94,4 +96,51 @@ test('parseViewBox: tolerates negative origin', () => {
 test('parseViewBox: null on missing or malformed', () => {
   assert.equal(parseViewBox('<svg></svg>'), null);
   assert.equal(parseViewBox('<svg viewBox="0 0 100"></svg>'), null);
+});
+
+test('diagramSizing: natural when diagram fits without scaling', () => {
+  const r = diagramSizing({ width: 300, height: 200, maxWidth: 643, maxHeight: 825, wholePageHeight: 893, floor: 0.65 });
+  assert.equal(r.mode, 'natural');
+  assert.equal(r.target, 'content');
+  assert.equal(r.scale, 1);
+});
+
+test('diagramSizing: fit when diagram scales into content box at acceptable level', () => {
+  const r = diagramSizing({ width: 800, height: 600, maxWidth: 643, maxHeight: 825, wholePageHeight: 893, floor: 0.65 });
+  assert.equal(r.mode, 'fit');
+  assert.equal(r.target, 'content');
+  assert.ok(r.scale < 1);
+  assert.ok(r.scale >= 0.65);
+});
+
+test('diagramSizing: fit for wide-but-short diagram (only width binds)', () => {
+  const r = diagramSizing({ width: 2000, height: 200, maxWidth: 643, maxHeight: 825, wholePageHeight: 893, floor: 0.65 });
+  assert.equal(r.target, 'content');
+  assert.equal(r.mode, 'fit');
+  assert.ok(r.scale < 0.65);
+});
+
+test('diagramSizing: whole-page when height can not fit content box legibly', () => {
+  const r = diagramSizing({ width: 200, height: 1300, maxWidth: 643, maxHeight: 825, wholePageHeight: 893, floor: 0.65 });
+  assert.equal(r.target, 'page');
+  assert.equal(r.mode, 'whole-page');
+  assert.ok(r.scale >= 0.65);
+});
+
+test('diagramSizing: xl when even whole page can not hold the diagram legibly', () => {
+  const r = diagramSizing({ width: 200, height: 5000, maxWidth: 643, maxHeight: 825, wholePageHeight: 893, floor: 0.65 });
+  assert.equal(r.target, 'page');
+  assert.equal(r.mode, 'xl');
+  assert.ok(r.scale < 0.65);
+});
+
+test('diagramSizing: zero dims returns natural', () => {
+  const r = diagramSizing({ width: 0, height: 0, maxWidth: 643, maxHeight: 825, wholePageHeight: 893, floor: 0.65 });
+  assert.equal(r.mode, 'natural');
+  assert.equal(r.scale, 1);
+});
+
+test('WHOLE_PAGE_RATIO allows more of the page than MAX_DIAGRAM_HEIGHT_RATIO', () => {
+  assert.ok(WHOLE_PAGE_RATIO > MAX_DIAGRAM_HEIGHT_RATIO);
+  assert.ok(WHOLE_PAGE_RATIO <= 0.95);
 });

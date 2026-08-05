@@ -8,13 +8,14 @@ import { existsSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { renderMermaid, layoutMermaid } from '../../src/pdf.js';
-import { contentSize, MAX_DIAGRAM_HEIGHT_RATIO, MAX_WIDTH_RATIO, LEGIBILITY_SCALE_FLOOR } from '../../src/layout.js';
+import { contentSize, MAX_DIAGRAM_HEIGHT_RATIO, MAX_WIDTH_RATIO, WHOLE_PAGE_RATIO, LEGIBILITY_SCALE_FLOOR } from '../../src/layout.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MERMAID_DIST = path.resolve(__dirname, '..', '..', 'node_modules', 'mermaid', 'dist', 'mermaid.min.js');
 
 const { widthPx: CONTENT_WIDTH, heightPx: PAGE_HEIGHT } = contentSize('A4');
 const MAX_DIAGRAM_HEIGHT = Math.round(PAGE_HEIGHT * MAX_DIAGRAM_HEIGHT_RATIO);
+const WHOLE_PAGE_HEIGHT = Math.round(PAGE_HEIGHT * WHOLE_PAGE_RATIO);
 const MAX_WIDTH = Math.round(CONTENT_WIDTH * MAX_WIDTH_RATIO);
 
 const CSS = `
@@ -262,6 +263,112 @@ test('layoutMermaid converges: no unmarked diagram crosses a page boundary, orph
       }
     }
     assert.ok(iterations <= 5, `layout loop ran ${iterations} times (cap 5)`);
+  } finally {
+    await browser.close();
+  }
+});
+
+test('tall diagram gets whole-page treatment when allowed', { timeout: 90000 }, async () => {
+  const { browser, page } = await launch();
+  try {
+    const nodes = [];
+    for (let i = 1; i <= 60; i++) nodes.push(`N${i}`);
+    const edges = [];
+    for (let i = 1; i < 60; i++) edges.push(`N${i}-->N${i + 1}`);
+    const flow = `flowchart TD;\n    ${nodes.join(' & ')}\n    ${edges.join('\n    ')}`;
+    await page.setContent(wrapHtml(`<div class="mermaid">${escapeHtml(flow)}</div>`), { waitUntil: 'domcontentloaded' });
+    await renderMermaid(page, 'terminal', {
+      maxWidth: MAX_WIDTH, maxHeight: MAX_DIAGRAM_HEIGHT,
+      wholePageHeight: WHOLE_PAGE_HEIGHT, allowWholePage: true,
+    });
+    const d = await dims(page);
+    const isWholePage = await page.evaluate(() =>
+      document.querySelector('.mermaid').classList.contains('mermaid--whole-page')
+    );
+    assert.ok(isWholePage, 'tall diagram should have mermaid--whole-page class');
+    assert.ok(d.height > MAX_DIAGRAM_HEIGHT, `box ${d.height}px should exceed content-box cap ${MAX_DIAGRAM_HEIGHT}`);
+    assert.ok(d.height <= WHOLE_PAGE_HEIGHT + 1, `box ${d.height}px exceeds whole-page cap ${WHOLE_PAGE_HEIGHT}`);
+  } finally {
+    await browser.close();
+  }
+});
+
+test('XL diagram (extremely tall) gets whole-page with accepted scale', { timeout: 120000 }, async () => {
+  const { browser, page } = await launch();
+  try {
+    const nodes = [];
+    for (let i = 1; i <= 150; i++) nodes.push(`N${i}`);
+    const edges = [];
+    for (let i = 1; i < 150; i++) edges.push(`N${i}-->N${i + 1}`);
+    const flow = `flowchart TD;\n    ${nodes.join(' & ')}\n    ${edges.join('\n    ')}`;
+    await page.setContent(wrapHtml(`<div class="mermaid">${escapeHtml(flow)}</div>`), { waitUntil: 'domcontentloaded' });
+    await renderMermaid(page, 'terminal', {
+      maxWidth: MAX_WIDTH, maxHeight: MAX_DIAGRAM_HEIGHT,
+      wholePageHeight: WHOLE_PAGE_HEIGHT, allowWholePage: true,
+    });
+    const d = await dims(page);
+    const isWholePage = await page.evaluate(() =>
+      document.querySelector('.mermaid').classList.contains('mermaid--whole-page')
+    );
+    assert.ok(isWholePage, 'XL diagram should have mermaid--whole-page class');
+    assert.ok(d.height <= WHOLE_PAGE_HEIGHT + 1, `box ${d.height}px exceeds whole-page cap`);
+  } finally {
+    await browser.close();
+  }
+});
+
+test('wide gantt does not get whole-page even when allowed', { timeout: 60000 }, async () => {
+  const { browser, page } = await launch();
+  try {
+    const gantt = [
+      'gantt', '    title Wide schedule', '    dateFormat YYYY-MM-DD',
+      '    section Planning', '    Write proposal        :a1, 2026-01-01, 30d',
+      '    Gather requirements   :a2, 2026-02-01, 45d',
+      '    Design architecture   :a3, 2026-03-15, 60d',
+      '    section Development', '    Implement core module :d1, 2026-05-15, 90d',
+      '    Implement second part :d2, 2026-08-15, 75d',
+      '    Implement third part  :d3, 2026-11-01, 60d',
+      '    section Testing', '    Unit and integration  :t1, 2027-01-01, 60d',
+      '    Load and stress tests :t2, 2027-03-01, 45d',
+      '    User acceptance       :t3, 2027-04-15, 30d',
+      '    section Release', '    Package and document  :r1, 2027-05-15, 20d',
+      '    Deploy and monitor    :r2, 2027-06-01, 15d',
+    ].join('\n');
+    await page.setContent(wrapHtml(`<div class="mermaid">${escapeHtml(gantt)}</div>`), { waitUntil: 'domcontentloaded' });
+    await renderMermaid(page, 'terminal', {
+      maxWidth: MAX_WIDTH, maxHeight: MAX_DIAGRAM_HEIGHT,
+      wholePageHeight: WHOLE_PAGE_HEIGHT, allowWholePage: true,
+    });
+    const isWholePage = await page.evaluate(() =>
+      document.querySelector('.mermaid').classList.contains('mermaid--whole-page')
+    );
+    assert.ok(!isWholePage, 'wide gantt should not get whole-page treatment');
+    const d = await dims(page);
+    assert.ok(d.height <= MAX_DIAGRAM_HEIGHT + 1, `wide gantt ${d.height}px should stay within content-box cap`);
+  } finally {
+    await browser.close();
+  }
+});
+
+test('whole-page is disabled when mermaidMaxHeight is set', { timeout: 90000 }, async () => {
+  const { browser, page } = await launch();
+  try {
+    const nodes = [];
+    for (let i = 1; i <= 60; i++) nodes.push(`N${i}`);
+    const edges = [];
+    for (let i = 1; i < 60; i++) edges.push(`N${i}-->N${i + 1}`);
+    const flow = `flowchart TD;\n    ${nodes.join(' & ')}\n    ${edges.join('\n    ')}`;
+    await page.setContent(wrapHtml(`<div class="mermaid">${escapeHtml(flow)}</div>`), { waitUntil: 'domcontentloaded' });
+    await renderMermaid(page, 'terminal', {
+      maxWidth: MAX_WIDTH, maxHeight: MAX_DIAGRAM_HEIGHT,
+      wholePageHeight: WHOLE_PAGE_HEIGHT, allowWholePage: false,
+    });
+    const isWholePage = await page.evaluate(() =>
+      document.querySelector('.mermaid').classList.contains('mermaid--whole-page')
+    );
+    assert.ok(!isWholePage, 'should not be whole-page when allowWholePage is false');
+    const d = await dims(page);
+    assert.ok(d.height <= MAX_DIAGRAM_HEIGHT + 1, `box ${d.height}px should stay within content-box cap`);
   } finally {
     await browser.close();
   }
