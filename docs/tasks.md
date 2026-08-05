@@ -15,6 +15,7 @@
 | 4.75 | File picker & batch rendering (multi-file, optional file argument, save) | Done |
 | 2.8 | Mermaid sizing & placement (scale to fit, font re-render, page-break intelligence) | Done |
 | 2.81 | Content-aware mermaid sizing (phantom viewBox trim, 0.98 right-edge margin) | Done |
+| 2.82 | Big diagram management (whole-page treatment, XL scale + readability warning) | Done |
 | 5 | Watch mode & user presets | Pending |
 | 6 | Extended format support (LaTeX, Jekyll/Liquid preprocessing) | Later |
 | 7 | `forgr doctor` diagnostic | Done |
@@ -190,9 +191,25 @@ Two reports under this banner: the 6.4 sequence diagram in `comprehensive-newsle
 - Fix: `layoutMermaid()` no longer short-circuits per iteration, so all crossing diagrams get marked in one pass instead of exhausting the iteration cap.
 - Verification: `test/mermaid/sizing.test.js` "viewBox is trimmed to full content extent" asserts zero clipped children and a full-width viewBox.
 
-### Issue 3 — massive diagrams get the whole page (pending)
+### Issue 3 — massive diagrams get the whole page (done)
 
-Charts that are genuinely huge should claim the whole page. Deferred per owner. Not started.
+Charts that are genuinely huge claim the whole page. Implemented in Milestone 2.82 below.
+
+---
+
+## Milestone 2.82 — Big diagram management (Done)
+
+Follow-up to M2.8.1, resolving Issue 3. Diagrams too tall to fit the content box legibly (scale below the 0.65 floor) get the whole page instead of a small cramped box. Automatically applies to any diagram; no new front-matter key.
+
+- [x] `WHOLE_PAGE_RATIO = 0.92` — whole-page diagrams claim up to 92% of page height (taller than the 0.85 content-box cap, so whole-page wins for tall charts)
+- [x] Whole-page re-render loop: renders at the base font, then steps the font down in 70% increments (min 9) until the diagram fits the whole-page box without scaling, then sizes it
+- [x] `mermaid--whole-page` class (`.mermaid { break-before: page }`) — the diagram starts on its own page; `layoutMermaid()` skips keep-heading affinity for it
+- [x] XL fallback: diagrams still too tall for a page at min font scale to the whole-page box and warn on stderr when displayed text would drop below 6px (`MIN_READABLE_TEXT`), e.g. `mermaid: diagram text at 4px below readability threshold; consider splitting in source`
+- [x] Wide-but-short diagrams (e.g. gantt) are untouched by whole-page — they stay capped at the content box
+- [x] `forgr.mermaidMaxHeight` disables whole-page treatment (`allowWholePage = mermaidMaxHeight == null`); the explicit cap is respected exactly
+- [x] `diagramSizing()` in `src/layout.js` — pure function classifying diagrams into natural / fit / whole-page / xl tiers; 8 new unit tests
+- [x] 4 new browser tests in `test/mermaid/sizing.test.js` (60-node tall whole-page, 150-node XL with warning, wide gantt no-whole-page, whole-page disabled via override)
+- [x] `sizing.md` tall flowchart (30 nodes) now renders whole-page; integration fixture still asserts 3+ pages
 
 ---
 

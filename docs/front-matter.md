@@ -42,7 +42,7 @@ These go under a `forgr:` key and control rendering behavior.
 | `paperFormat` | string | `A4` | Page size: `A4` or `Letter` |
 | `margins` | object | `{ top: '2cm', bottom: '2cm', left: '2cm', right: '2cm' }` | CSS-length strings for all four margins |
 | `mermaidMaxWidth` | string/number | content width | Max rendered width for mermaid diagrams (CSS length, e.g. `500px`, `12cm`, or px number). Defaults to the page content width |
-| `mermaidMaxHeight` | string/number | 85% of page height | Max rendered height for mermaid diagrams (CSS length, or px number). Diagrams are scaled to fit this box |
+| `mermaidMaxHeight` | string/number | 85% of page height | Max rendered height for mermaid diagrams (CSS length, or px number). Diagrams are scaled to fit this box. Setting this disables the whole-page treatment for very tall diagrams |
 
 ## Merge priority
 
