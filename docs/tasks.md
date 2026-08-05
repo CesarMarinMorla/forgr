@@ -190,6 +190,7 @@ Two reports under this banner: the 6.4 sequence diagram in `comprehensive-newsle
 - Fix: content extent is now measured as the union of `getBoundingClientRect()` over all graphical children, mapped into viewBox units (getBoundingClientRect includes stroke). The SVG `viewBox` is re-trimmed to that extent plus a 1% padding, then the box is sized from it. The sequence diagram renders complete and unclipped at its true extent (e.g. 630×342 on A4).
 - Fix: `layoutMermaid()` no longer short-circuits per iteration, so all crossing diagrams get marked in one pass instead of exhausting the iteration cap.
 - Verification: `test/mermaid/sizing.test.js` "viewBox is trimmed to full content extent" asserts zero clipped children and a full-width viewBox.
+- Status: **partial**. Phantom spacing still recurs in some diagrams (mostly sequence diagrams and diagrams near a page boundary). Tracked as an open known issue in `docs/KNOWN_ISSUES.md` (issue 1). The whole-page path (milestone 2.82) mitigates it for the largest diagrams.
 
 ### Issue 3 — massive diagrams get the whole page (done)
 

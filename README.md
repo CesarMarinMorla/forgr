@@ -249,6 +249,12 @@ Integration tests accept a `FORGR_PRESET` environment variable (`terminal`, `min
 
 ---
 
+## Known issues
+
+Known bugs and limitations are tracked in [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md). Mermaid diagram sizing is under active iteration: phantom vertical spacing still appears in some diagrams. If a diagram renders with unexpected blank space or a near-empty page, cap its box with the `forgr.mermaidMaxWidth` and `forgr.mermaidMaxHeight` front-matter keys.
+
+---
+
 ## License
 
 MIT: see [LICENSE](LICENSE).
