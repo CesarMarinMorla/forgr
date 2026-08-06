@@ -1,6 +1,6 @@
 # Forgr — Implementation Specification
 
-*Last reviewed 2026-07-17 against the source tree. Where this doc and the code disagree, the code wins.*
+*Last reviewed 2026-08-06 against the source tree. Where this doc and the code disagree, the code wins.*
 
 ## Overview
 
@@ -69,6 +69,7 @@ Node.js + Playwright. A single browser launch handles markdown rendering, Mermai
   - `--cover-date <text>` — cover date (default: document date)
   - `--section-numbering` / `--no-section-numbering` — enable/disable section numbering
   - `--write` — persist all rendering options into the file's front-matter
+  - `--watch` — render once, then re-render when the input file changes (press Ctrl+C to stop; cannot be combined with `--write`)
 - `uninstall` — remove the Chromium cache at `~/.forgr/browsers`.
 - `doctor` — diagnose the install.
   - `-f, --fix` — auto-fix where possible (download Chromium, remove malformed user presets)
@@ -178,7 +179,7 @@ Keys live at the top of the `.md` file. Shared keys (`title`, `date`, `author`) 
 ## Key Decisions (locked)
 
 - **Fail loudly, never degrade silently** — bad input, unwritable output, Chromium launch failure, or a broken Mermaid diagram all produce a clear error and a non-zero exit. No partial or empty PDF is ever written.
-- **Silent overwrite** by default — required for future `--watch` mode.
+- **Silent overwrite** by default — required for `--watch` mode, where re-renders must never block on a prompt.
 - **Playwright pinned exactly** (`playwright-core` 1.61.1, no `^`/`~`) so Chromium build drift can't change rendering.
 - **Margins via Playwright, not CSS** — verified: CSS-only padding renders content flush to the page edge.
 - **Mermaid runs unconditionally** on every document (no block-presence detection) — removes a class of "did we detect Mermaid" bugs.
