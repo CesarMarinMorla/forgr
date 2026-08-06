@@ -65,9 +65,10 @@ function formatDate(dateStr, format, locale) {
   return dateStr || new Date().toISOString().slice(0, 10);
 }
 
-function templateContext(body, config) {
+export function templateContext(body, config) {
   return {
     body,
+    data: config.data,
     preset: config.preset,
     docMeta: config.docMeta,
     cover: config.cover,
@@ -90,7 +91,7 @@ function templateContext(body, config) {
 async function renderStage(markdownBody, config, absInput, outputPath, withToc, headingPages, onProgress) {
   const baseDir = path.dirname(absInput);
   if (onProgress) onProgress('Rendering markdown...');
-  const { body, tocHtml } = renderMarkdown(markdownBody, { toc: withToc, headingPages, baseDir });
+  const { body, tocHtml } = renderMarkdown(markdownBody, { toc: withToc, headingPages, baseDir, data: config.data });
   if (onProgress) onProgress('Rendering template...');
   const html = await renderTemplate(templateContext(tocHtml + body, config));
   return generatePdf(html, outputPath, { captureHeadings: !withToc, onProgress, ...config });
@@ -119,6 +120,7 @@ export async function run(inputPath, cliOptions = {}, { write, writeKeys, onProg
   const { frontMatter, rawData, body: markdownBody } = parseFrontMatter(markdown);
   const config = buildConfig(cliOptions, frontMatter);
   config.outputPath = outputPath;
+  config.data = rawData;
 
   if (onProgress) onProgress('Checking preset...');
   if (!BUILTIN_PRESETS.some(p => p.name === config.preset)) {

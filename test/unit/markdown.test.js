@@ -158,3 +158,45 @@ test('throws when baseDir is not provided for local image', () => {
   const src = '![img](test/fixtures/assets/sample.png)';
   assert.throws(() => body(src), /baseDir/);
 });
+
+test('substitutes {{ var }} from front-matter data', () => {
+  const src = 'The {{product}} engine converts files.';
+  const html = body(src, { data: { product: 'forgr' } });
+  assert.match(html, /<p>The forgr engine converts files\.<\/p>/);
+});
+
+test('substitutes nested forgr keys', () => {
+  const src = 'Run {{forgr.command}}.';
+  const html = body(src, { data: { forgr: { command: 'forgr report.md' } } });
+  assert.match(html, /<p>Run forgr report\.md\.<\/p>/);
+});
+
+test('leaves unknown variables literal', () => {
+  const src = 'Value is {{missing}}.';
+  const html = body(src, { data: { product: 'forgr' } });
+  assert.match(html, /<p>Value is \{\{missing\}\}\.<\/p>/);
+});
+
+test('leaves variables untouched when no data is provided', () => {
+  const src = 'Value is {{product}}.';
+  const html = body(src);
+  assert.match(html, /<p>Value is \{\{product\}\}\.<\/p>/);
+});
+
+test('escapes HTML in substituted values', () => {
+  const src = 'Made by {{company}}.';
+  const html = body(src, { data: { company: 'Acme & Co' } });
+  assert.match(html, /<p>Made by Acme &amp; Co\.<\/p>/);
+});
+
+test('does not substitute inside fenced code blocks', () => {
+  const src = '```\nconst x = "{{product}}";\n```';
+  const html = body(src, { data: { product: 'forgr' } });
+  assert.match(html, /\{\{product\}\}/);
+});
+
+test('does not substitute inside inline code', () => {
+  const src = 'Use `{{product}}` in the docs.';
+  const html = body(src, { data: { product: 'forgr' } });
+  assert.match(html, /<code>\{\{product\}\}<\/code>/);
+});

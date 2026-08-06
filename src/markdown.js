@@ -77,6 +77,27 @@ md.renderer.rules.fence = (tokens, idx, options, env, self) => {
   return defaultFence(tokens, idx, options, env, self);
 };
 
+function resolveData(data, key) {
+  if (!data) return undefined;
+  return key.split('.').reduce((acc, part) => (acc == null ? undefined : acc[part]), data);
+}
+
+md.core.ruler.before('anchor', 'substitute_variables', (state) => {
+  if (!state.env || state.env.data == null) return;
+  const data = state.env.data;
+  for (let i = 0; i < state.tokens.length; i++) {
+    const token = state.tokens[i];
+    if (token.type !== 'inline' || !token.children) continue;
+    for (const child of token.children) {
+      if (child.type !== 'text') continue;
+      child.content = child.content.replace(/\{\{\s*([\w.]+)\s*\}\}/g, (match, key) => {
+        const value = resolveData(data, key);
+        return value === undefined || value === null ? match : String(value);
+      });
+    }
+  }
+});
+
 md.core.ruler.before('anchor', 'strip_h2_leading_number', (state) => {
   for (let i = 0; i < state.tokens.length; i++) {
     const token = state.tokens[i];
@@ -137,14 +158,15 @@ function buildTocHtml(tokens, headingPages) {
   return html;
 }
 
-export function renderMarkdown(source, { toc, headingPages, baseDir } = {}) {
-  const tokens = md.parse(source, {});
+export function renderMarkdown(source, { toc, headingPages, baseDir, data } = {}) {
+  const env = { baseDir, data };
+  const tokens = md.parse(source, env);
 
   let tocHtml = '';
   if (toc) {
     tocHtml = buildTocHtml(tokens, headingPages);
   }
 
-  const body = wrapTableNumbers(md.renderer.render(tokens, md.options, { baseDir }));
+  const body = wrapTableNumbers(md.renderer.render(tokens, md.options, env));
   return { body, tocHtml };
 }
