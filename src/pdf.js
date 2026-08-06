@@ -87,7 +87,7 @@ export async function hasMermaidDiagrams(page) {
   return page.evaluate(() => document.querySelector('.mermaid') !== null);
 }
 
-export async function renderMermaid(page, preset, { maxWidth, maxHeight, wholePageHeight, allowWholePage } = {}) {
+export async function renderMermaid(page, preset, { maxWidth, maxHeight, wholePageHeight, allowWholePage, pageHeight } = {}) {
   const hasMermaidLib = await page.evaluate(() => typeof window.mermaid !== 'undefined');
   if (!hasMermaidLib) {
     await page.addScriptTag({ path: MERMAID_DIST });
@@ -99,7 +99,7 @@ export async function renderMermaid(page, preset, { maxWidth, maxHeight, wholePa
   }, mermaidConfig);
 
   const result = await page.evaluate(async (opts) => {
-    const { theme, maxWidth, maxHeight, wholePageHeight, allowWholePage, scaleFloor, fontReduction, minFont, minReadable } = opts;
+    const { theme, maxWidth, maxHeight, wholePageHeight, allowWholePage, scaleFloor, fontReduction, minFont, minReadable, pageHeight } = opts;
     const baseFont = theme.themeVariables?.fontSize ?? 16;
     const contentBBox = (svg) => {
       const vb = svg.viewBox.baseVal;
@@ -164,9 +164,11 @@ export async function renderMermaid(page, preset, { maxWidth, maxHeight, wholePa
     const errorMessages = [];
     const warningMessages = [];
     const els = document.querySelectorAll('.mermaid');
+    const firstEl = els.length > 0 ? els[0] : null;
     for (const el of els) {
       const source = el.textContent.trim();
       if (!source) continue;
+      const isFirst = el === firstEl;
       const renderId = () => 'mermaid_' + Math.random().toString(36).slice(2, 8);
       try {
         let result = await mermaid.render(renderId(), source);
@@ -226,6 +228,16 @@ export async function renderMermaid(page, preset, { maxWidth, maxHeight, wholePa
         } else {
           if (svg && dims) scale = applySizing(svg, dims, maxWidth, maxHeight);
         }
+
+        if (isFirst && svg && dims && pageHeight && !el.classList.contains('mermaid--whole-page')) {
+          const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
+          const top = el.getBoundingClientRect().top + scrollTop;
+          const marginBottom = parseFloat(getComputedStyle(el).marginBottom) || 0;
+          const available = pageHeight - top - marginBottom;
+          if (available < maxHeight && available / dims.height >= scaleFloor) {
+            scale = applySizing(svg, dims, maxWidth, available);
+          }
+        }
       } catch (e) {
         errorMessages.push(e.message || String(e));
       }
@@ -241,6 +253,7 @@ export async function renderMermaid(page, preset, { maxWidth, maxHeight, wholePa
     fontReduction: DIAGRAM_FONT_REDUCTION,
     minFont: MIN_DIAGRAM_FONT,
     minReadable: MIN_READABLE_TEXT,
+    pageHeight,
   });
 
   for (const w of result.warnings) {
@@ -249,49 +262,6 @@ export async function renderMermaid(page, preset, { maxWidth, maxHeight, wholePa
   if (result.errors.length > 0) {
     throw new Error(`mermaid: ${result.errors.length} diagram(s) failed to render: ${result.errors.join('; ')}`);
   }
-}
-
-export async function layoutMermaid(page, { pageHeight }) {
-  return page.evaluate((h) => {
-    const maxIterations = 5;
-    const pageOf = (y) => Math.floor(y / h) + 1;
-    const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
-    let iterations = 0;
-    while (iterations < maxIterations) {
-      const diagrams = Array.from(document.querySelectorAll('.mermaid'));
-      let changed = false;
-      for (const el of diagrams) {
-        const rect = el.getBoundingClientRect();
-        const y = rect.top + scrollTop;
-        const startPage = pageOf(y);
-        const endPage = pageOf(y + rect.height - 1);
-        if (endPage > startPage && !el.classList.contains('mermaid--new-page')) {
-          el.classList.add('mermaid--new-page');
-          changed = true;
-          continue;
-        }
-        if (el.classList.contains('mermaid--whole-page')) continue;
-        let heading = null;
-        let prev = el.previousElementSibling;
-        while (prev) {
-          if (prev.matches('h1, h2, h3, h4, h5, h6[id]')) {
-            heading = prev;
-            break;
-          }
-          prev = prev.previousElementSibling;
-        }
-        if (!heading) continue;
-        const headingPage = pageOf(heading.getBoundingClientRect().top + scrollTop);
-        if (headingPage !== startPage && !heading.classList.contains('mermaid--keep-heading')) {
-          heading.classList.add('mermaid--keep-heading');
-          changed = true;
-        }
-      }
-      if (!changed) break;
-      iterations++;
-    }
-    return iterations;
-  }, pageHeight);
 }
 
 export function computeHeadingPages(page, paperFormat, margins) {
@@ -372,16 +342,12 @@ export async function generatePdf(html, outputPath, opts = {}) {
         maxHeight: diagramMaxHeight,
         wholePageHeight,
         allowWholePage,
+        pageHeight,
       });
     }
 
     if (onProgress) onProgress('Waiting for fonts...');
     await page.evaluate(() => document.fonts.ready);
-
-    if (hasMermaid) {
-      const fixed = await layoutMermaid(page, { pageHeight });
-      if (fixed > 0 && onProgress) onProgress('Adjusting diagram placement...');
-    }
 
     const headingPages = captureHeadings ? await computeHeadingPages(page, paperFormat, margins) : [];
     if (onProgress) onProgress('Generating PDF...');

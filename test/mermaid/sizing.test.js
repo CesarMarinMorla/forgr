@@ -7,7 +7,7 @@ import { chromium } from 'playwright-core';
 import { existsSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { renderMermaid, layoutMermaid } from '../../src/pdf.js';
+import { renderMermaid } from '../../src/pdf.js';
 import { contentSize, MAX_DIAGRAM_HEIGHT_RATIO, MAX_WIDTH_RATIO, WHOLE_PAGE_RATIO, LEGIBILITY_SCALE_FLOOR } from '../../src/layout.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -21,9 +21,8 @@ const MAX_WIDTH = Math.round(CONTENT_WIDTH * MAX_WIDTH_RATIO);
 const CSS = `
   <style>
     .mermaid { margin: 1.4em auto; max-width: 100%; text-align: center; break-inside: avoid; break-before: avoid; }
-    .mermaid svg { max-width: 100%; height: auto; }
-    .mermaid--new-page { break-before: page; }
-    .mermaid--keep-heading { break-before: page; }
+    .mermaid svg { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+    h1, h2, h3, h4, h5, h6 { break-after: avoid; }
   </style>`;
 
 function wrapHtml(body) {
@@ -68,6 +67,16 @@ function contentDims(page) {
       viewBoxH: vb.height,
       childrenOutside: outside,
     };
+  });
+}
+
+function containerDims(page) {
+  return page.evaluate(() => {
+    const el = document.querySelector('.mermaid');
+    const svg = el.querySelector('svg');
+    const e = el.getBoundingClientRect();
+    const s = svg.getBoundingClientRect();
+    return { containerH: e.height, svgH: s.height, containerW: e.width, svgW: s.width };
   });
 }
 
@@ -126,6 +135,19 @@ test('gantt with past dates does not balloon to a thumbnail from the off-chart t
     assert.ok(ratio < 5, `past-date gantt viewBox ${c.viewBoxW}px over ${d.width}px box (ratio ${ratio.toFixed(1)}) inflated by off-chart today marker`);
     assert.ok(d.width > MAX_WIDTH * 0.5, `past-date gantt collapsed to ${d.width}px thumbnail`);
     assert.ok(d.width <= MAX_WIDTH + 1, `gantt width ${d.width} exceeds 0.98 cap ${MAX_WIDTH}`);
+  } finally {
+    await browser.close();
+  }
+});
+
+test('.mermaid container has no phantom height: container matches svg box exactly', { timeout: 60000 }, async () => {
+  const { browser, page } = await launch();
+  try {
+    const flow = 'flowchart LR; A-->B; B-->C; C-->D';
+    await page.setContent(wrapHtml(`<div class="mermaid">${escapeHtml(flow)}</div>`), { waitUntil: 'domcontentloaded' });
+    await renderMermaid(page, 'terminal', { maxWidth: MAX_WIDTH, maxHeight: MAX_DIAGRAM_HEIGHT });
+    const d = await containerDims(page);
+    assert.ok(Math.abs(d.containerH - d.svgH) <= 0.5, `container ${d.containerH}px exceeds svg ${d.svgH}px (inline baseline phantom)`);
   } finally {
     await browser.close();
   }
@@ -241,7 +263,7 @@ test('oversized diagram is re-rendered with reduced font', { timeout: 60000 }, a
   }
 });
 
-test('layoutMermaid converges: no unmarked diagram crosses a page boundary, orphaned headings get marked', { timeout: 60000 }, async () => {
+test('placement relies on native fragmentation: headings keep break-after avoid and diagrams break-inside avoid', { timeout: 60000 }, async () => {
   const { browser, page } = await launch();
   try {
     const pageHeight = 320;
@@ -256,40 +278,70 @@ test('layoutMermaid converges: no unmarked diagram crosses a page boundary, orph
     }
     await page.setContent(wrapHtml(body), { waitUntil: 'domcontentloaded' });
     await renderMermaid(page, 'terminal', { maxWidth: CONTENT_WIDTH, maxHeight: MAX_DIAGRAM_HEIGHT });
-    const iterations = await layoutMermaid(page, { pageHeight });
 
-    const report = await page.evaluate((h) => {
-      const pageOf = (y) => Math.floor(y / h) + 1;
-      const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
-      return Array.from(document.querySelectorAll('.mermaid')).map((el) => {
-        const rect = el.getBoundingClientRect();
-        const startPage = pageOf(rect.top + scrollTop);
-        const endPage = pageOf(rect.top + scrollTop + rect.height - 1);
-        let heading = null;
-        let prev = el.previousElementSibling;
-        while (prev) {
-          if (prev.matches('h1, h2, h3, h4, h5, h6[id]')) { heading = prev; break; }
-          prev = prev.previousElementSibling;
-        }
-        const headingPage = heading ? pageOf(heading.getBoundingClientRect().top + scrollTop) : null;
-        return {
-          startPage, endPage, headingPage,
-          newPage: el.classList.contains('mermaid--new-page'),
-          keepHeading: heading ? heading.classList.contains('mermaid--keep-heading') : false,
-        };
-      });
-    }, pageHeight);
+    const contract = await page.evaluate(() => {
+      const heading = getComputedStyle(document.querySelector('h2'));
+      const diagram = getComputedStyle(document.querySelector('.mermaid'));
+      return { headingBreakAfter: heading.breakAfter, diagramBreakInside: diagram.breakInside };
+    });
 
-    assert.ok(report.some((r) => r.newPage || r.keepHeading), 'fixture should force at least one placement fix');
-    for (const r of report) {
-      if (!r.newPage) {
-        assert.equal(r.endPage, r.startPage, `unmarked diagram spans pages ${r.startPage}-${r.endPage}`);
-      }
-      if (r.headingPage !== null && r.headingPage !== r.startPage) {
-        assert.ok(r.keepHeading, `heading on page ${r.headingPage} orphaned from diagram on ${r.startPage} without fix`);
-      }
-    }
-    assert.ok(iterations <= 5, `layout loop ran ${iterations} times (cap 5)`);
+    assert.equal(contract.headingBreakAfter, 'avoid', 'headings must keep break-after avoid so they stay attached to their diagram');
+    assert.equal(contract.diagramBreakInside, 'avoid', 'diagrams must keep break-inside avoid so they never split across pages');
+  } finally {
+    await browser.close();
+  }
+});
+
+test('first diagram is clamped to the page-1 space left below its heading chain', { timeout: 60000 }, async () => {
+  const { browser, page } = await launch();
+  try {
+    const flow = [
+      'flowchart TD',
+      '  Question([Research question]) --> Review[Literature review]',
+      '  Review --> Hypothesis[Form hypothesis]',
+      '  Hypothesis --> Design[Design study]',
+      '  Design --> Collect[Collect data]',
+      '  Collect --> Analyze[Analyze results]',
+      '  Analyze --> Significant{Significant?}',
+      '  Significant -->|Yes| Publish([Manuscript])',
+      '  Significant -->|No| Null[Null result]',
+      '  Null --> Publish',
+    ].join('\n');
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+      .mermaid { margin: 1.4em auto; max-width: 100%; text-align: center; break-inside: avoid; break-before: avoid; }
+      .mermaid svg { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+      h1, h2, h3, h4, h5, h6 { break-after: avoid; }
+      .doc-meta { font-size: 12px; padding-bottom: 8px; margin-bottom: 28px; }
+      h1 { font-size: 26px; margin: 40px 0 12px; }
+      h2 { font-size: 18px; margin: 36px 0 14px; }
+    </style></head><body>
+      <header class="doc-meta"><span>Mermaid Diagrams - Academic</span></header>
+      <h1>Research Study</h1>
+      <h2>Flowchart</h2>
+      <div class="mermaid">${escapeHtml(flow)}</div>
+    </body></html>`;
+    await page.setContent(html, { waitUntil: 'domcontentloaded' });
+    await renderMermaid(page, 'academic', {
+      maxWidth: MAX_WIDTH, maxHeight: MAX_DIAGRAM_HEIGHT, pageHeight: PAGE_HEIGHT,
+    });
+
+    const r = await page.evaluate(({ pageH, maxH }) => {
+      const el = document.querySelector('.mermaid');
+      const svg = el.querySelector('svg');
+      const rect = el.getBoundingClientRect();
+      const srect = svg.getBoundingClientRect();
+      const marginBottom = parseFloat(getComputedStyle(el).marginBottom) || 0;
+      return {
+        top: rect.top,
+        svgH: srect.height,
+        marginBottom,
+        fitsPage: rect.top + srect.height + marginBottom <= pageH,
+        clamped: srect.height < maxH,
+      };
+    }, { pageH: PAGE_HEIGHT, maxH: MAX_DIAGRAM_HEIGHT });
+
+    assert.ok(r.clamped, `first diagram should be clamped below max height ${MAX_DIAGRAM_HEIGHT}, got ${r.svgH}px`);
+    assert.ok(r.fitsPage, `title+heading+diagram chain must stay on page 1 (top ${r.top} + svg ${r.svgH} + margin ${r.marginBottom} > ${PAGE_HEIGHT})`);
   } finally {
     await browser.close();
   }

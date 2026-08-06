@@ -33,6 +33,20 @@ Spacing that is technically intentional but handled clumsily. This is the lesser
 - The `1.4em` container margin reading as excessive against the document rhythm
 - A whole-page diagram forcing a fresh page even when the previous page has room
 
+### Reported cases
+
+The layout pass applies `mermaid--new-page` (`break-before: page`) when a diagram crosses a page boundary, but it measures page positions in screen space where that CSS class has no effect. As a result the pass never applies `mermaid--keep-heading` to the heading above the break, and the printed PDF puts the heading alone on a page with roughly 95% of the vertical space blank while the diagram starts on the next page. The diagram itself fits in 35% to 40% of the page height, so the sizes are correct and the waste is pure placement.
+
+Confirmed on these fixture diagrams:
+
+- `test/mermaid/fixtures/academic.md`, first diagram (Flowchart)
+- `test/mermaid/fixtures/technical.md`, fourth diagram (Entity Relationship) and seventh diagram (Mindmap)
+- `test/fixtures/comprehensive.md`, section 6.4 Authentication Sequence
+
+Status: **resolved**. The JS placement pass (`layoutMermaid`) was redundant with the native CSS fragmentation rules and actively harmful, so it was removed. The browser keeps a heading attached to its diagram through `h1..h6 { break-after: avoid }` and keeps diagrams whole through `.mermaid { break-inside: avoid }`, both already in the templates. Rendered PDFs now place each flagged diagram on the same page as its heading.
+
+One placement case remains handled in the renderer: when the first diagram plus its heading chain is taller than the first page, the diagram height is capped to the space left below the chain (as long as the text stays readable) so the whole block stays on page 1 instead of pushing to page 2 and leaving the first page blank. Diagrams too large to fit this way fall through to the existing whole-page or page-break behavior.
+
 Handle only after phantom spacing (issue 1) is resolved, and only for the specific cases the owner chooses. Not a defect to fix mechanically; each case is a judgment call.
 
 ## Issue 3 — mermaid sizing is a work in progress
