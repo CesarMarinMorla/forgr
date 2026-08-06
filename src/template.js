@@ -2,7 +2,8 @@ import { readFile } from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import Handlebars from 'handlebars';
-import { BUILTIN_PRESETS } from './presets.js';
+import { USER_PRESETS_DIR, findUserPreset, listPresets } from './presets.js';
+import { PresetNotFoundError } from './errors.js';
 import { FONTS } from './assets/fonts/manifest.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -11,16 +12,21 @@ const TEMPLATE_PATH = path.join(__dirname, 'templates', 'base.html');
 const PRESETS_DIR = path.join(__dirname, 'templates', 'presets');
 const FONTS_DIR = path.join(__dirname, 'assets', 'fonts');
 
-export async function renderTemplate(context = {}) {
+export async function renderTemplate(context = {}, { userPresetsDir = USER_PRESETS_DIR } = {}) {
   const preset = context.preset || 'terminal';
-  const presetPath = path.join(PRESETS_DIR, `${preset}.css`);
+  const builtinPath = path.join(PRESETS_DIR, `${preset}.css`);
 
   let presetCss;
   try {
-    presetCss = await readFile(presetPath, 'utf8');
+    presetCss = await readFile(builtinPath, 'utf8');
   } catch {
-    const names = BUILTIN_PRESETS.map(p => p.name).join(', ');
-    throw new Error(`preset "${preset}" not found. Available: ${names}`);
+    const user = findUserPreset(preset, userPresetsDir);
+    if (user && user.cssPath) {
+      presetCss = await readFile(user.cssPath, 'utf8');
+    } else {
+      const names = listPresets(userPresetsDir).map(p => p.name);
+      throw new PresetNotFoundError(preset, names);
+    }
   }
 
   const reads = FONTS.map(f =>

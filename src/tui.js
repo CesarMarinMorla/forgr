@@ -123,7 +123,7 @@ function FilePicker({ files, onSelect, onQuit }) {
   );
 }
 
-function PresetPicker({ presets, notification, onSelect, fileLabel }) {
+function PresetPicker({ presets, onSelect, fileLabel }) {
   const [index, setIndex] = useState(0);
 
   useInput((input, key) => {
@@ -188,22 +188,12 @@ function PresetPicker({ presets, notification, onSelect, fileLabel }) {
     React.createElement(Text, { dimColor: true }, ' quit')
   );
 
-  const notif = notification
-    ? React.createElement(
-        Box,
-        { marginTop: 1 },
-        React.createElement(Text, { color: '#C85A48' }, '\u26A0'),
-        React.createElement(Text, { dimColor: true }, ` ${notification}`)
-      )
-    : null;
-
   return React.createElement(
     Box,
     { flexDirection: 'column', paddingX: 1, width: '100%' },
     React.createElement(Box, { marginBottom: 1 }, title),
     fileLabel ? React.createElement(Box, { marginBottom: 1 }, React.createElement(Text, { dimColor: true }, `  ${fileLabel}`)) : null,
     React.createElement(Box, { flexDirection: 'column' }, ...rows),
-    notif,
     React.createElement(Box, { marginTop: 1 }, help)
   );
 }
@@ -549,7 +539,6 @@ function TuiApp({ presets, inputFile }) {
   const [results, setResults] = useState([]);
   const [progress, setProgress] = useState('');
   const [currentFileIndex, setCurrentFileIndex] = useState(0);
-  const [notification, setNotification] = useState('');
   const [saveStatus, setSaveStatus] = useState(null);
   const startTimeRef = useRef(null);
 
@@ -661,15 +650,9 @@ function TuiApp({ presets, inputFile }) {
     case 'picker':
       return React.createElement(PresetPicker, {
         presets,
-        notification,
         fileLabel,
         onSelect: (preset) => {
           if (!preset) { process.exit(0); return; }
-          if (preset.source === 'user') {
-            setNotification('User presets not yet supported. Pick a built-in preset.');
-            return;
-          }
-          setNotification('');
           setSelectedPreset(preset.name);
           setScreen('settings');
         },
@@ -746,6 +729,5 @@ export function launchTui(presets, inputFile) {
 
 export function classifyPreset(preset) {
   if (!preset) return { action: 'abort' };
-  if (preset.source === 'user') return { action: 'unsupported-user', name: preset.name };
   return { action: 'render', name: preset.name };
 }

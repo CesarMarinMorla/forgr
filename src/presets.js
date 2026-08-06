@@ -53,10 +53,24 @@ export function scanUserPresets(dir = USER_PRESETS_DIR) {
       continue;
     }
 
-    presets.push({ name: parsed.name, description: parsed.description, source: 'user' });
+    const cssFile = typeof parsed.css_file === 'string' && parsed.css_file.length > 0
+      ? parsed.css_file
+      : undefined;
+
+    presets.push({
+      name: parsed.name,
+      description: parsed.description,
+      source: 'user',
+      css_file: cssFile,
+      cssPath: cssFile ? join(dir, cssFile) : undefined,
+    });
   }
 
   return presets;
+}
+
+export function findUserPreset(name, dir = USER_PRESETS_DIR) {
+  return scanUserPresets(dir).find((p) => p.name === name);
 }
 
 export const PRESET_COLORS = {

@@ -26,9 +26,9 @@ test('classifyPreset renders a built-in preset', () => {
   });
 });
 
-test('classifyPreset defers user presets until user-preset rendering ships', () => {
+test('classifyPreset renders a user preset like a built-in', () => {
   assert.deepEqual(classifyPreset({ name: 'brand', source: 'user' }), {
-    action: 'unsupported-user',
+    action: 'render',
     name: 'brand',
   });
 });

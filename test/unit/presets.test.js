@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, writeFileSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { BUILTIN_PRESETS, PRESET_COLORS, scanUserPresets, listPresets } from '../../src/presets.js';
+import { BUILTIN_PRESETS, PRESET_COLORS, scanUserPresets, listPresets, findUserPreset } from '../../src/presets.js';
 
 test('BUILTIN_PRESETS lists the five shipped presets', () => {
   const names = BUILTIN_PRESETS.map((p) => p.name);
@@ -61,6 +61,42 @@ test('listPresets merges built-ins with user presets', () => {
     assert.ok(names.includes('terminal'));
     assert.ok(names.includes('brand'));
     assert.equal(presets.filter((p) => p.name === 'brand')[0].source, 'user');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('scanUserPresets returns css_file and a resolved cssPath', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'forgr-presets-'));
+  try {
+    writeFileSync(join(dir, 'brand.json'), JSON.stringify({ name: 'brand', description: 'Brand guide', css_file: 'brand.css' }));
+    const presets = scanUserPresets(dir);
+    assert.equal(presets[0].css_file, 'brand.css');
+    assert.equal(presets[0].cssPath, join(dir, 'brand.css'));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('scanUserPresets omits css fields when css_file is absent', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'forgr-presets-'));
+  try {
+    writeFileSync(join(dir, 'custom.json'), JSON.stringify({ name: 'custom', description: 'No css' }));
+    const presets = scanUserPresets(dir);
+    assert.equal(presets[0].css_file, undefined);
+    assert.equal(presets[0].cssPath, undefined);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('findUserPreset returns the matching preset or undefined', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'forgr-presets-'));
+  try {
+    writeFileSync(join(dir, 'brand.json'), JSON.stringify({ name: 'brand', description: 'Brand guide' }));
+    const found = findUserPreset('brand', dir);
+    assert.equal(found.name, 'brand');
+    assert.equal(findUserPreset('nope', dir), undefined);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
