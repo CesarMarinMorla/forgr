@@ -104,6 +104,33 @@ test('wide diagram (gantt) is capped at 0.98 content width', { timeout: 60000 },
   }
 });
 
+test('gantt with past dates does not balloon to a thumbnail from the off-chart today marker', { timeout: 60000 }, async () => {
+  const { browser, page } = await launch();
+  try {
+    const gantt = [
+      'gantt',
+      '    title Past schedule',
+      '    dateFormat YYYY-MM-DD',
+      '    section Writing',
+      '    Lead story :w1, 2024-11-01, 5d',
+      '    Sidebar   :w2, after w1, 3d',
+      '    section Production',
+      '    Layout  :p1, after w2, 3d',
+      '    Ship    :crit, s1, after p1, 1d',
+    ].join('\n');
+    await page.setContent(wrapHtml(`<div class="mermaid">${escapeHtml(gantt)}</div>`), { waitUntil: 'domcontentloaded' });
+    await renderMermaid(page, 'terminal', { maxWidth: MAX_WIDTH, maxHeight: MAX_DIAGRAM_HEIGHT });
+    const d = await dims(page);
+    const c = await contentDims(page);
+    const ratio = c.viewBoxW / d.width;
+    assert.ok(ratio < 5, `past-date gantt viewBox ${c.viewBoxW}px over ${d.width}px box (ratio ${ratio.toFixed(1)}) inflated by off-chart today marker`);
+    assert.ok(d.width > MAX_WIDTH * 0.5, `past-date gantt collapsed to ${d.width}px thumbnail`);
+    assert.ok(d.width <= MAX_WIDTH + 1, `gantt width ${d.width} exceeds 0.98 cap ${MAX_WIDTH}`);
+  } finally {
+    await browser.close();
+  }
+});
+
 test('tall diagram (vertical flowchart) is capped at max height', { timeout: 60000 }, async () => {
   const { browser, page } = await launch();
   try {

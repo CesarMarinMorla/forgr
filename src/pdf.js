@@ -130,6 +130,10 @@ export async function renderMermaid(page, preset, { maxWidth, maxHeight, wholePa
       if (!isFinite(x1)) {
         return { x: vb.x, y: vb.y, width: vb.width, height: vb.height };
       }
+      x1 = Math.max(x1, vb.x);
+      y1 = Math.max(y1, vb.y);
+      x2 = Math.min(x2, vb.x + vb.width);
+      y2 = Math.min(y2, vb.y + vb.height);
       const pad = Math.max(2, (x2 - x1) * 0.01);
       return { x: x1 - pad, y: y1 - pad, width: x2 - x1 + pad * 2, height: y2 - y1 + pad * 2 };
     };
