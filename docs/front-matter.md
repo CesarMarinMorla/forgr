@@ -56,6 +56,7 @@ CLI flags > front-matter `forgr:` keys > front-matter shared keys > built-in def
 
 - Files without front-matter render with all defaults — nothing is required.
 - Unrecognized keys are silently ignored (safe with Obsidian, Jekyll, etc.).
+- All front-matter keys (recognized and unrecognized) are kept in the render data. See [docs/custom-data.md](custom-data.md) for how the data drives templates, body variables, and the planned features.
 
 ## Writing settings back with `--write`
 
