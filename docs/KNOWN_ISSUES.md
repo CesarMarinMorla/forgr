@@ -8,8 +8,8 @@ Status values: `open`, `workaround`, `fixed`.
 
 | ID | Status | Symptom | Impact | Workaround | Milestone |
 |---|---|---|---|---|---|
-| 1 | open | Phantom spacing: a diagram reserves more vertical space than its drawn content, leaving empty space with no reason to exist | Blank gaps and near-empty pages; layout looks unbalanced, diagrams can sit far from their heading | Cap the diagram box with `forgr.mermaidMaxWidth` / `forgr.mermaidMaxHeight` in front-matter | 2.8.1, 2.82 |
-| 2 | open | Graceful spacing: spacing that is intentional but handled clumsily, such as a diagram alone on a page, an orphaned heading, or an overly large diagram margin | Layout looks unpolished; not a defect, a quality issue | Review rendered fixture PDFs and tune spacing behavior per case | 2.8, 2.8.1, 2.82 |
+| 1 | fixed | Phantom spacing: a diagram reserves more vertical space than its drawn content, leaving empty space with no reason to exist | Blank gaps and near-empty pages; layout looks unbalanced, diagrams can sit far from their heading | Cap the diagram box with `forgr.mermaidMaxWidth` / `forgr.mermaidMaxHeight` in front-matter | 2.8.1, 2.82, 2.83 |
+| 2 | fixed | Graceful spacing: spacing that is intentional but handled clumsily, such as a diagram alone on a page, an orphaned heading, or an overly large diagram margin | Layout looks unpolished; not a defect, a quality issue | Review rendered fixture PDFs and tune spacing behavior per case | 2.8, 2.8.1, 2.82, 2.83 |
 | 3 | open | Mermaid sizing and placement is under active iteration | Behavior can change between releases as the layout engine is refined | Pin expectations by reviewing rendered fixture PDFs after an upgrade | 2.8, 2.8.1, 2.82 |
 
 ## Issue 1 — phantom spacing (P1, defect)
@@ -20,9 +20,13 @@ Mermaid sizing was switched from the SVG `viewBox` to a measured content extent 
 
 The whole-page path added in milestone 2.82 routes the largest diagrams to a full page, which avoids the gap for those cases, but the content-box path can still produce phantom space.
 
-Fix priority is highest: a diagram must never reserve space it does not draw.
+### Resolution (milestone 2.83)
 
-Follow-up work: reproduce with the smallest diagram that still shows the gap, compare measured extent against the reserved layout height, and reconcile the two.
+The remaining phantom space came from the SVG being an inline element: the descender baseline added ~4px of space below the SVG inside its `.mermaid` container, so the container reserved more height than the diagram drew. The fix makes the SVG `display: block` (`.mermaid svg { display: block; max-width: 100%; height: auto; margin: 0 auto; }`), so the container height now matches the drawn box exactly.
+
+Verification: `test/mermaid/sizing.test.js` ".mermaid container has no phantom height" asserts the container height equals the SVG box within 0.5px.
+
+Status: **fixed**. A diagram no longer reserves space it does not draw.
 
 ## Issue 2 — graceful spacing (P2, polish)
 

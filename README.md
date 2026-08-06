@@ -239,7 +239,7 @@ npm uninstall -g forgr
 ## Development
 
 ```bash
-npm test                  # full suite (108 tests: unit, integration, comprehensive)
+npm test                  # full suite (146 tests: unit, integration, mermaid)
 npm run test:unit         # unit tests only
 npm run test:integration  # integration tests only
 npm run test:mermaid      # mermaid-specific tests only
@@ -251,7 +251,7 @@ Integration tests accept a `FORGR_PRESET` environment variable (`terminal`, `min
 
 ## Known issues
 
-Known bugs and limitations are tracked in [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md). Mermaid diagram sizing is under active iteration: phantom vertical spacing still appears in some diagrams. If a diagram renders with unexpected blank space or a near-empty page, cap its box with the `forgr.mermaidMaxWidth` and `forgr.mermaidMaxHeight` front-matter keys.
+Known bugs and limitations are tracked in [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md). Mermaid diagram sizing is under active iteration: the container no longer reserves phantom space and headings stay attached to their diagrams. If a diagram still renders too large or with unexpected blank space, cap its box with the `forgr.mermaidMaxWidth` and `forgr.mermaidMaxHeight` front-matter keys.
 
 ---
 
