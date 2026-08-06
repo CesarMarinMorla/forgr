@@ -1,15 +1,50 @@
 import { createRequire } from 'module';
 import { Command } from 'commander';
 import fs from 'fs-extra';
+import path from 'path';
 import ora from 'ora';
 import { run } from './pipeline.js';
 import { runUninstall } from './uninstall.js';
-import { buildWriteKeys, printResult, handleCliError } from './utils.js';
+import { buildWriteKeys, printResult, handleCliError, dim, errMsg } from './utils.js';
 
 const require = createRequire(import.meta.url);
 const { version } = require('../package.json');
 
 const program = new Command();
+
+async function startWatch(input, cliOptions) {
+  const { watchFile } = await import('./watch.js');
+  const absInput = path.resolve(input);
+  console.log(dim(`Watching ${absInput} for changes. Press Ctrl+C to stop.`));
+  watchFile(absInput, async () => {
+    const spinner = ora('File changed, re-rendering...').start();
+    const start = Date.now();
+    try {
+      const result = await run(input, cliOptions, {
+        write: false,
+        writeKeys: undefined,
+        onProgress: (stage) => { spinner.text = stage; },
+      });
+      let fileSize;
+      try {
+        fileSize = (await fs.stat(result.outputPath)).size;
+      } catch {}
+      spinner.succeed();
+      printResult({
+        outputPath: result.outputPath,
+        pageCount: result.pageCount,
+        preset: result.preset,
+        elapsed: Date.now() - start,
+        fileSize,
+      });
+      console.log(dim('Watching for changes. Press Ctrl+C to stop.'));
+    } catch (err) {
+      spinner.fail();
+      console.error(errMsg(err.message));
+      console.log(dim('Watching for changes. Press Ctrl+C to stop.'));
+    }
+  });
+}
 
 program
   .name('forgr')
@@ -51,6 +86,7 @@ program
   .option('--doc-meta', 'Show document meta header (title, date, author)')
   .option('--no-doc-meta', 'Skip document meta header')
   .option('--footer <style>', 'Footer style: page-numbers | page-x-of-y | none')
+  .option('--watch', 'Watch the input file and re-render the PDF when it changes')
   .option('--write', 'Save CLI settings into the file\'s front-matter')
   .action(async (input, options) => {
     const cliOptions = {
@@ -69,6 +105,10 @@ program
     };
 
     const writeKeys = buildWriteKeys(options);
+
+    if (options.watch && options.write) {
+      handleCliError(new Error('--watch cannot be combined with --write'));
+    }
 
     const spinner = ora('Reading file...').start();
     const startTime = Date.now();
@@ -94,6 +134,10 @@ program
         elapsed: elapsed,
         fileSize,
       });
+
+      if (options.watch) {
+        startWatch(input, cliOptions);
+      }
     } catch (err) {
       spinner.fail();
       handleCliError(err);

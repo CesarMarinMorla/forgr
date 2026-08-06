@@ -44,6 +44,14 @@ export function printOutputMsg(outputPath) {
   console.log(`  ${G}\u2713${N} Written: ${outputPath}`);
 }
 
+export function dim(text) {
+  return `${D}${text}${N}`;
+}
+
+export function errMsg(text) {
+  return `${R}\u2717${N} ${text}`;
+}
+
 export function handleCliError(err) {
   if (err instanceof ChromiumNotFoundError) {
     console.error(`  ${R}\u2717${N} ${err.message}`);

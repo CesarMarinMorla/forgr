@@ -435,7 +435,13 @@ TOC is implemented without template partials — it runs at the markdown-render 
 
 ## Milestone 5 — Watch Mode & User Presets (Pending)
 
-- [ ] Watch mode (`--watch` flag, re-render on file change)
+### Watch mode
+
+- [x] `src/watch.js` — directory watcher with content-based change detection (mtime/size gate filters macOS sibling-file events, so writing the PDF next to the input never loops)
+- [x] `--watch` flag on the `convert` command re-renders the PDF on file change, debounced (300ms)
+- [x] Re-render failures print the error and watching continues; the process never dies on a broken edit
+- [x] `--watch` rejects `--write` (forgr never rewrites a file it is watching)
+- [x] `test/unit/watch.test.js` — 5 unit tests (change, debounce, sibling-file filtering, delete/recreate, close)
 - [ ] User-preset rendering (discovery done in M3)
 - [ ] Plugin system for custom Markdown transformations
 

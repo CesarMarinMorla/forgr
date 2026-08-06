@@ -120,6 +120,7 @@ forgr short-note.md --no-toc
 | `--cover-date <text>` | Cover page date (default: document date). |
 | `--section-numbering` / `--no-section-numbering` | Enable or disable heading section numbering. |
 | `--write` | Persist CLI flags into the file's front-matter for repeatable builds. |
+| `--watch` | Watch the input file and re-render the PDF when it changes. Press Ctrl+C to stop. |
 | `convert <input>` | Convert a Markdown file to PDF (default command). |
 | `doctor` | Diagnose installation and fix common issues. |
 | `doctor --fix` | Auto-fix detected issues (re-download Chromium, remove malformed user presets). |
@@ -166,6 +167,16 @@ forgr report.md --preset academic --write
 ```
 
 This saves `preset: academic` into the file's front-matter (omitting values that match defaults), so subsequent runs do not need the flag.
+
+### Watch mode
+
+Re-render the PDF automatically whenever the source file changes:
+
+```bash
+forgr report.md --watch
+```
+
+forgr renders once, then watches the file. Each save produces a fresh PDF. Re-render errors are printed and watching continues, so a broken edit does not kill the session. `--watch` cannot be combined with `--write` (forgr never rewrites a file it is watching).
 
 ---
 
