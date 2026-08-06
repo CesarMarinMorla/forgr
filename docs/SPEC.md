@@ -87,7 +87,7 @@ When no argument is passed, scans cwd for `.md` files. If none found, prints a m
 
 After file selection, the TUI flows through PresetPicker → SettingsScreen (TOC, doc-meta, date format, footer, cover, section numbering) → batch render. Selected files are rendered one at a time with per-file progress shown. A file failure does not stop the batch.
 
-The result screen shows per-file success/failure, truncated to 6 visible files with `... N more`. `s` saves the current settings to all files' front-matter via `writeForgrFrontMatter()`. `o` opens the folder in the system file manager. `Enter` goes back to the preset picker. Selecting a user preset prints a "coming in R1" message (user-preset rendering).
+The result screen shows per-file success/failure, truncated to 6 visible files with `... N more`. `s` saves the current settings to all files' front-matter via `writeForgrFrontMatter()`. `o` opens the folder in the system file manager. `Enter` goes back to the preset picker. User presets render exactly like built-ins.
 
 ## Chromium
 
@@ -105,7 +105,7 @@ Five built-ins, each a CSS file overriding custom properties in `base.html`:
 | `academic` | Typeset-journal serif, marginal counters, restrained typography |
 | `newsletter` | Warm editorial off-white, coral accents, pull-quotes |
 
-User presets are JSON descriptors under `~/.config/forgr/presets/` referencing external CSS.
+User presets are JSON descriptors under `~/.config/forgr/presets/`. A descriptor carries `name`, `description`, and an optional `css_file` naming a CSS file in the same directory. The pipeline accepts user presets alongside built-ins: the template resolver checks the built-in dir first, then the descriptor's `css_file`. `renderTemplate()` receives an optional `userPresetsDir` override so tests can isolate the resolution.
 
 ## Styling — `terminal` preset tokens
 

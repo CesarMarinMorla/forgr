@@ -64,6 +64,26 @@ Pick a design with `--preset <name>`. Each preset is its own CSS theme. The five
 forgr document.md --preset technical
 ```
 
+### User presets
+
+Add your own theme by dropping a JSON descriptor and a CSS file into `~/.config/forgr/presets/`. The descriptor needs `name` and `description`; `css_file` points at a CSS file in the same directory. The CSS is embedded alongside the built-in `base.html` template, so it can override any built-in style.
+
+```json
+{
+  "name": "brand",
+  "description": "Company brand colors",
+  "css_file": "brand.css"
+}
+```
+
+```css
+/* brand.css */
+body { color: #1a1a1a; }
+h1, h2, h3 { color: #123456; }
+```
+
+Render with `forgr document.md --preset brand`, reference it from front-matter (`preset: brand`), or pick it in the TUI. `forgr doctor` validates the descriptor and checks that the `css_file` exists.
+
 ---
 
 ## Diagrams & images
@@ -196,8 +216,8 @@ forgr-tui report.md          # process a specific file (skips file picker)
 1. **File picker**: if 2+ `.md` files found, select which to render (space to
    toggle, enter to confirm). If 0 files, exits with a message. If 1 file,
    auto-selects it. Pass a file argument to skip this step entirely.
-2. **Preset picker**: choose from the five built-in presets (user presets
-   shown for discovery. Rendering them lands in a later milestone).
+2. **Preset picker**: choose from the five built-in presets or any user preset
+   (see [User presets](#user-presets)).
 3. **Settings screen**: configure table of contents (auto/on/off), doc-meta header, date
    format, footer style, cover page, and section numbering. Arrow keys to
    navigate, Enter to render.

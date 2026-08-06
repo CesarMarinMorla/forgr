@@ -37,7 +37,7 @@ Tier 0 makes the data available where rendering happens. No user-facing feature 
 The data reaches three places:
 
 1. The markdown renderer. `renderMarkdown` receives the data and passes it into the render environment. Markdown rules can read it.
-2. The template. The Handlebars context receives the data as `data`, so a template can read `{{ data.title }}` or `{{ data.forgr.preset }}`. The built-in `base.html` does not use it yet. User presets (roadmap R1) will be the first consumers.
+2. The template. The Handlebars context receives the data as `data`, so a template can read `{{ data.title }}` or `{{ data.forgr.preset }}`. The built-in `base.html` does not use it yet. User presets are CSS-only and reuse `base.html`, so they do not consume `data` either; custom templates that read it land with Tier 2 authoring power (roadmap R4).
 3. The PDF options object. The data is carried into `generatePdf` so a later tier can stamp PDF metadata (title, author, keywords).
 
 ### Body variables

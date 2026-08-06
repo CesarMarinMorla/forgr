@@ -6,7 +6,7 @@
 
 | # | Scope | State |
 |---|---|---|
-| R1 | User-preset rendering (finish M17) | Next |
+| R1 | User-preset rendering (finish M17) | Done |
 | R2 | Custom data — Tier 1 quick wins | Planned |
 | R3 | Custom data — Tier 3 intelligence | Planned |
 | R4 | Custom data — Tier 2 authoring power | Later |
@@ -33,7 +33,7 @@
 | M14 | Big diagram management (whole-page treatment, XL scale + readability warning) | Done |
 | M15 | Mermaid placement & phantom spacing (native fragmentation, container height, page-1 cap) | Done |
 | M16 | Custom data foundation (front-matter threading, body variables, TUI pre-fill) | Done |
-| M17 | Watch mode (done) & user-preset rendering | In progress |
+| M17 | Watch mode & user-preset rendering | Done |
 
 ### Renumbering
 
@@ -55,17 +55,17 @@ The milestone numbers now reflect the order the work shipped, not the original p
 
 ## Roadmap
 
-### R1 — User-preset rendering (finish M17)
+### R1 — User-preset rendering (finish M17) — Done
 
-Milestone 5's remaining work. The discovery and scanning already exist (M4); this makes a selected user preset actually render. User presets are CSS-only: they reuse the built-in `base.html` and get the terminal mermaid theme as a fallback (already wired in `pdf.js`).
+User presets are CSS-only: they reuse the built-in `base.html` and get the terminal mermaid theme as a fallback (already wired in `pdf.js`).
 
-- [ ] `src/presets.js` — `scanUserPresets()` returns the `css_file` field and a resolved CSS path (it drops it today)
-- [ ] `src/template.js` — `renderTemplate()` resolves preset CSS from the builtin dir first, then the user preset's `css_file`
-- [ ] `src/pipeline.js` — the preset gate accepts user presets (uses `listPresets()` instead of `BUILTIN_PRESETS` only)
-- [ ] `src/tui.js` — remove the "User presets not yet supported" deferral; a selected user preset renders like a built-in
-- [ ] `src/errors.js` — `PresetNotFoundError` lists user presets in the available set
-- [ ] Tests — template renders with a user CSS file, pipeline accepts a user preset, TUI selection renders
-- [ ] Docs — README presets section, `docs/front-matter.md` user-preset example
+- [x] `src/presets.js` — `scanUserPresets()` returns the `css_file` field and a resolved CSS path
+- [x] `src/template.js` — `renderTemplate()` resolves preset CSS from the builtin dir first, then the user preset's `css_file`
+- [x] `src/pipeline.js` — the preset gate accepts user presets (uses `listPresets()` instead of `BUILTIN_PRESETS` only)
+- [x] `src/tui.js` — remove the "User presets not yet supported" deferral; a selected user preset renders like a built-in
+- [x] `src/errors.js` — `PresetNotFoundError` lists user presets in the available set
+- [x] Tests — template renders with a user CSS file, pipeline accepts a user preset, TUI selection renders
+- [x] Docs — README presets section, `docs/front-matter.md` user-preset example
 
 ### R2 — Custom data: Tier 1 quick wins
 

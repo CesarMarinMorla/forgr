@@ -31,7 +31,7 @@ These go under a `forgr:` key and control rendering behavior.
 
 | Key | Type | Default | Description |
 |---|---|---|---|---|
-| `preset` | string | `terminal` | CSS preset: `terminal`, `minimal`, `technical`, `academic`, `newsletter` |
+| `preset` | string | `terminal` | CSS preset: `terminal`, `minimal`, `technical`, `academic`, `newsletter`, or any user preset name from `~/.config/forgr/presets/`. A user preset needs a JSON descriptor with a `css_file` field in that directory (see README, User presets) |
 | `toc` | bool/string | `auto` | Table of contents: `auto` (word/page threshold), `true` (always), `false` (never) |
 | `tocTitle` | string | `Contents` | Custom heading text for the table of contents |
 | `cover` | boolean | `false` | Enable a cover page |
@@ -57,6 +57,7 @@ CLI flags > front-matter `forgr:` keys > front-matter shared keys > built-in def
 - Files without front-matter render with all defaults — nothing is required.
 - Unrecognized keys are silently ignored (safe with Obsidian, Jekyll, etc.).
 - All front-matter keys (recognized and unrecognized) are kept in the render data. See [docs/custom-data.md](custom-data.md) for how the data drives templates, body variables, and the planned features.
+- A user preset name works anywhere a built-in preset name does: `forgr --preset brand`, `forgr: { preset: brand }`, or the TUI preset picker.
 
 ## Writing settings back with `--write`
 
