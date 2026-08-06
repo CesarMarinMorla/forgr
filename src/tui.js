@@ -214,7 +214,7 @@ const COVER_FIELDS = [
   { key: 'coverDateText', label: 'Custom date', type: 'text' },
 ];
 
-function SettingsScreen({ settings, onChange, preset, fileLabel, onRender, onBack }) {
+function SettingsScreen({ settings, onChange, preset, fileLabel, sourceNote, onRender, onBack }) {
   const [focus, setFocus] = useState(0);
   const [editingField, setEditingField] = useState(null);
   const [editBuffer, setEditBuffer] = useState('');
@@ -283,6 +283,10 @@ function SettingsScreen({ settings, onChange, preset, fileLabel, onRender, onBac
     React.createElement(Text, null, fileLabel)
   );
 
+  const sourceLine = sourceNote
+    ? React.createElement(Text, { dimColor: true }, `  ${sourceNote}`)
+    : null;
+
   const rows = allSettings.map((def, i) => {
     const isFocused = i === focus;
     const isEditing = def.type === 'text' && def.key === editingField;
@@ -345,6 +349,7 @@ function SettingsScreen({ settings, onChange, preset, fileLabel, onRender, onBac
     { flexDirection: 'column', paddingX: 1, width: '100%' },
     React.createElement(Box, { marginBottom: 1 }, title),
     fileCountLine,
+    sourceLine,
     React.createElement(Box, { marginTop: 1, flexDirection: 'column' }, ...rows),
     React.createElement(Box, { marginTop: 1 }, help)
   );
@@ -525,11 +530,22 @@ function defaultSettings() {
   };
 }
 
+const SETTINGS_KEYS = [...SETTINGS.map((d) => d.key), ...COVER_FIELDS.map((d) => d.key)];
+
+export function settingsFromFrontMatter(frontMatter, fallback = defaultSettings()) {
+  const out = { ...fallback };
+  for (const key of SETTINGS_KEYS) {
+    if (frontMatter[key] !== undefined) out[key] = frontMatter[key];
+  }
+  return out;
+}
+
 function TuiApp({ presets, inputFile }) {
   const [screen, setScreen] = useState(() => inputFile ? 'picker' : 'files');
   const [selectedFiles, setSelectedFiles] = useState(() => inputFile ? [path.resolve(inputFile)] : []);
   const [selectedPreset, setSelectedPreset] = useState(null);
   const [settings, setSettings] = useState(defaultSettings);
+  const [settingsSource, setSettingsSource] = useState('');
   const [results, setResults] = useState([]);
   const [progress, setProgress] = useState('');
   const [currentFileIndex, setCurrentFileIndex] = useState(0);
@@ -554,6 +570,26 @@ function TuiApp({ presets, inputFile }) {
     }
     setSaveStatus(ok ? 'saved' : 'error');
   };
+
+  useEffect(() => {
+    if (selectedFiles.length === 0) return;
+    const filePath = selectedFiles[0];
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const content = await readFile(filePath, 'utf8');
+        if (cancelled) return;
+        const { frontMatter } = parseFrontMatter(content);
+        setSettings(settingsFromFrontMatter(frontMatter));
+        setSettingsSource(Object.keys(frontMatter).length > 0 ? path.basename(filePath) : '');
+      } catch {
+        if (!cancelled) setSettingsSource('');
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [selectedFiles]);
 
   useEffect(() => {
     if (screen !== 'rendering' || !selectedPreset || selectedFiles.length === 0) return;
@@ -644,6 +680,7 @@ function TuiApp({ presets, inputFile }) {
         onChange: (key, value) => setSettings(prev => ({ ...prev, [key]: value })),
         preset: selectedPreset,
         fileLabel,
+        sourceNote: settingsSource ? `pre-filled from ${settingsSource}` : '',
         onRender: () => {
           startTimeRef.current = Date.now();
           setProgress('Reading file...');
