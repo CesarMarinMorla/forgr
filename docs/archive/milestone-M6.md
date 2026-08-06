@@ -4,7 +4,7 @@
 
 All 13 user-facing forgr properties can be set from YAML front-matter. The parsing layer reads both shared keys (`title`, `date`, `author`) and the `forgr:` namespace. Unrecognized keys pass through silently. A `--write` flag saves CLI settings back into the file.
 
-Rendering behavior of each property (what docMeta does, how cover looks, etc.) is **not** part of this milestone — that is M4.
+Rendering behavior of each property (what docMeta does, how cover looks, etc.) is **not** part of this milestone — that is M7.
 
 ## Current state
 
@@ -30,7 +30,7 @@ Per-key priority: `forgr.<key>` > `<key>` > undefined
 
 ### 2. Full key set
 
-Parse all 13 properties. Most are not wired to rendering yet — they pass through the config object inert and become active in M4.
+Parse all 13 properties. Most are not wired to rendering yet — they pass through the config object inert and become active in M7.
 
 | Source | Keys |
 |---|---|
@@ -55,11 +55,11 @@ Silently ignored. Obsidian, Jekyll, Hugo, and 11ty front-matter keys pass throug
 
 ## Out of scope
 
-- Doc-meta header show/hide (M4)
-- Footer style switching (M4)
-- Cover page rendering (M4)
-- Section numbering CSS (M4)
-- TUI settings form (M4)
+- Doc-meta header show/hide (M7)
+- Footer style switching (M7)
+- Cover page rendering (M7)
+- Section numbering CSS (M7)
+- TUI settings form (M7)
 
 ## Files to touch
 

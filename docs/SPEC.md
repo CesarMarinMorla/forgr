@@ -86,7 +86,7 @@ When no argument is passed, scans cwd for `.md` files. If none found, prints a m
 
 After file selection, the TUI flows through PresetPicker → SettingsScreen (TOC, doc-meta, date format, footer, cover, section numbering) → batch render. Selected files are rendered one at a time with per-file progress shown. A file failure does not stop the batch.
 
-The result screen shows per-file success/failure, truncated to 6 visible files with `... N more`. `s` saves the current settings to all files' front-matter via `writeForgrFrontMatter()`. `o` opens the folder in the system file manager. `Enter` goes back to the preset picker. Selecting a user preset prints a "coming in Milestone 5" message.
+The result screen shows per-file success/failure, truncated to 6 visible files with `... N more`. `s` saves the current settings to all files' front-matter via `writeForgrFrontMatter()`. `o` opens the folder in the system file manager. `Enter` goes back to the preset picker. Selecting a user preset prints a "coming in R1" message (user-preset rendering).
 
 ## Chromium
 

@@ -2,30 +2,145 @@
 
 ## Status
 
-| Milestone | Scope | State |
+### Roadmap (priority order)
+
+| # | Scope | State |
 |---|---|---|
-| 1 | Published CLI (v0.1.0) | Done |
-| 2 | Mermaid rendering & image embedding | Done |
-| 2.5 | Preset expansion & polish (newsletter preset, academic revamp, spacing, mermaid colors) | Done |
-| 2.75 | TUI & CLI polish | Done |
-| 3 | TUI preset picker (v0.6.0) | Done |
-| 3.5 | Front-matter processing | Done |
-| 4 | Rendering options (doc-meta, footer, cover, section numbering) | Done |
-| 4.5 | TUI settings form (remove CLI flags, interactive options) | Done |
-| 4.75 | File picker & batch rendering (multi-file, optional file argument, save) | Done |
-| 2.8 | Mermaid sizing & placement (scale to fit, font re-render, page-break intelligence) | Done |
-| 2.81 | Content-aware mermaid sizing (phantom viewBox trim, 0.98 right-edge margin) | Done |
-| 2.82 | Big diagram management (whole-page treatment, XL scale + readability warning) | Done |
-| 2.83 | Mermaid placement & phantom spacing (native fragmentation, container height, page-1 cap) | Done |
-| 2.9 | Custom data foundation (front-matter threading, body variables, TUI pre-fill) | Done |
-| 5 | Watch mode & user presets | Pending |
-| 6 | Extended format support (LaTeX, Jekyll/Liquid preprocessing) | Later |
-| 7 | `forgr doctor` diagnostic | Done |
-| — | Structural cleanup (P1–P3) | Done |
+| R1 | User-preset rendering (finish M17) | Next |
+| R2 | Custom data — Tier 1 quick wins | Planned |
+| R3 | Custom data — Tier 3 intelligence | Planned |
+| R4 | Custom data — Tier 2 authoring power | Later |
+| R5 | Extended format support (LaTeX, Jekyll/Liquid preprocessing) | Later |
+| R6 | Plugin system for custom Markdown transformations | Last priority |
 
-## Milestone 1 — Published (v0.1.0)
+### Completed (ordered by when the work shipped)
 
-### Project setup
+| # | Scope | State |
+|---|---|---|
+| M1 | Published CLI (v0.1.0) | Done |
+| M2 | Preset expansion & polish (newsletter preset, academic revamp, spacing, mermaid colors) | Done |
+| M3 | Mermaid rendering & image embedding | Done |
+| M4 | TUI preset picker (v0.6.0) | Done |
+| M5 | `forgr doctor` diagnostic | Done |
+| M6 | Front-matter processing | Done |
+| M7 | Rendering options (doc-meta, footer, cover, section numbering) | Done |
+| M8 | Structural cleanup (P1–P3) | Done |
+| M9 | TUI settings form (remove CLI flags, interactive options) | Done |
+| M10 | File picker & batch rendering (multi-file, optional file argument, save) | Done |
+| M11 | TUI & CLI polish | Done |
+| M12 | Mermaid sizing & placement (scale to fit, font re-render, page-break intelligence) | Done |
+| M13 | Content-aware mermaid sizing (phantom viewBox trim, 0.98 right-edge margin) | Done |
+| M14 | Big diagram management (whole-page treatment, XL scale + readability warning) | Done |
+| M15 | Mermaid placement & phantom spacing (native fragmentation, container height, page-1 cap) | Done |
+| M16 | Custom data foundation (front-matter threading, body variables, TUI pre-fill) | Done |
+| M17 | Watch mode (done) & user-preset rendering | In progress |
+
+### Renumbering
+
+The milestone numbers now reflect the order the work shipped, not the original plan numbers. Old plan number → current:
+
+| Old | Current | | Old | Current |
+|---|---|---|---|---|
+| M1 | M1 | | M4.5 | M9 |
+| M2.5 | M2 | | M4.75 | M10 |
+| M2 | M3 | | M2.75 | M11 |
+| M3 | M4 | | M2.8 | M12 |
+| M7 | M5 | | M2.81 | M13 |
+| M3.5 | M6 | | M2.82 | M14 |
+| M4 | M7 | | M2.83 | M15 |
+| (unnamed cleanup) | M8 | | M2.9 | M16 |
+| | | | M5 | M17 |
+
+---
+
+## Roadmap
+
+### R1 — User-preset rendering (finish M17)
+
+Milestone 5's remaining work. The discovery and scanning already exist (M4); this makes a selected user preset actually render. User presets are CSS-only: they reuse the built-in `base.html` and get the terminal mermaid theme as a fallback (already wired in `pdf.js`).
+
+- [ ] `src/presets.js` — `scanUserPresets()` returns the `css_file` field and a resolved CSS path (it drops it today)
+- [ ] `src/template.js` — `renderTemplate()` resolves preset CSS from the builtin dir first, then the user preset's `css_file`
+- [ ] `src/pipeline.js` — the preset gate accepts user presets (uses `listPresets()` instead of `BUILTIN_PRESETS` only)
+- [ ] `src/tui.js` — remove the "User presets not yet supported" deferral; a selected user preset renders like a built-in
+- [ ] `src/errors.js` — `PresetNotFoundError` lists user presets in the available set
+- [ ] Tests — template renders with a user CSS file, pipeline accepts a user preset, TUI selection renders
+- [ ] Docs — README presets section, `docs/front-matter.md` user-preset example
+
+### R2 — Custom data: Tier 1 quick wins
+
+Low-risk features built directly on the M16 plumbing. Detail and front-matter shapes live in `docs/custom-data.md` (Tier 1).
+
+- [ ] PDF document metadata (title, author, keywords)
+- [ ] Tags as keyword chips in the doc-meta header
+- [ ] Output filename templating (`forgr.output`)
+- [ ] Draft / watermark banner
+- [ ] Read-time estimate
+- [ ] Cover layout modes
+
+### R3 — Custom data: Tier 3 intelligence
+
+The priority direction for the custom-data roadmap. The converter infers instead of following instructions. Detail in `docs/custom-data.md` (Tier 3).
+
+- [ ] Auto-preset detection (`forgr.preset: auto`) — math → academic, code-heavy → technical, prose → newsletter, neutral → terminal
+- [ ] Pre-render lint (broken images, duplicate heading ids, malformed mermaid, near-empty pages)
+- [ ] Language-aware typography (date locale, quote styles, font swap via `lang`)
+- [ ] Auto cover stats (word count, diagram count, read time)
+
+### R4 — Custom data: Tier 2 authoring power
+
+Structural and data-to-content features. Detail in `docs/custom-data.md` (Tier 2). The plugin system (R6) may be built here if one of these features requires it, not before.
+
+- [ ] Per-section configuration keyed by heading
+- [ ] Chapter mode (`h1` starts a new page)
+- [ ] Auto-diagrams from data (timeline, flow)
+- [ ] Markdown includes
+- [ ] CSV tables
+
+### R5 — Extended format support
+
+Deferred until the roadmap above is polished.
+
+#### LaTeX math notation
+
+- [ ] Math rendering via `markdown-it-texmath` or `markdown-it-katex`
+  - [ ] Inline math: `$...$` and `\(...\)`
+  - [ ] Display math: `$$...$$`, `\[...\]`, and fenced ` ```math ` blocks
+- [ ] KaTeX CSS bundled per-preset (or a shared math stylesheet)
+- [ ] Font loading for math glyphs (KaTeX fonts embedded or CDN)
+- [ ] Math in mermaid labels (stretch goal — mermaid's built-in math is experimental)
+- [ ] Test fixtures with mixed math/markdown content
+
+#### Jekyll / Liquid preprocessing
+
+Jekyll files contain Liquid templating (`{% %}`, `{{ }}`) that passes through as raw text. A pre-processor steps before markdown-it:
+
+- [ ] Strip or transform `{% highlight lang %}...{% endhighlight %}` to fenced code blocks
+- [ ] Strip `{% raw %}...{% endraw %}` wrappers, keep inner content
+- [ ] Strip unknown `{% %}` tags to avoid raw text in output
+- [ ] Resolve Liquid variables from front-matter data where possible
+- [ ] Option: full `liquidjs` processing for `{% include %}` resolution
+
+### R6 — Plugin system (last priority)
+
+*Not planned. This is the very last item on the roadmap. It needs serious design and architecture work that cannot be tested or validated right now: a trust boundary for arbitrary code, a per-render markdown-it instance factory, async plugin loading, and a concrete consumer. It stays deferred until a Tier 2 custom-data feature (R4) actually needs it.*
+
+- [ ] Design the plugin contract (markdown-it `md.use()` signature, npm package vs local file resolution)
+- [ ] Trust boundary documentation and loading rules (plugins run in Node, never inside Chromium)
+- [ ] `createMarkdown({ plugins })` factory refactor in `src/markdown.js` (module-level singleton today)
+- [ ] Plugin loader + resolver (`src/plugins.js`)
+- [ ] Front-matter `forgr.plugins` wiring through the pipeline
+- [ ] Fixture plugin + unit tests + docs
+
+---
+
+## Completed work
+
+## Core CLI & packaging
+
+### M1 — Published CLI (v0.1.0)
+
+#### Project setup
 - [x] Git repo initialized, remote set
 - [x] AGENTS.md written with full spec
 - [x] .gitignore (node_modules, *.pdf, .env, logs, editor dirs, dist/, coverage/)
@@ -33,7 +148,7 @@
 - [x] package.json — repository, bugs, homepage, author, keywords, files fields
 - [x] LICENSE (MIT)
 
-### Core pipeline
+#### Core pipeline
 - [x] package.json — all dependencies pinned (playwright-core at exact 1.61.1)
 - [x] Chromium downloaded on first `forgr` run, not during install
 - [x] `forgr uninstall` command removes Chromium cache without removing the tool (primary path)
@@ -50,16 +165,16 @@
 - [x] src/pdf.js — ensureChromium() downloads headless shell on first run
 - [x] src/templates/base.html — @font-face blocks, doc-meta header (dot, label, timestamp)
 
-### Presets
+#### Presets
 - [x] src/templates/presets/terminal.css — default preset (all-mono IBM Plex Mono headings, graphite/teal palette, terminal code blocks, NOTE callouts, tabular numbers, pagination control)
-- [x] src/templates/presets/minimal.css, technical.css, academic.css — built from the ground up with four distinct identities (see HIGH PRIORITY section below)
+- [x] src/templates/presets/minimal.css, technical.css, academic.css — built from the ground up with four distinct identities (see M2 below)
 
-### Fonts
+#### Fonts
 - [x] IBMPlexSans-Variable.woff2 (45KB) — @fontsource-variable
 - [x] IBMPlexMono-400.woff2 (49KB) — full file from @ibm/plex-mono@2.5.0 (replaced 14KB subset)
 - [x] IBMPlexMono-600.woff2 (50KB) — full file from @ibm/plex-mono@2.5.0 (replaced 15KB subset)
 
-### Styling details
+#### Styling details
 - [x] Doc-meta header: left-aligned label with 6px --signal dot, timestamp right-aligned
 - [x] h2: IBM Plex Mono 400 all-mono uppercase, teal ::before counter (01 02 03...)
 - [x] Code blocks: terminal-pane style with 3-dot chrome (box-shadow)
@@ -69,7 +184,7 @@
 - [x] Ordered list markers: IBM Plex Mono, graphite color, 2em padding to prevent clipping
 - [x] Print pagination: break-after avoid on headings, break-inside avoid on tables/pre/blockquote, widows/orphans 2 on paragraphs
 
-### Test suite
+#### Test suite
 - [x] test/markdown.test.js — unit tests for markdown rendering + table number wrapping
 - [x] test/pipeline.test.js — output path resolution tests
 - [x] test/integration.test.js — end-to-end PDF generation test (globs all fixtures)
@@ -78,7 +193,7 @@
 - [x] integration test accepts `FORGR_PRESET` env var (terminal|minimal|technical|academic|newsletter, default terminal) to validate one preset at a time; rejects unknown values
 - [x] Rendered fixture PDFs stay in test/fixtures/ (gitignored) for visual review — do not delete them after a run
 
-### Dev tooling
+#### Dev tooling
 - [x] scripts/font-diagnostic.js — 7-comparison side-by-side font diagnostic PDF
 - [x] scripts/postinstall.js — manual Chromium install script
 - [x] scripts/preuninstall.js — Chromium cache cleanup on uninstall
@@ -87,16 +202,81 @@
 - [x] test/fixtures/comprehensive.md — two mermaid diagrams added as sections 6.3 (request flow) and 6.4 (auth sequence)
 - [x] docs/font-investigation.md — font issue investigation and resolution notes
 
-### Published
+#### Published
 - [x] npm pack — 21 files, 190KB unpacked, 159KB compressed
 - [x] npm publish — forgr@0.1.0 live on registry.npmjs.org
 - [x] Verified: install -> first run -> render -> uninstall (cleanup confirmed)
 
+### M5 — `forgr doctor` diagnostic command
+
+*Self-check command at `src/doctor.js`, registered as `forgr doctor` in `cli.js`.*
+
+#### What it checks
+
+- [x] **Chromium binary** — verify `~/.forgr/browsers/chromium_headless_shell-*` exists and is executable
+- [x] **Preset CSS files** — for each built-in preset, check the CSS file exists at the expected path inside the package
+- [x] **User preset files** — validate all `~/.config/forgr/presets/*.json` are parseable and have required fields
+- [x] **User preset CSS targets** — for presets that reference an external CSS path, check the file exists and is readable
+- [x] **Font files** — verify `IBMPlexSans-Variable.woff2`, `IBMPlexMono-400.woff2`, `IBMPlexMono-600.woff2` exist in the package assets dir
+- [x] **Template file** — verify `base.html` exists
+- [x] **Node version** — warn if below the minimum supported version
+
+#### Fix modes
+
+- [x] `forgr doctor` — report-only (exit code 0 = all good, non-zero = issues found)
+- [x] `forgr doctor --fix` — auto-fix where possible:
+  - Re-download Chromium if missing/corrupt
+  - Reinstall package if built-in files are missing (prompt user to run `npm install` or re-download)
+  - Remove malformed user preset files
+- [x] `forgr doctor --verbose` — print full paths inspected, file sizes, and timestamps
+
+#### Output format
+
+- [x] Colored output: green OK / red FAIL / yellow WARN per check
+- [x] Summary line: "N passed, N warnings, N errors"
+- [x] Suggestions for each failure
+
+### M8 — Structural cleanup (P1–P3)
+
+Three-phase refactor eliminating duplicated code and centralizing hardcoded configuration.
+
+#### P1 — Extract duplicates
+
+- [x] `getChromiumInstallCmd()` in `browsers-path.js` — replaces `npx` string in `pdf.js`, `doctor.js`, `postinstall.js`
+- [x] `removeFfmpeg()` in `browsers-path.js` — extracted from `pdf.js` and `postinstall.js`
+- [x] Preset name list — `cli.js` and `template.js` read from `BUILTIN_PRESETS` (single source)
+- [x] `normalizeTocOption()` in `utils.js` — shared by `cli.js` and `bin/forgr-tui`
+- [x] `printOutputMsg()` in `utils.js` — shared by `cli.js` and `bin/forgr-tui`
+- [x] `handleCliError()` in `utils.js` — shared by `cli.js` and `bin/forgr-tui`
+
+#### P2 — Config object
+
+- [x] `src/config.js` — single `DEFAULTS` object with all hardcoded values
+- [x] `buildConfig()` in `pipeline.js` — merges CLI options > front-matter > DEFAULTS
+- [x] Config flows through `pipeline.js` → `pdf.js`, `template.js` instead of loose options
+- [x] `toc` field uses `'auto' | 'on' | 'off'` strings (merged via priority: CLI > FM > defaults)
+- [x] `dateFormat`, `docMeta`, `cover`, `footer`, `sectionNumbering` ready for TUI/front-matter wiring
+
+#### P3 — Front-matter merge
+
+- [x] `gray-matter` dependency added for YAML parsing
+- [x] `parseFrontMatter()` in `markdown.js` — extracts `preset`, `title`, `date`, `author`, `toc`
+- [x] Merged into config in `pipeline.js` — front-matter sits between CLI flags and DEFAULTS
+- [x] Title, author, date passed to template context and rendered conditionally in `base.html`
+
+#### Extra — `npx` lockfile pollution fix
+
+- [x] `getChromiumInstallCmd()` resolves playwright-core CLI path via `require.resolve` instead of shelling to `npx`, preventing random `package-lock.json` files in the working directory
+
 ---
 
-## Presets — all 5 complete (terminal, minimal, technical, academic, newsletter)
+## Presets
 
-### minimal.css — black-on-white from source template
+### M2 — Preset expansion & polish
+
+All five presets complete with distinct design identities. M2.5 in the old numbering.
+
+#### minimal.css — black-on-white from source template
 - [x] Adapt forgr minimal.css: system sans, one gray (#666), hairline rules, no accent
 - [x] Remove @page margin/size (forgr handles via pdf.js)
 - [x] Add @page background for full-page white
@@ -106,12 +286,12 @@
 - [x] Add h1:first-of-type page-break-before: avoid
 - [x] Test with all fixture files
 
-### technical.css — from functional stub to intentional design
+#### technical.css — from functional stub to intentional design
 - [x] Define technical's design identity (dense, monospace-heavy, grid-like tables)
 - [x] Write full CSS with distinct palette, infra/ops tooling feel (full monospace, amber accent, full-grid tables, tinted code panels, bracket section markers)
 - [x] Test with all fixture files
 
-### academic.css — from functional stub to intentional design
+#### academic.css — from functional stub to intentional design
 - [x] Initial release: typeset-journal (rubric blue, roman numerals, superscript citations, QED, drop cap)
 - [x] **Revamp (Modern Scholarly)**: pine green accent, Georgia serif body + IBM Plex Sans headings → later switched to pure serif, marginal arabic counters against hairline rule, clean restrained typography
 - [x] Line spacing tightened from 1.7 → 1.45 (book standard Butterick range)
@@ -121,7 +301,7 @@
 - [x] Added secondaryColor for diamond nodes, edgeLabelBackground, primaryBorderColor
 - [x] Test with all fixture files (92 tests pass)
 
-### newsletter.css — new preset (warm editorial)
+#### newsletter.css — new preset (warm editorial)
 - [x] Warm off-white paper (#FAF8F5), dark warm gray ink (#2D2A24), terra-cotta coral accent (#C85A48)
 - [x] Serif display headings (Georgia), IBM Plex Sans body, spacious 700px measure
 - [x] Coral left-border code blocks, italic pull-quotes, dot section dividers, card-style TOC
@@ -130,7 +310,9 @@
 
 ---
 
-## Milestone 2 — Mermaid Rendering & Image Embedding (Done)
+## Mermaid
+
+### M3 — Mermaid rendering & image embedding
 
 - [x] Add `mermaid` 11.16.0 to `package.json` (exact pin)
 - [x] Load mermaid dist into Playwright page via `page.addScriptTag`
@@ -145,7 +327,7 @@
 - [x] 8 image embedding unit tests
 - [x] `.mermaid` CSS in `base.html`: `break-inside: avoid; break-before: avoid;` — headings stay with their diagrams
 
-### Mermaid theming & fixture reorg (v0.7.0 feature branch: `feat/mermaid-theming`)
+#### Mermaid theming & fixture reorg (v0.7.0 feature branch: `feat/mermaid-theming`)
 
 - [x] Gantt contrast fix — remove gantt text color overrides from all 5 presets (mermaid defaults are readable)
 - [x] Timeline contrast fix — inject `cScale[0-11]` (light fill) and `cScaleLabel[0-11]` (dark text) to compensate for mermaid's 25% darken
@@ -154,9 +336,9 @@
 - [x] Old monolithic `test/fixtures/mermaid.md` deleted
 - [x] `test/mermaid/pie.test.js` — pie label regression + per-preset fixture rendering tests
 - [x] Test modularization — all mermaid tests + fixtures moved to `test/mermaid/`
-- [ ] **Mermaid sizing & layout** — diagrams are currently rendered at default mermaid size, leading to inconsistent proportions. Need to research mermaid dimension options, test what works in Playwright/PDF context, and create intelligent sizing (fit content, cap max width, handle wide diagrams like gantt/timeline gracefully)
+- [ ] **Mermaid sizing & layout** — diagrams are currently rendered at default mermaid size, leading to inconsistent proportions. *(resolved in M12)*
 
-## Milestone 2.8 — Mermaid sizing & placement (Done)
+### M12 — Mermaid sizing & placement
 
 - [x] `src/layout.js` — shared layout math (`contentSize`, `pageOf`, `diagramScale`, `toPx`, viewBox parsing), replaces the hardcoded `contentHeight` formula in `pdf.js`
 - [x] `renderMermaid()` scales each diagram to fit the content box: `min(1, contentWidth/W, 0.85×pageHeight/H)` via explicit px width/height (viewBox aspect ratio)
@@ -171,11 +353,11 @@
 - [x] `test/fixtures/sizing.md` — integration fixture with wide gantt, tall flowchart, and 8 heading+diagram sections forcing page boundaries (asserted at 3+ pages)
 - [x] 132 tests passing (103 unit + 15 integration + 14 mermaid)
 
-## Milestone 2.8.1 — Content-aware mermaid sizing (Done)
+### M13 — Content-aware mermaid sizing
 
-Follow-up to M2.8. Reports from rendered PDFs surfaced three issues. Issues 1 and 2 are fixed; issue 3 is pending by owner decision.
+Follow-up to M12. Reports from rendered PDFs surfaced three issues. Issues 1 and 2 are fixed; issue 3 is pending by owner decision.
 
-### Issue 1 — right-edge clip (fixed)
+#### Issue 1 — right-edge clip (fixed)
 
 The 6.3 flowchart in `comprehensive-academic` showed the rightmost node (PostgreSQL) clipped by a few px at the page margin.
 
@@ -183,7 +365,7 @@ The 6.3 flowchart in `comprehensive-academic` showed the rightmost node (Postgre
 - Fix: default max width is now `contentWidth × MAX_WIDTH_RATIO` (0.98), giving ~13px of real slack. User-specified `forgr.mermaidMaxWidth` is respected exactly (no ratio applied).
 - Verification: `test/mermaid/sizing.test.js` "right edge keeps safety slack" asserts the box is at most 0.98 of content width.
 
-### Issue 2 — clipped box edges + phantom space / near-empty pages (fixed)
+#### Issue 2 — clipped box edges + phantom space / near-empty pages (fixed)
 
 Two reports under this banner: the 6.4 sequence diagram in `comprehensive-newsletter` was sent to a new page leaving a page ~90% blank, and later, after an incomplete fix, diagram edges were cut on all sides and the sequence diagram showed only one participant box.
 
@@ -192,17 +374,15 @@ Two reports under this banner: the 6.4 sequence diagram in `comprehensive-newsle
 - Fix: content extent is now measured as the union of `getBoundingClientRect()` over all graphical children, mapped into viewBox units (getBoundingClientRect includes stroke). The SVG `viewBox` is re-trimmed to that extent plus a 1% padding, then the box is sized from it. The sequence diagram renders complete and unclipped at its true extent (e.g. 630×342 on A4).
 - Fix: `layoutMermaid()` no longer short-circuits per iteration, so all crossing diagrams get marked in one pass instead of exhausting the iteration cap.
 - Verification: `test/mermaid/sizing.test.js` "viewBox is trimmed to full content extent" asserts zero clipped children and a full-width viewBox.
-- Status: **partial**. Phantom spacing still recurs in some diagrams (mostly sequence diagrams and diagrams near a page boundary). Tracked as an open known issue in `docs/KNOWN_ISSUES.md` (issue 1). The whole-page path (milestone 2.82) mitigates it for the largest diagrams.
+- Status: **partial**. Phantom spacing still recurs in some diagrams (mostly sequence diagrams and diagrams near a page boundary). Tracked as an open known issue in `docs/KNOWN_ISSUES.md` (issue 1). The whole-page path (M14) mitigates it for the largest diagrams.
 
-### Issue 3 — massive diagrams get the whole page (done)
+#### Issue 3 — massive diagrams get the whole page (done)
 
-Charts that are genuinely huge claim the whole page. Implemented in Milestone 2.82 below.
+Charts that are genuinely huge claim the whole page. Implemented in M14 below.
 
----
+### M14 — Big diagram management
 
-## Milestone 2.82 — Big diagram management (Done)
-
-Follow-up to M2.8.1, resolving Issue 3. Diagrams too tall to fit the content box legibly (scale below the 0.65 floor) get the whole page instead of a small cramped box. Automatically applies to any diagram; no new front-matter key.
+Follow-up to M13, resolving Issue 3. Diagrams too tall to fit the content box legibly (scale below the 0.65 floor) get the whole page instead of a small cramped box. Automatically applies to any diagram; no new front-matter key.
 
 - [x] `WHOLE_PAGE_RATIO = 0.92` — whole-page diagrams claim up to 92% of page height (taller than the 0.85 content-box cap, so whole-page wins for tall charts)
 - [x] Whole-page re-render loop: renders at the base font, then steps the font down in 70% increments (min 9) until the diagram fits the whole-page box without scaling, then sizes it
@@ -214,19 +394,17 @@ Follow-up to M2.8.1, resolving Issue 3. Diagrams too tall to fit the content box
 - [x] 4 new browser tests in `test/mermaid/sizing.test.js` (60-node tall whole-page, 150-node XL with warning, wide gantt no-whole-page, whole-page disabled via override)
 - [x] `sizing.md` tall flowchart (30 nodes) now renders whole-page; integration fixture still asserts 3+ pages
 
----
+### M15 — Mermaid placement & phantom spacing
 
-## Milestone 2.83 — Mermaid placement & phantom spacing (Done)
+Follow-up to M14. The JS placement pass (`layoutMermaid`) and the phantom container spacing were both replaced with simpler, native behavior. Reported cases from `docs/KNOWN_ISSUES.md` issues 1 and 2 are resolved.
 
-Follow-up to M2.8.2. The JS placement pass (`layoutMermaid`) and the phantom container spacing were both replaced with simpler, native behavior. Reported cases from `docs/KNOWN_ISSUES.md` issues 1 and 2 are resolved.
-
-### Phantom container spacing (P1, fixed)
+#### Phantom container spacing (P1, fixed)
 
 - [x] Root cause: the rendered SVG is an inline element by default, so the descender baseline adds ~4px of space below it inside the `.mermaid` container. The container then reserved more height than the diagram drew, showing as blank gaps.
 - [x] Fix: `.mermaid svg { display: block; max-width: 100%; height: auto; margin: 0 auto; }` in `src/templates/base.html`. Container height now matches the SVG box.
 - [x] Regression test: `test/mermaid/sizing.test.js` ".mermaid container has no phantom height" asserts container height equals SVG height within 0.5px.
 
-### Placement (P2, fixed)
+#### Placement (P2, fixed)
 
 - [x] `layoutMermaid()` removed from `src/pdf.js` along with the `mermaid--new-page` / `mermaid--keep-heading` CSS classes. The pass measured page positions in screen space where its own `break-before: page` classes had no effect, so it could never fix the orphaned-heading case it was written for.
 - [x] Placement now relies on native CSS fragmentation already present in the templates: `h1..h6 { break-after: avoid }` keeps a heading attached to its diagram, and `.mermaid { break-inside: avoid }` keeps diagrams whole.
@@ -235,7 +413,7 @@ Follow-up to M2.8.2. The JS placement pass (`layoutMermaid`) and the phantom con
 - [x] Regression test: `test/mermaid/sizing.test.js` "first diagram is clamped to the page-1 space left below its heading chain" asserts the chain fits on page 1 and the diagram is actually shrunk below the 0.85 cap.
 - [x] `docs/KNOWN_ISSUES.md` issues 1 and 2 marked fixed.
 
-### Fixture results (A4, 2cm margins)
+#### Fixture results (A4, 2cm margins)
 
 Page counts before (old) and after (new) the work:
 
@@ -252,70 +430,9 @@ No fixture has an empty or near-empty page after the work. `test/fixtures/*.pdf`
 
 ---
 
-## Milestone 2.9 — Custom data foundation (Done)
+## TUI
 
-Follow-up to M2.83. Sets the foundation for the custom-data roadmap in `docs/custom-data.md`. The full front-matter data now flows through the render pipeline so later tiers (metadata, inference, data-driven content) can consume it.
-
-### Data threading
-
-- [x] `run()` stores the raw front-matter data on the config as `config.data`.
-- [x] `templateContext()` exposes the data to the Handlebars template as `data` (e.g. `{{ data.title }}`). The built-in `base.html` does not use it yet; user presets (Milestone 5) will.
-- [x] `renderMarkdown()` accepts `data` and passes it into the render environment so markdown rules can read it.
-
-### Body variables
-
-- [x] Markdown core rule `substitute_variables`: replaces `{{ key }}` (dotted keys supported) in text tokens from the data. Unknown keys stay literal. Values are inserted as escaped text. Fenced code and inline code are untouched.
-- [x] The rule is the smallest consumer that proves the markdown data path end-to-end and is the building block for the authoring tiers.
-
-### TUI settings pre-fill
-
-- [x] `settingsFromFrontMatter()` maps the settings form keys from a file's front-matter, falling back to built-in defaults.
-- [x] The TUI pre-fills the settings form from the first selected file once per file selection. User edits persist across the session.
-- [x] The settings screen shows "pre-filled from <file>" when a single file carries front-matter.
-
-### Docs
-
-- [x] `docs/custom-data.md` describes Tier 0 (implemented) and thoroughly documents Tiers 1, 2, and 3 with front-matter examples. Priority: automated inference (Tier 3) first, authoring power (Tier 2) after the foundations are proven.
-
-### Tests
-
-- [x] Unit tests for `settingsFromFrontMatter` (empty, partial, cover fields, unknown keys).
-- [x] Unit tests for variable substitution (known, nested, unknown, escaped, code isolation).
-- [x] Unit tests for `templateContext` data passthrough.
-- [x] Full suite passes: 159 tests.
-
----
-
-## Milestone 2.75 — TUI & CLI Polish (Pending)
-
-### CLI output
-
-- [x] Colored prefixes: ✓ success, ✗ error, ℹ info
-- [x] Inline spinner during PDF generation (replaces silent gap)
-- [x] Completion summary: page count, word count, file size, preset, elapsed
-- [x] Chromium download as single-line progress (no Playwright noise)
-
-### TUI (Ink)
-
-- [x] Visual preset cards with accent color swatch beside each name
-- [x] Confirmation animation before generation kicks off
-- [x] Result screen after render: file path, page count, preset, time — "done" state, q quits
-- [x] Consistent accent color for TUI chrome (separate from document presets)
-- [x] Persistent state machine: picker → rendering → result → picker (Enter renders again)
-- [x] Ink-native spinner animation during render (replaces ora in TUI path)
-- [x] Colored key hints in footer (action keys in teal accent)
-- [x] `o` key opens rendered PDF in default OS viewer
-- [x] User preset selection shows inline notification, does not exit
-
-### Error format (both paths)
-
-- [x] Chromium not found → message + fix hint, no stack trace
-- [x] Invalid preset → formatted list of available presets
-- [x] Pipeline errors → single line + hint, never raw dump
-
----
-
-## Milestone 3 — TUI Preset Picker (Done, v0.6.0)
+### M4 — TUI preset picker (v0.6.0)
 
 Launched via the `forgr-tui` command (separate bin), not an `--interactive` flag.
 
@@ -327,74 +444,10 @@ Launched via the `forgr-tui` command (separate bin), not an `--interactive` flag
 - [x] Non-TTY guard: `launchTui` throws a clear error when stdin is not a TTY
 - [x] `test/presets.test.js` — registry + user-preset scan (valid, malformed, incomplete)
 - [x] `test/tui.test.js` — TUI non-TTY guard
-- User-preset *rendering* is deferred to Milestone 5 (config); selecting a user preset prints an informative message
-- No PDF preview in this milestone (that is Milestone 4)
+- User-preset *rendering* is deferred to R1 (M17); selecting a user preset prints an informative message
+- No PDF preview in this milestone (that is M7)
 
----
-
-## Milestone 3.5 — Front-Matter Parsing (Done)
-
-### Reading
-
-- [x] Parse YAML front-matter (delimited by `---`) at top of `.md` files (via `gray-matter`)
-- [x] Shared fields: `layout` / `preset`, `title`, `date`, `author`
-- [x] Namespaced fields: `forgr.toc`, `forgr.cover`, `forgr.footer`, `forgr.section_numbering`
-- [x] Ignore unrecognized fields (Obsidian/Jekyll/Typora safe)
-- [x] Files without front-matter render unchanged
-
-### Merge priority
-
-- [x] CLI flags win over front-matter
-- [ ] TUI settings win over front-matter (TUI settings form not yet implemented)
-- [x] Front-matter is the baseline (no CLI flags + no TUI = file config)
-- [ ] TUI form pre-fills from front-matter when available (TUI settings form not yet implemented)
-
-### Write discipline
-
-- [x] forgr never writes to the input `.md` file
-- [x] Settings are ephemeral per render
-- [x] `--write` flag saves CLI settings into file's front-matter
-
-### README
-
-- [x] Document all supported front-matter keys with examples (`docs/front-matter.md`)
-- [x] Show minimal block for fully automated render (title + layout = zero CLI flags)
-
----
-
-## Milestone 4 — Rendering options (Done)
-
-All five rendering options implemented: doc-meta toggle, date format (iso/locale), footer style switching, cover page, and section numbering. Each works as CLI flag, front-matter key, and `--write` target.
-
-### Doc-meta header
-
-- [x] `--doc-meta` / `--no-doc-meta` flag + `forgr.docMeta` front-matter key
-- [x] `--date-format <iso|locale>` flag + `forgr.dateFormat` key
-- [x] `--date-locale <locale>` flag + `forgr.dateLocale` key
-- [x] Template conditionally shows/hides the header block
-- [x] Locale-aware date formatting when `dateFormat: locale`
-
-### Footer
-
-- [x] `--footer <page-numbers|page-x-of-y|none>` flag + `forgr.footer` front-matter key
-- [x] Footer template switches between `page-numbers` and `page-x-of-y` and `none`
-- [x] `displayHeaderFooter` and `footerTemplate` driven by config, not hardcoded
-
-### Cover page
-
-- [x] `--cover` flag + `forgr.cover` front-matter key
-- [x] `--cover-title`, `--cover-author`, `--cover-date` flags + front-matter keys
-- [x] Cover template partial in `base.html`
-- [x] Cover renders as separate first page before body
-
-### Section numbering
-
-- [x] `--section-numbering` / `--no-section-numbering` flag + `forgr.sectionNumbering` key
-- [x] CSS counters in base.html (off by default)
-
----
-
-## Milestone 4.5 — TUI settings form (Done)
+### M9 — TUI settings form
 
 All CLI flags removed from `forgr-tui`. After selecting a preset, the TUI shows an interactive settings screen where all rendering options are configured with arrow keys before rendering.
 
@@ -406,13 +459,11 @@ All CLI flags removed from `forgr-tui`. After selecting a preset, the TUI shows 
 - [x] Settings persist across renders (going back to picker and re-selecting)
 - [x] Output path shown as read-only (default: same dir as input)
 
----
-
-## Milestone 4.75 — File picker & batch rendering (Done)
+### M10 — File picker & batch rendering
 
 Optional `[file]` argument — when a file is passed it works as if that file was the only `.md` in cwd; skips file picker. When omitted, scans cwd for `.md` files, lets the user select one or more, and configures rendering settings interactively.
 
-### FilePicker
+#### FilePicker
 
 - [x] Scan cwd for `*.md` files, sort alphabetically
 - [x] 0 files: show empty message, `q` to quit
@@ -421,7 +472,7 @@ Optional `[file]` argument — when a file is passed it works as if that file wa
 - [x] Checkmark prefix for selected files, accent-colored
 - [x] Arrow navigation with wrapping
 
-### Batch rendering
+#### Batch rendering
 
 - [x] Render loop iterates through all selected files sequentially
 - [x] RenderingScreen shows `[N/M] filename` + pipeline stage + completed files
@@ -430,20 +481,107 @@ Optional `[file]` argument — when a file is passed it works as if that file wa
 - [x] Result list truncation at 6 files with `... N more`
 - [x] Summary line: preset + total elapsed time
 
-### Save to front-matter
+#### Save to front-matter
 
 - [x] `s` key on result screen saves current settings to all selected files
 - [x] Per-file read/merge/write via `writeForgrFrontMatter()`
 - [x] Shows in-progress, success, and error states
 
-### Remaining CLI surface
+#### Remaining CLI surface
 
 - [x] `forgr-tui` accepts no flags — zero CLI flags
 - [x] `forgr-tui` accepts optional `[file]` argument: single markdown file bypasses file picker, error on not-found
 
+### M11 — TUI & CLI polish
+
+#### CLI output
+
+- [x] Colored prefixes: ✓ success, ✗ error, ℹ info
+- [x] Inline spinner during PDF generation (replaces silent gap)
+- [x] Completion summary: page count, word count, file size, preset, elapsed
+- [x] Chromium download as single-line progress (no Playwright noise)
+
+#### TUI (Ink)
+
+- [x] Visual preset cards with accent color swatch beside each name
+- [x] Confirmation animation before generation kicks off
+- [x] Result screen after render: file path, page count, preset, time — "done" state, q quits
+- [x] Consistent accent color for TUI chrome (separate from document presets)
+- [x] Persistent state machine: picker → rendering → result → picker (Enter renders again)
+- [x] Ink-native spinner animation during render (replaces ora in TUI path)
+- [x] Colored key hints in footer (action keys in teal accent)
+- [x] `o` key opens rendered PDF in default OS viewer
+- [x] User preset selection shows inline notification, does not exit
+
+#### Error format (both paths)
+
+- [x] Chromium not found → message + fix hint, no stack trace
+- [x] Invalid preset → formatted list of available presets
+- [x] Pipeline errors → single line + hint, never raw dump
+
 ---
 
-## TOC — Done (implemented outside Milestone 5)
+## Front-matter & rendering options
+
+### M6 — Front-matter parsing
+
+#### Reading
+
+- [x] Parse YAML front-matter (delimited by `---`) at top of `.md` files (via `gray-matter`)
+- [x] Shared fields: `layout` / `preset`, `title`, `date`, `author`
+- [x] Namespaced fields: `forgr.toc`, `forgr.cover`, `forgr.footer`, `forgr.section_numbering`
+- [x] Ignore unrecognized fields (Obsidian/Jekyll/Typora safe)
+- [x] Files without front-matter render unchanged
+
+#### Merge priority
+
+- [x] CLI flags win over front-matter
+- [x] TUI settings win over front-matter *(resolved in M9)*
+- [x] Front-matter is the baseline (no CLI flags + no TUI = file config)
+- [x] TUI form pre-fills from front-matter when available *(resolved in M16)*
+
+#### Write discipline
+
+- [x] forgr never writes to the input `.md` file
+- [x] Settings are ephemeral per render
+- [x] `--write` flag saves CLI settings into file's front-matter
+
+#### README
+
+- [x] Document all supported front-matter keys with examples (`docs/front-matter.md`)
+- [x] Show minimal block for fully automated render (title + layout = zero CLI flags)
+
+### M7 — Rendering options
+
+All five rendering options implemented: doc-meta toggle, date format (iso/locale), footer style switching, cover page, and section numbering. Each works as CLI flag, front-matter key, and `--write` target.
+
+#### Doc-meta header
+
+- [x] `--doc-meta` / `--no-doc-meta` flag + `forgr.docMeta` front-matter key
+- [x] `--date-format <iso|locale>` flag + `forgr.dateFormat` key
+- [x] `--date-locale <locale>` flag + `forgr.dateLocale` key
+- [x] Template conditionally shows/hides the header block
+- [x] Locale-aware date formatting when `dateFormat: locale`
+
+#### Footer
+
+- [x] `--footer <page-numbers|page-x-of-y|none>` flag + `forgr.footer` front-matter key
+- [x] Footer template switches between `page-numbers` and `page-x-of-y` and `none`
+- [x] `displayHeaderFooter` and `footerTemplate` driven by config, not hardcoded
+
+#### Cover page
+
+- [x] `--cover` flag + `forgr.cover` front-matter key
+- [x] `--cover-title`, `--cover-author`, `--cover-date` flags + front-matter keys
+- [x] Cover template partial in `base.html`
+- [x] Cover renders as separate first page before body
+
+#### Section numbering
+
+- [x] `--section-numbering` / `--no-section-numbering` flag + `forgr.sectionNumbering` key
+- [x] CSS counters in base.html (off by default)
+
+### TOC — done outside a milestone
 
 TOC is implemented without template partials — it runs at the markdown-render level and injects HTML into the body.
 
@@ -454,7 +592,7 @@ TOC is implemented without template partials — it runs at the markdown-render 
 - [x] TOC styling in all 5 presets (.toc, .toc__title, .toc__list, .toc__item--hN)
 - [x] Input: docs/elements.md — checklist of all basic styling elements
 
-### Hardcoded constants (now in `src/config.js`)
+#### Hardcoded constants (now in `src/config.js`)
 
 | Key | Default |
 |---|---|
@@ -468,109 +606,63 @@ TOC is implemented without template partials — it runs at the markdown-render 
 | `cover` | `false` |
 | `sectionNumbering` | `false` |
 
-## Milestone 5 — Watch Mode & User Presets (Pending)
+---
 
-### Watch mode
+## Custom data
+
+### M16 — Custom data foundation
+
+Follow-up to M15. Sets the foundation for the custom-data roadmap in `docs/custom-data.md`. The full front-matter data now flows through the render pipeline so later tiers (metadata, inference, data-driven content) can consume it.
+
+#### Data threading
+
+- [x] `run()` stores the raw front-matter data on the config as `config.data`.
+- [x] `templateContext()` exposes the data to the Handlebars template as `data` (e.g. `{{ data.title }}`). The built-in `base.html` does not use it yet; user presets (R1) will.
+- [x] `renderMarkdown()` accepts `data` and passes it into the render environment so markdown rules can read it.
+
+#### Body variables
+
+- [x] Markdown core rule `substitute_variables`: replaces `{{ key }}` (dotted keys supported) in text tokens from the data. Unknown keys stay literal. Values are inserted as escaped text. Fenced code and inline code are untouched.
+- [x] The rule is the smallest consumer that proves the markdown data path end-to-end and is the building block for the authoring tiers.
+
+#### TUI settings pre-fill
+
+- [x] `settingsFromFrontMatter()` maps the settings form keys from a file's front-matter, falling back to built-in defaults.
+- [x] The TUI pre-fills the settings form from the first selected file once per file selection. User edits persist across the session.
+- [x] The settings screen shows "pre-filled from <file>" when a single file carries front-matter.
+
+#### Docs
+
+- [x] `docs/custom-data.md` describes Tier 0 (implemented) and thoroughly documents Tiers 1, 2, and 3 with front-matter examples. Priority: automated inference (Tier 3) first, authoring power (Tier 2) after the foundations are proven.
+
+#### Tests
+
+- [x] Unit tests for `settingsFromFrontMatter` (empty, partial, cover fields, unknown keys).
+- [x] Unit tests for variable substitution (known, nested, unknown, escaped, code isolation).
+- [x] Unit tests for `templateContext` data passthrough.
+- [x] Full suite passes: 159 tests.
+
+---
+
+## Active milestone
+
+### M17 — Watch mode & user presets
+
+#### Watch mode
 
 - [x] `src/watch.js` — directory watcher with content-based change detection (mtime/size gate filters macOS sibling-file events, so writing the PDF next to the input never loops)
 - [x] `--watch` flag on the `convert` command re-renders the PDF on file change, debounced (300ms)
 - [x] Re-render failures print the error and watching continues; the process never dies on a broken edit
 - [x] `--watch` rejects `--write` (forgr never rewrites a file it is watching)
 - [x] `test/unit/watch.test.js` — 5 unit tests (change, debounce, sibling-file filtering, delete/recreate, close)
-- [ ] User-preset rendering (discovery done in M3)
-- [ ] Plugin system for custom Markdown transformations
+
+#### User-preset rendering
+
+The remaining M17 work. See R1 for the concrete checklist.
 
 ---
 
-## Milestone 6 — Extended format support (Later)
-
-*Deferred until Milestones 1-5 are fully polished.*
-
-### LaTeX Math Notation
-- [ ] Math rendering via `markdown-it-texmath` or `markdown-it-katex`
-  - [ ] Inline math: `$...$` and `\(...\)`
-  - [ ] Display math: `$$...$$`, `\[...\]`, and fenced `` ```math `` blocks
-- [ ] KaTeX CSS bundled per-preset (or a shared math stylesheet)
-- [ ] Font loading for math glyphs (KaTeX fonts embedded or CDN)
-- [ ] Math in mermaid labels (stretch goal — mermaid's built-in math is experimental)
-- [ ] Test fixtures with mixed math/markdown content
-
-### Jekyll / Liquid preprocessing
-
-Jekyll files contain Liquid templating (`{% %}`, `{{ }}`) that passes through as raw text. A pre-processor steps before markdown-it:
-
-- [ ] Strip or transform `{% highlight lang %}...{% endhighlight %}` to fenced code blocks
-- [ ] Strip `{% raw %}...{% endraw %}` wrappers, keep inner content
-- [ ] Strip unknown `{% %}` tags to avoid raw text in output
-- [ ] Resolve Liquid variables from front-matter data where possible
-- [ ] Option: full `liquidjs` processing for `{% include %}` resolution
-
----
-
-## Milestone 7 — `forgr doctor` diagnostic command (Done)
-
-*Self-check command at `src/doctor.js`, registered as `forgr doctor` in `cli.js`.*
-
-### What it checks
-
-- [x] **Chromium binary** — verify `~/.forgr/browsers/chromium_headless_shell-*` exists and is executable
-- [x] **Preset CSS files** — for each built-in preset, check the CSS file exists at the expected path inside the package
-- [x] **User preset files** — validate all `~/.config/forgr/presets/*.json` are parseable and have required fields
-- [x] **User preset CSS targets** — for presets that reference an external CSS path, check the file exists and is readable
-- [x] **Font files** — verify `IBMPlexSans-Variable.woff2`, `IBMPlexMono-400.woff2`, `IBMPlexMono-600.woff2` exist in the package assets dir
-- [x] **Template file** — verify `base.html` exists
-- [x] **Node version** — warn if below the minimum supported version
-
-### Fix modes
-
-- [x] `forgr doctor` — report-only (exit code 0 = all good, non-zero = issues found)
-- [x] `forgr doctor --fix` — auto-fix where possible:
-  - Re-download Chromium if missing/corrupt
-  - Reinstall package if built-in files are missing (prompt user to run `npm install` or re-download)
-  - Remove malformed user preset files
-- [x] `forgr doctor --verbose` — print full paths inspected, file sizes, and timestamps
-
-### Output format
-
-- [x] Colored output: green OK / red FAIL / yellow WARN per check
-- [x] Summary line: "N passed, N warnings, N errors"
-- [x] Suggestions for each failure
-
----
-
-## Structural cleanup (P1–P3) — Done
-
-Three-phase refactor eliminating duplicated code and centralizing hardcoded configuration.
-
-### P1 — Extract duplicates
-
-- [x] `getChromiumInstallCmd()` in `browsers-path.js` — replaces `npx` string in `pdf.js`, `doctor.js`, `postinstall.js`
-- [x] `removeFfmpeg()` in `browsers-path.js` — extracted from `pdf.js` and `postinstall.js`
-- [x] Preset name list — `cli.js` and `template.js` read from `BUILTIN_PRESETS` (single source)
-- [x] `normalizeTocOption()` in `utils.js` — shared by `cli.js` and `bin/forgr-tui`
-- [x] `printOutputMsg()` in `utils.js` — shared by `cli.js` and `bin/forgr-tui`
-- [x] `handleCliError()` in `utils.js` — shared by `cli.js` and `bin/forgr-tui`
-
-### P2 — Config object
-
-- [x] `src/config.js` — single `DEFAULTS` object with all hardcoded values
-- [x] `buildConfig()` in `pipeline.js` — merges CLI options > front-matter > DEFAULTS
-- [x] Config flows through `pipeline.js` → `pdf.js`, `template.js` instead of loose options
-- [x] `toc` field uses `'auto' | 'on' | 'off'` strings (merged via priority: CLI > FM > defaults)
-- [x] `dateFormat`, `docMeta`, `cover`, `footer`, `sectionNumbering` ready for TUI/front-matter wiring
-
-### P3 — Front-matter merge
-
-- [x] `gray-matter` dependency added for YAML parsing
-- [x] `parseFrontMatter()` in `markdown.js` — extracts `preset`, `title`, `date`, `author`, `toc`
-- [x] Merged into config in `pipeline.js` — front-matter sits between CLI flags and DEFAULTS
-- [x] Title, author, date passed to template context and rendered conditionally in `base.html`
-
-### Extra — `npx` lockfile pollution fix
-
-- [x] `getChromiumInstallCmd()` resolves playwright-core CLI path via `require.resolve` instead of shelling to `npx`, preventing random `package-lock.json` files in the working directory
-
----
+## Reference
 
 ## Publishing workflow
 
@@ -587,8 +679,6 @@ Three-phase refactor eliminating duplicated code and centralizing hardcoded conf
 - [x] `.npmrc` with `allow-scripts=false` to prevent postinstall warnings
 - [x] `preuninstall.js` removed from published `"files"` array in package.json
 
----
-
 ## Design decisions locked in (do not revisit without owner sign-off)
 
 - Margins: 2cm all sides via Playwright page.pdf(), never via CSS body padding
@@ -599,18 +689,16 @@ Three-phase refactor eliminating duplicated code and centralizing hardcoded conf
 - `.mermaid { break-inside: avoid; break-before: avoid; }` — prevents diagrams from splitting across pages away from their heading
 - Academic preset: justified body text must be overridden to `text-align: left` on `<pre>` blocks to preserve ASCII art alignment
 
----
+## Architecture Assessment (post-M1)
 
-## Architecture Assessment (post-Milestone 1)
-
-Assessed 2026-07-06. Overall structure is sound — module boundaries match the spec and pipeline separation is clean. No major restructuring needed. The issues below are real but non-blocking for Milestone 1; items 1 and 2 will cause friction when the TUI (Milestone 2) and watch mode (Milestone 5) are added on top of the same pipeline.
+Assessed 2026-07-06. Overall structure is sound — module boundaries match the spec and pipeline separation is clean. No major restructuring needed. The issues below are real but non-blocking for M1; items 1 and 2 will cause friction when the TUI (M4) and watch mode (M17) are added on top of the same pipeline.
 
 ### Issue 1 — process.exit() scattered across modules (priority: resolved)
 
 `pdf.js`, `template.js`, `pipeline.js`, and `cli.js` all call `process.exit(1)` directly. This has two consequences:
 
 - Unit tests cannot test error paths without mocking `process.exit`.
-- The TUI (Milestone 2) and watch mode (Milestone 5) will both reuse the pipeline; a `process.exit` inside a library module kills the whole process instead of letting the caller handle the error gracefully.
+- The TUI (M4) and watch mode (M17) will both reuse the pipeline; a `process.exit` inside a library module kills the whole process instead of letting the caller handle the error gracefully.
 
 **Correct pattern:** modules throw typed errors; only `cli.js` (the entry point) catches them and exits. Example:
 
@@ -666,16 +754,12 @@ Affects: `src/template.js`.
 
 Affects: `src/pipeline.js`.
 
----
-
 ## Refactoring tasks (derived from assessment above)
 
 - [x] Refactor pdf.js, template.js, pipeline.js to throw errors instead of calling process.exit — add single exit boundary in cli.js (Issue 1, 6)
 - [x] Import BROWSERS_PATH from browsers-path.js in cli.js instead of re-deriving (Issue 2)
 - [x] Extract hljs setup to src/highlighter.js (Issue 3)
 - [x] Log a warning in template.js when a font file is not found (Issue 5)
-
----
 
 ## Future — Deno Desktop port (deferred)
 

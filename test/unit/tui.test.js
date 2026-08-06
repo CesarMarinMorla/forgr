@@ -26,7 +26,7 @@ test('classifyPreset renders a built-in preset', () => {
   });
 });
 
-test('classifyPreset defers user presets to Milestone 5', () => {
+test('classifyPreset defers user presets until user-preset rendering ships', () => {
   assert.deepEqual(classifyPreset({ name: 'brand', source: 'user' }), {
     action: 'unsupported-user',
     name: 'brand',

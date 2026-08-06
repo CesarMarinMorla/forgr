@@ -2,6 +2,8 @@
 
 This file describes what the custom front-matter data is and what the converter can do with it. The roadmap is split into tiers. Tier 0 is implemented. The later tiers describe features that build on it.
 
+Milestone and task tracking lives in [docs/tasks.md](tasks.md) — the tiers here map to the R2, R3, and R4 roadmap items there.
+
 ## What is custom data
 
 Every markdown file can carry YAML front-matter. forgr reads three kinds of keys:
@@ -35,7 +37,7 @@ Tier 0 makes the data available where rendering happens. No user-facing feature 
 The data reaches three places:
 
 1. The markdown renderer. `renderMarkdown` receives the data and passes it into the render environment. Markdown rules can read it.
-2. The template. The Handlebars context receives the data as `data`, so a template can read `{{ data.title }}` or `{{ data.forgr.preset }}`. The built-in `base.html` does not use it yet. User presets (Milestone 5) will be the first consumers.
+2. The template. The Handlebars context receives the data as `data`, so a template can read `{{ data.title }}` or `{{ data.forgr.preset }}`. The built-in `base.html` does not use it yet. User presets (roadmap R1) will be the first consumers.
 3. The PDF options object. The data is carried into `generatePdf` so a later tier can stamp PDF metadata (title, author, keywords).
 
 ### Body variables
@@ -213,7 +215,7 @@ forgr:
 ---
 ```
 
-Value: reusable parts across documents. This overlaps with the Liquid `{% include %}` work in Milestone 6.
+Value: reusable parts across documents. This overlaps with the Liquid `{% include %}` work in R5 (extended format support).
 
 ### CSV tables
 
@@ -239,7 +241,7 @@ Control blocks over the data, like `{% if %}` and `{% for %}`.
 {% endfor %}
 ```
 
-Value: generate repeated content from a list. This overlaps with Milestone 6 (Liquid). It is listed here for the roadmap but should be built inside Milestone 6, not before it.
+Value: generate repeated content from a list. This overlaps with R5 (extended format support / Liquid). It is listed here for the roadmap but should be built inside R5, not before it.
 
 ## Tier 3. Intelligence
 
@@ -316,4 +318,4 @@ Shows word count, diagram count, and read time. These numbers come from the rend
 1. Tier 0 is done. It is the foundation.
 2. Tier 3 (intelligence) is the priority direction. Auto-preset detection and pre-render lint are the first candidates because they add value with no new front-matter burden.
 3. Tier 1 quick wins come next as low-risk polish.
-4. Tier 2 authoring power comes after the foundations are proven. The conditional and loop blocks belong to Milestone 6.
+4. Tier 2 authoring power comes after the foundations are proven. The conditional and loop blocks belong to R5 (extended format support).

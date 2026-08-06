@@ -16,11 +16,11 @@ Status values: `open`, `workaround`, `fixed`.
 
 Empty space with no reason to exist. The `.mermaid` container claims more vertical height than the drawn diagram occupies, so the layout pass reserves space that shows up as blank gaps or near-empty pages.
 
-Mermaid sizing was switched from the SVG `viewBox` to a measured content extent (union of all child bounding boxes) in milestone 2.8.1, which removed the worst phantom space. Reports continue: the measured extent still does not always match the space the layout pass reserves, so blank gaps and near-empty pages reappear in some diagrams, especially sequence diagrams and diagrams near a page boundary.
+Mermaid sizing was switched from the SVG `viewBox` to a measured content extent (union of all child bounding boxes) in milestone M13, which removed the worst phantom space. Reports continue: the measured extent still does not always match the space the layout pass reserves, so blank gaps and near-empty pages reappear in some diagrams, especially sequence diagrams and diagrams near a page boundary.
 
-The whole-page path added in milestone 2.82 routes the largest diagrams to a full page, which avoids the gap for those cases, but the content-box path can still produce phantom space.
+The whole-page path added in milestone M14 routes the largest diagrams to a full page, which avoids the gap for those cases, but the content-box path can still produce phantom space.
 
-### Resolution (milestone 2.83)
+### Resolution (milestone M15)
 
 The remaining phantom space came from the SVG being an inline element: the descender baseline added ~4px of space below the SVG inside its `.mermaid` container, so the container reserved more height than the diagram drew. The fix makes the SVG `display: block` (`.mermaid svg { display: block; max-width: 100%; height: auto; margin: 0 auto; }`), so the container height now matches the drawn box exactly.
 
@@ -55,4 +55,4 @@ Handle only after phantom spacing (issue 1) is resolved, and only for the specif
 
 ## Issue 3 — mermaid sizing is a work in progress
 
-Mermaid rendering and placement are not treated as stable. Milestones 2.8, 2.8.1, and 2.82 changed sizing behavior (scale-to-fit, content-aware extent, whole-page treatment). Expect further changes. The fixture PDFs in `test/fixtures/` are the visual reference; re-render and inspect them after any change to the sizing or placement code.
+Mermaid rendering and placement are not treated as stable. Milestones M12, M13, and M14 changed sizing behavior (scale-to-fit, content-aware extent, whole-page treatment). Expect further changes. The fixture PDFs in `test/fixtures/` are the visual reference; re-render and inspect them after any change to the sizing or placement code.
