@@ -1,6 +1,6 @@
 {
   "name": "forgr",
-  "version": "0.18.0",
+  "version": "0.18.1",
   "description": "Convert Markdown files into polished PDFs",
   "license": "MIT",
   "type": "module",
