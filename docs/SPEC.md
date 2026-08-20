@@ -127,6 +127,8 @@ Signature elements: a doc-meta header strip (status dot + mono label + timestamp
 
 **Margins:** 2cm on all sides, set exclusively via Playwright's `page.pdf()` — never via CSS body padding (which stays `padding: 0` under `@media print`). The content column is capped at `max-width: 720px` inside that margin box.
 
+**Mermaid in landscape:** the `body[data-orientation="landscape"]` override drops the `max-width` cap on `.mermaid` and `.mermaid svg`, so diagrams span the full landscape content width (the only element that escapes the content-column cap). Centering is preserved: `main`, `.mermaid`, and the svg are all `margin: 0 auto`, so a wider diagram overflows symmetrically and stays centered on the page, with the 0.98 sizing ratio keeping ~1% slack on each side.
+
 ## Defaults (`src/config.js`)
 
 | Key | Default |

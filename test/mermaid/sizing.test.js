@@ -113,6 +113,56 @@ test('wide diagram (gantt) is capped at 0.98 content width', { timeout: 60000 },
   }
 });
 
+test('landscape: wide diagram uses the full landscape content width, escaping the portrait column cap', { timeout: 60000 }, async () => {
+  const { browser, page } = await launch();
+  try {
+    const landscape = contentSize('A4', undefined, 'landscape');
+    const landscapeMaxWidth = Math.round(landscape.widthPx * MAX_WIDTH_RATIO);
+    const landscapeMaxHeight = Math.round(landscape.heightPx * MAX_DIAGRAM_HEIGHT_RATIO);
+
+    const gantt = [
+      'gantt',
+      '    title Wide schedule',
+      '    dateFormat YYYY-MM-DD',
+      '    section Planning',
+      '    Write proposal        :a1, 2026-01-01, 30d',
+      '    Gather requirements   :a2, 2026-02-01, 45d',
+      '    Design architecture   :a3, 2026-03-15, 60d',
+      '    section Development',
+      '    Implement core module :d1, 2026-05-15, 90d',
+      '    Implement second part :d2, 2026-08-15, 75d',
+      '    Implement third part  :d3, 2026-11-01, 60d',
+      '    section Testing',
+      '    Unit and integration  :t1, 2027-01-01, 60d',
+      '    Load and stress tests :t2, 2027-03-01, 45d',
+      '    User acceptance       :t3, 2027-04-15, 30d',
+      '    section Release',
+      '    Package and document  :r1, 2027-05-15, 20d',
+      '    Deploy and monitor    :r2, 2027-06-01, 15d',
+    ].join('\n');
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+      main { max-width: 720px; margin: 0 auto; }
+      .mermaid { margin: 1.4em auto; max-width: 100%; text-align: center; break-inside: avoid; break-before: avoid; }
+      .mermaid svg { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+      body[data-orientation="landscape"] .mermaid { max-width: none; }
+      body[data-orientation="landscape"] .mermaid svg { max-width: none; }
+    </style></head><body data-orientation="landscape"><main>
+      <div class="mermaid">${escapeHtml(gantt)}</div>
+    </main></body></html>`;
+
+    await page.setContent(html, { waitUntil: 'domcontentloaded' });
+    await renderMermaid(page, 'terminal', { maxWidth: landscapeMaxWidth, maxHeight: landscapeMaxHeight });
+    const d = await dims(page);
+
+    assert.ok(d.width > 720, `landscape diagram ${d.width}px should escape the 720px portrait column cap`);
+    assert.ok(d.width <= landscapeMaxWidth + 1, `landscape diagram ${d.width}px exceeds cap ${landscapeMaxWidth}`);
+    assert.ok(d.width > CONTENT_WIDTH * MAX_WIDTH_RATIO, `landscape diagram ${d.width}px should exceed the portrait max width ${Math.round(CONTENT_WIDTH * MAX_WIDTH_RATIO)}px`);
+  } finally {
+    await browser.close();
+  }
+});
+
 test('gantt with past dates does not balloon to a thumbnail from the off-chart today marker', { timeout: 60000 }, async () => {
   const { browser, page } = await launch();
   try {

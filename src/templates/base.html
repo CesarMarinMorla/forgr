@@ -30,7 +30,7 @@
     {{{css}}}
   </style>
 </head>
-<body>
+<body data-orientation="{{orientation}}">
   {{#if cover}}
   <section class="cover">
     <div class="cover__content">
@@ -74,6 +74,8 @@
     .mermaid { margin: 1.4em auto; max-width: 100%; text-align: center; break-inside: avoid; break-before: avoid; }
     .mermaid svg { display: block; max-width: 100%; height: auto; margin: 0 auto; }
     .mermaid--whole-page { break-before: page; }
+    body[data-orientation="landscape"] .mermaid { max-width: none; }
+    body[data-orientation="landscape"] .mermaid svg { max-width: none; }
   </style>
 </body>
 </html>

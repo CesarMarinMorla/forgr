@@ -71,6 +71,7 @@ export function templateContext(body, config) {
     body,
     data: config.data,
     preset: config.preset,
+    orientation: config.orientation,
     docMeta: config.docMeta,
     cover: config.cover,
     coverTitle: config.coverTitle || config.meta.title || null,
