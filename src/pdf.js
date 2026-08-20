@@ -3,7 +3,7 @@ import { execSync } from 'child_process';
 import { existsSync } from 'fs';
 import fs from 'fs-extra';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
 import { BROWSERS_PATH, getChromiumInstallCmd, getHeadlessShellPath, removeFfmpeg } from './browsers-path.js';
 import { PRESET_MERMAID_THEMES } from './themes/index.js';
 import { ChromiumNotFoundError } from './errors.js';
@@ -20,8 +20,8 @@ import {
   MIN_READABLE_TEXT,
 } from './layout.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const MERMAID_DIST = path.resolve(__dirname, '..', 'node_modules', 'mermaid', 'dist', 'mermaid.min.js');
+const _require = createRequire(import.meta.url);
+const MERMAID_DIST = _require.resolve('mermaid/dist/mermaid.min.js');
 
 const RENDER_DEFAULTS = {
   printBackground: true,
