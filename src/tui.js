@@ -698,7 +698,10 @@ function TuiApp({ presets, inputFile }) {
         onQuit: () => process.exit(0),
         onOpen: () => {
           const cmd = process.platform === 'darwin' ? 'open' : process.platform === 'linux' ? 'xdg-open' : '';
-          if (cmd) execFile(cmd, [process.cwd()], () => {});
+          if (!cmd) return;
+          const first = results.find(r => !r.error && r.outputPath);
+          const target = first ? path.dirname(first.outputPath) : process.cwd();
+          execFile(cmd, [target], () => {});
         },
       });
     default:
