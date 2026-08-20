@@ -11,6 +11,7 @@ Status values: `open`, `workaround`, `fixed`.
 | 1 | fixed | Phantom spacing: a diagram reserves more vertical space than its drawn content, leaving empty space with no reason to exist | Blank gaps and near-empty pages; layout looks unbalanced, diagrams can sit far from their heading | Cap the diagram box with `forgr.mermaidMaxWidth` / `forgr.mermaidMaxHeight` in front-matter | 2.8.1, 2.82, 2.83 |
 | 2 | fixed | Graceful spacing: spacing that is intentional but handled clumsily, such as a diagram alone on a page, an orphaned heading, or an overly large diagram margin | Layout looks unpolished; not a defect, a quality issue | Review rendered fixture PDFs and tune spacing behavior per case | 2.8, 2.8.1, 2.82, 2.83 |
 | 3 | open | Mermaid sizing and placement is under active iteration | Behavior can change between releases as the layout engine is refined | Pin expectations by reviewing rendered fixture PDFs after an upgrade | 2.8, 2.8.1, 2.82 |
+| 4 | open | `forgr-tui` has no version flag; only `-h`/`--help` is supported | Cannot report the TUI version from the CLI, complicating bug reports and scripts that pin the installed version | Run `forgr -V`; both binaries ship from the same package and version | 0.17.0 |
 
 ## Issue 1 — phantom spacing (P1, defect)
 
@@ -56,3 +57,11 @@ Handle only after phantom spacing (issue 1) is resolved, and only for the specif
 ## Issue 3 — mermaid sizing is a work in progress
 
 Mermaid rendering and placement are not treated as stable. Milestones M12, M13, and M14 changed sizing behavior (scale-to-fit, content-aware extent, whole-page treatment). Expect further changes. The fixture PDFs in `test/fixtures/` are the visual reference; re-render and inspect them after any change to the sizing or placement code.
+
+## Issue 4 — forgr-tui has no version flag
+
+The `forgr-tui` binary accepts only `-h`/`--help` and a positional file argument. It has no `--version` or `-V` option, so there is no way to report which version of the TUI is installed. `forgr --version` returns `0.17.0`; `forgr-tui --version` exits with `error: unknown option '--version'` and `forgr-tui -V` fails the same way.
+
+The impact is small but real: bug reports and scripts that want to pin the installed version have to call `forgr -V` instead. Because both binaries ship from the same package and version, that output is a reliable proxy for the TUI version.
+
+Status: **open**. Add a `-V`/`--version` option to `bin/forgr-tui` when the CLI is next touched. A suitable fix is to define an explicit option before the positional file argument so the flag parses instead of falling through to the "unknown option" path.
