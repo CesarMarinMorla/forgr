@@ -45,6 +45,7 @@ test('settingsFromFrontMatter: empty front-matter keeps defaults', () => {
     coverDate: 'auto',
     coverDateText: '',
     sectionNumbering: false,
+    orientation: 'portrait',
   });
 });
 

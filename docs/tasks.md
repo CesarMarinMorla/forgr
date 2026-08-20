@@ -12,6 +12,7 @@
 | R4 | Custom data — Tier 2 authoring power | Later |
 | R5 | Extended format support (LaTeX, Jekyll/Liquid preprocessing) | Later |
 | R6 | Plugin system for custom Markdown transformations | Last priority |
+| R7 | Landscape (horizontal) page orientation | Done |
 
 ### Completed (ordered by when the work shipped)
 

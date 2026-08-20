@@ -36,6 +36,7 @@ const SETTINGS = [
   { key: 'cover', label: 'Cover page', values: [false, true], display: v => v ? 'yes' : 'no' },
   { key: 'coverDate', label: 'Cover date', values: ['auto', 'custom', 'none'] },
   { key: 'sectionNumbering', label: 'Section numbering', values: [false, true], display: v => v ? 'yes' : 'no' },
+  { key: 'orientation', label: 'Orientation', values: ['portrait', 'landscape'] },
 ];
 
 function Swatch({ color }) {
@@ -517,6 +518,7 @@ function defaultSettings() {
     coverDate: DEFAULTS.coverDate,
     coverDateText: DEFAULTS.coverDateText,
     sectionNumbering: DEFAULTS.sectionNumbering,
+    orientation: DEFAULTS.orientation,
   };
 }
 

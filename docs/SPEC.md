@@ -85,7 +85,7 @@ Fully interactive batch converter (Ink/React). No CLI flags.
 
 When no argument is passed, scans cwd for `.md` files. If none found, prints a message and exits. If one found, auto-selects it. If multiple, shows an interactive file picker (space to toggle, enter to confirm).
 
-After file selection, the TUI flows through PresetPicker → SettingsScreen (TOC, doc-meta, date format, footer, cover, section numbering) → batch render. Selected files are rendered one at a time with per-file progress shown. A file failure does not stop the batch.
+After file selection, the TUI flows through PresetPicker → SettingsScreen (TOC, doc-meta, date format, footer, cover, section numbering, orientation) → batch render. Selected files are rendered one at a time with per-file progress shown. A file failure does not stop the batch.
 
 The result screen shows per-file success/failure, truncated to 6 visible files with `... N more`. `s` saves the current settings to all files' front-matter via `writeForgrFrontMatter()`. `o` opens the folder in the system file manager. `Enter` goes back to the preset picker. User presets render exactly like built-ins.
 
@@ -142,6 +142,7 @@ Signature elements: a doc-meta header strip (status dot + mono label + timestamp
 | `cover` | `false` |
 | `sectionNumbering` | `false` |
 | `paperFormat` | `A4` |
+| `orientation` | `portrait` |
 | `margins` | `{ top/bottom/left/right: '2cm' }` |
 
 **TOC logic:** `toc: true` always renders; `false` never; `'auto'` (default) renders only when word count >= 8000 **and** page count >= 3.
@@ -161,6 +162,7 @@ Keys live at the top of the `.md` file. Shared keys (`title`, `date`, `author`) 
 | `cover` | boolean | `false` |
 | `sectionNumbering` | boolean | `false` |
 | `paperFormat` | `A4` / `Letter` | `A4` |
+| `orientation` | `portrait` / `landscape` | `portrait` |
 | `margins` | object | all `2cm` |
 
 `--write` persists all rendering options (preset, toc, docMeta, dateFormat, dateLocale, cover settings, footer, sectionNumbering). Files without front-matter render with all defaults. Unrecognized keys are ignored (Obsidian/Jekyll/Hugo safe).

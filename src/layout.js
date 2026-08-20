@@ -39,16 +39,19 @@ export function pageSize(paperFormat) {
   return PAGE_SIZES[paperFormat] || PAGE_SIZES.A4;
 }
 
-export function contentSize(paperFormat, margins = DEFAULT_MARGINS) {
+export function contentSize(paperFormat, margins = DEFAULT_MARGINS, orientation = 'portrait') {
   const size = pageSize(paperFormat);
+  const width = size.widthMm - toMm(margins.left) - toMm(margins.right);
+  const height = size.heightMm - toMm(margins.top) - toMm(margins.bottom);
+  const landscape = orientation === 'landscape';
   return {
-    widthPx: Math.round((size.widthMm - toMm(margins.left) - toMm(margins.right)) * MM_TO_PX),
-    heightPx: Math.round((size.heightMm - toMm(margins.top) - toMm(margins.bottom)) * MM_TO_PX),
+    widthPx: Math.round((landscape ? height : width) * MM_TO_PX),
+    heightPx: Math.round((landscape ? width : height) * MM_TO_PX),
   };
 }
 
-export function contentHeight(paperFormat, margins = DEFAULT_MARGINS) {
-  return contentSize(paperFormat, margins).heightPx;
+export function contentHeight(paperFormat, margins = DEFAULT_MARGINS, orientation = 'portrait') {
+  return contentSize(paperFormat, margins, orientation).heightPx;
 }
 
 export function pageOf(y, pageHeight) {

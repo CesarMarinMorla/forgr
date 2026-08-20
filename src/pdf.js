@@ -264,8 +264,8 @@ export async function renderMermaid(page, preset, { maxWidth, maxHeight, wholePa
   }
 }
 
-export function computeHeadingPages(page, paperFormat, margins) {
-  const pageHeight = contentHeight(paperFormat, margins);
+export function computeHeadingPages(page, paperFormat, margins, orientation) {
+  const pageHeight = contentHeight(paperFormat, margins, orientation);
   return page.evaluate((h) => {
     const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6[id]');
     const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
@@ -291,9 +291,10 @@ export function buildFooterTemplates(footer, render) {
   return { displayHeaderFooter, headerTemplate: render.headerTemplate, footerTemplate };
 }
 
-export function generatePdfOptions(paperFormat, margins, render) {
+export function generatePdfOptions(paperFormat, orientation, margins, render) {
   return {
     format: paperFormat,
+    landscape: orientation === 'landscape',
     printBackground: render.printBackground,
     margin: margins,
     displayHeaderFooter: render.displayHeaderFooter,
@@ -304,14 +305,14 @@ export function generatePdfOptions(paperFormat, margins, render) {
 
 export async function generatePdf(html, outputPath, opts = {}) {
   const {
-    captureHeadings, preset, paperFormat, margins, footer, onProgress,
+    captureHeadings, preset, paperFormat, orientation, margins, footer, onProgress,
     mermaidMaxWidth, mermaidMaxHeight,
   } = opts;
 
   assertWritableDir(path.dirname(outputPath));
   await ensureChromium({ onProgress });
 
-  const { widthPx: contentWidth, heightPx: pageHeight } = contentSize(paperFormat, margins);
+  const { widthPx: contentWidth, heightPx: pageHeight } = contentSize(paperFormat, margins, orientation);
   const diagramMaxWidth = mermaidMaxWidth != null
     ? toPx(mermaidMaxWidth)
     : Math.round(contentWidth * MAX_WIDTH_RATIO);
@@ -349,12 +350,12 @@ export async function generatePdf(html, outputPath, opts = {}) {
     if (onProgress) onProgress('Waiting for fonts...');
     await page.evaluate(() => document.fonts.ready);
 
-    const headingPages = captureHeadings ? await computeHeadingPages(page, paperFormat, margins) : [];
+    const headingPages = captureHeadings ? await computeHeadingPages(page, paperFormat, margins, orientation) : [];
     if (onProgress) onProgress('Generating PDF...');
     const renderOpts = footer
       ? { ...RENDER_DEFAULTS, ...buildFooterTemplates(footer, RENDER_DEFAULTS) }
       : RENDER_DEFAULTS;
-    const pdfBuffer = await page.pdf(generatePdfOptions(paperFormat, margins, renderOpts));
+    const pdfBuffer = await page.pdf(generatePdfOptions(paperFormat, orientation, margins, renderOpts));
     const pageCount = countPdfPages(pdfBuffer);
     if (onProgress) onProgress('Writing file...');
     await fs.writeFile(outputPath, pdfBuffer);

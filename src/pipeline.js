@@ -39,6 +39,7 @@ function buildConfig(cliOptions, frontMatter) {
     footer: cliOptions.footer ?? frontMatter.footer ?? DEFAULTS.footer,
     sectionNumbering: cliOptions.sectionNumbering ?? frontMatter.sectionNumbering ?? DEFAULTS.sectionNumbering,
     paperFormat: frontMatter.paperFormat ?? DEFAULTS.paperFormat,
+    orientation: cliOptions.orientation ?? frontMatter.orientation ?? DEFAULTS.orientation,
     margins: frontMatter.margins ?? DEFAULTS.margins,
     mermaidMaxWidth: frontMatter.mermaidMaxWidth ?? DEFAULTS.mermaidMaxWidth,
     mermaidMaxHeight: frontMatter.mermaidMaxHeight ?? DEFAULTS.mermaidMaxHeight,

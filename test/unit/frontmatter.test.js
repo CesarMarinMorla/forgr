@@ -71,6 +71,7 @@ test('parseFrontMatter: forgr-only keys read from forgr namespace', () => {
     '  sectionNumbering: true',
     '  footer: none',
     '  paperFormat: Letter',
+    '  orientation: landscape',
     '  margins:',
     '    top: 1in',
     '    bottom: 1in',
@@ -87,6 +88,7 @@ test('parseFrontMatter: forgr-only keys read from forgr namespace', () => {
   assert.equal(frontMatter.sectionNumbering, true);
   assert.equal(frontMatter.footer, 'none');
   assert.equal(frontMatter.paperFormat, 'Letter');
+  assert.equal(frontMatter.orientation, 'landscape');
   assert.deepEqual(frontMatter.margins, { top: '1in', bottom: '1in', left: '1.5in', right: '1.5in' });
 });
 
@@ -99,6 +101,7 @@ test('parseFrontMatter: forgr-only keys ignored at top level', () => {
     'cover: true',
     'footer: none',
     'paperFormat: Letter',
+    'orientation: landscape',
     'margins:',
     '  top: 1in',
     '---',
@@ -111,6 +114,7 @@ test('parseFrontMatter: forgr-only keys ignored at top level', () => {
   assert.equal(frontMatter.cover, undefined);
   assert.equal(frontMatter.footer, undefined);
   assert.equal(frontMatter.paperFormat, undefined);
+  assert.equal(frontMatter.orientation, undefined);
   assert.equal(frontMatter.margins, undefined);
 });
 
