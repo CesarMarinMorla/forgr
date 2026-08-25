@@ -352,11 +352,17 @@ export async function generatePdf(html, outputPath, opts = {}) {
 
     const headingPages = captureHeadings ? await computeHeadingPages(page, paperFormat, margins, orientation) : [];
     if (onProgress) onProgress('Generating PDF...');
-    const renderOpts = footer
-      ? { ...RENDER_DEFAULTS, ...buildFooterTemplates(footer, RENDER_DEFAULTS) }
-      : RENDER_DEFAULTS;
-    const pdfBuffer = await page.pdf(generatePdfOptions(paperFormat, orientation, margins, renderOpts));
-    const pageCount = countPdfPages(pdfBuffer);
+    const noFooterRender = { ...RENDER_DEFAULTS, displayHeaderFooter: false, footerTemplate: '' };
+    const noFooterBuffer = await page.pdf(generatePdfOptions(paperFormat, orientation, margins, noFooterRender));
+    const pageCount = countPdfPages(noFooterBuffer);
+
+    let pdfBuffer = noFooterBuffer;
+    if (pageCount > 1 && footer) {
+      if (onProgress) onProgress('Generating PDF with page numbers...');
+      const renderOpts = { ...RENDER_DEFAULTS, ...buildFooterTemplates(footer, RENDER_DEFAULTS) };
+      pdfBuffer = await page.pdf(generatePdfOptions(paperFormat, orientation, margins, renderOpts));
+    }
+
     if (onProgress) onProgress('Writing file...');
     await fs.writeFile(outputPath, pdfBuffer);
 

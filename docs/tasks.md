@@ -13,6 +13,7 @@
 | B5 | TUI options must show squares with the full palette of the currently selected preset (only one square today) | Open |
 | B6 | Mermaid timelines should have differentiating colors between eras | Open |
 | B7 | TUI: session settings should persist across renders within a session (reset on exit) | Open |
+| B8 | Single page files should not have page numbering | Done |
 
 ### Roadmap (priority order)
 
@@ -115,6 +116,14 @@ When the user changes a setting (e.g. orientation to landscape) and renders, the
 - [ ] Settings state survives the render→result→back→picker→settings loop within a session
 - [ ] Settings reset to defaults only when the TUI process starts fresh
 - [ ] Verify: change orientation to landscape, render, go back, render again — still landscape
+
+### B8 — Single page files: no page numbering
+
+- [x] Render without footer first to get accurate page count
+- [x] Re-render with footer only if page count > 1
+- [x] Single-page files have no page number in the footer
+- [x] Multi-page files still show page numbers
+- [x] Tests pass (157 tests)
 
 ### Visual testing note
 
