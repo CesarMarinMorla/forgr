@@ -2,6 +2,17 @@
 
 ## Status
 
+### Bug fixes (highest priority)
+
+| # | Scope | State |
+|---|---|---|
+| B1 | TUI result screen: show both options (show folder + open file when a single file was rendered) | Open |
+| B2 | TUI: Enter on the result screen closes the TUI instead of going back to the menu | Open |
+| B3 | TUI: color-differentiate the input legends | Open |
+| B4 | Rendering: landscape layout has a massive left margin while content runs to the right edge | Done |
+| B5 | TUI options must show squares with the full palette of the currently selected preset (only one square today) | Open |
+| B6 | Mermaid timelines should have differentiating colors between eras | Open |
+
 ### Roadmap (priority order)
 
 | # | Scope | State |
@@ -51,6 +62,60 @@ The milestone numbers now reflect the order the work shipped, not the original p
 | M4 | M7 | | M2.83 | M15 |
 | (unnamed cleanup) | M8 | | M2.9 | M16 |
 | | | | M5 | M17 |
+
+---
+
+## Bug fixes (highest priority)
+
+### B1 — TUI result screen: show both open options
+
+- [ ] Result screen shows both actions: show the output folder and open the rendered file
+- [ ] The "open rendered file" option only appears when exactly one file was rendered (batch of 1)
+- [ ] Batch renders show only "show folder"
+
+### B2 — TUI: Enter closes after render
+
+- [ ] After a render completes, pressing Enter exits the TUI instead of returning to the preset picker
+- [ ] `q`/`esc` still work as exit paths
+
+### B3 — TUI input legends color differentiation
+
+- [ ] Each key hint in the footer legends gets its own color so keys stand out from their descriptions
+- [ ] Colors stay consistent across all screens (picker, settings, rendering, result)
+
+### B4 — Landscape left margin
+
+The most obvious rendering issue right now. In landscape orientation the content has a massive padding or margin on the left side while it extends all the way to the end of the usable real state on the right.
+
+- [x] Reproduce with a landscape render (`orientation` option) and measure body offsets
+- [x] Find the source of the asymmetric left margin (page size vs margins vs CSS width)
+- [x] Fix so content sits inside symmetric 2cm margins on both sides
+- [x] Regression check: portrait renders unchanged, mermaid sizing unaffected
+
+### B5 — TUI preset palette squares
+
+- [ ] Each preset option shows squares sampled from that preset's palette (not a single accent square)
+- [ ] The currently selected preset's palette squares are visible while configuring options
+- [ ] Squares match the actual CSS custom properties of each preset (ink, accent, surface, etc.)
+
+### B6 — Mermaid timeline era colors (not yet implemented)
+
+Timeline diagrams currently use a single color for all era blocks. Each era should get a distinct color so adjacent time blocks are visually distinguishable.
+
+- [ ] Design per-preset color palettes for timeline era blocks (terminal, minimal, technical, academic, newsletter)
+- [ ] Implement era color cycling in the mermaid theme configs (`src/themes/`)
+- [ ] Test with a timeline fixture across all 5 presets
+- [ ] Regression: other diagram types (flowchart, sequence, pie) unaffected
+
+### Visual testing note
+
+All five presets have been visually verified only in **portrait** and in **landscape with terminal**. The following remain untested visually by the owner:
+
+- [ ] Minimal — landscape
+- [ ] Technical — landscape
+- [ ] Academic — landscape
+- [ ] Newsletter — landscape
+- [ ] All presets — portrait (integration tests pass but no visual spot-check)
 
 ---
 
