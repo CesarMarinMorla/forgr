@@ -7,7 +7,7 @@
 | # | Scope | State |
 |---|---|---|
 | B1 | TUI result screen: show both options (show folder + open file when a single file was rendered) | Done |
-| B2 | TUI: Enter on the result screen closes the TUI instead of going back to the menu | Open |
+| B2 | TUI: Enter on the result screen closes the TUI instead of going back to the menu | Done |
 | B3 | TUI: color-differentiate the input legends | Open |
 | B4 | Rendering: landscape layout has a massive left margin while content runs to the right edge | Done |
 | B5 | TUI options must show squares with the full palette of the currently selected preset (only one square today) | Open |
