@@ -81,6 +81,14 @@ export const PRESET_COLORS = {
   newsletter: '#C85A48',
 };
 
+export const PRESET_PALETTES = {
+  terminal: ['#1C2128', '#6E7683', '#2DD4BF', '#0F766E', '#12161C'],
+  minimal: ['#1A1A1A', '#666666', '#888888', '#CCCCCC', '#F5F5F5'],
+  technical: ['#1C1917', '#78716C', '#C2410C', '#EA580C', '#1C1917'],
+  academic: ['#1B4A36', '#5A7A68', '#3D6B55', '#2D5040', '#0F291D'],
+  newsletter: ['#2D2A24', '#8A8070', '#C85A48', '#A04030', '#FAF8F5'],
+};
+
 export function listPresets(dir = USER_PRESETS_DIR) {
   return [...BUILTIN_PRESETS, ...scanUserPresets(dir)];
 }

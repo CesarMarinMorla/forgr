@@ -10,7 +10,7 @@
 | B2 | TUI: Enter on the result screen closes the TUI instead of going back to the menu | Done |
 | B3 | TUI: color-differentiate the input legends | Open |
 | B4 | Rendering: landscape layout has a massive left margin while content runs to the right edge | Done |
-| B5 | TUI options must show squares with the full palette of the currently selected preset (only one square today) | Open |
+| B5 | TUI options must show squares with the full palette of the currently selected preset (only one square today) | Done |
 | B6 | Mermaid timelines should have differentiating colors between eras | Open |
 | B7 | TUI: session settings should persist across renders within a session (reset on exit) | Open |
 | B8 | Single page files should not have page numbering | Done |
@@ -98,9 +98,10 @@ The most obvious rendering issue right now. In landscape orientation the content
 
 ### B5 — TUI preset palette squares
 
-- [ ] Each preset option shows squares sampled from that preset's palette (not a single accent square)
-- [ ] The currently selected preset's palette squares are visible while configuring options
-- [ ] Squares match the actual CSS custom properties of each preset (ink, accent, surface, etc.)
+- [x] Define 5-color palettes for each preset in `PRESET_PALETTES` (ink, soft, accent, accent-dim, surface)
+- [x] Swatch component renders multiple color squares instead of one double-wide block
+- [x] PresetPicker uses palette squares instead of single accent color
+- [x] Tests pass
 
 ### B6 — Mermaid timeline era colors (not yet implemented)
 

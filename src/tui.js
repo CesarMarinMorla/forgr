@@ -4,7 +4,7 @@ import { existsSync, readdirSync, statSync } from 'fs';
 import { execFile } from 'child_process';
 import { stat, readFile, writeFile } from 'fs/promises';
 import path from 'path';
-import { PRESET_COLORS } from './presets.js';
+import { PRESET_COLORS, PRESET_PALETTES } from './presets.js';
 import { formatElapsed, formatFileSize } from './utils.js';
 import { DEFAULTS } from './config.js';
 import { parseFrontMatter, writeForgrFrontMatter } from './frontmatter.js';
@@ -39,8 +39,11 @@ const SETTINGS = [
   { key: 'orientation', label: 'Orientation', values: ['portrait', 'landscape'] },
 ];
 
-function Swatch({ color }) {
-  return React.createElement(Text, { color }, ' \u2588\u2588');
+function Swatch({ colors }) {
+  if (!colors || colors.length === 0) return null;
+  return React.createElement(Text, null, ...colors.map((c, i) =>
+    React.createElement(Text, { key: i, color: c }, ' \u2588')
+  ));
 }
 
 function FilePicker({ files, onSelect, onQuit }) {
@@ -141,11 +144,11 @@ function PresetPicker({ presets, onSelect, fileLabel }) {
 
   const rows = presets.map((p, i) => {
     const isSelected = i === index;
-    const color = PRESET_COLORS[p.name] || '#888888';
+    const palette = PRESET_PALETTES[p.name] || ['#888888'];
     const marker = isSelected
       ? React.createElement(Text, { color: TUI_ACCENT }, '\u276F ')
       : React.createElement(Text, null, '  ');
-    const swatch = React.createElement(Swatch, { color });
+    const swatch = React.createElement(Swatch, { colors: palette });
     const nameNode = React.createElement(
       Text,
       { color: isSelected ? TUI_ACCENT : undefined, bold: isSelected },
