@@ -309,6 +309,9 @@ function SettingsScreen({ settings, onChange, preset, fileLabel, sourceNote, onR
     );
   });
 
+  const focusedDef = allSettings[focus];
+  const isTextFocused = focusedDef && focusedDef.type === 'text';
+
   const help = editingField
     ? React.createElement(
         Box,
@@ -328,9 +331,15 @@ function SettingsScreen({ settings, onChange, preset, fileLabel, sourceNote, onR
         React.createElement(Text, { color: TUI_ACCENT }, '\u2190/\u2192'),
         React.createElement(Text, { dimColor: true }, ' change \u00B7 '),
         React.createElement(Text, { color: TUI_ACCENT }, 'enter'),
-        React.createElement(Text, { dimColor: true }, ' render \u00B7 '),
-        React.createElement(Text, { color: TUI_TEXT_ACCENT }, 'e'),
-        React.createElement(Text, { dimColor: true }, ' edit \u00B7 '),
+        React.createElement(Text, { dimColor: true }, ' render'),
+        isTextFocused
+          ? React.createElement(Text, null,
+              React.createElement(Text, { dimColor: true }, ' \u00B7 '),
+              React.createElement(Text, { color: TUI_TEXT_ACCENT }, 'e'),
+              React.createElement(Text, { dimColor: true }, ' edit'),
+            )
+          : null,
+        React.createElement(Text, { dimColor: true }, ' \u00B7 '),
         React.createElement(Text, { color: TUI_ACCENT }, 'q'),
         React.createElement(Text, { dimColor: true }, ' back')
       );
@@ -346,7 +355,7 @@ function SettingsScreen({ settings, onChange, preset, fileLabel, sourceNote, onR
   );
 }
 
-function RenderingScreen({ preset, selectedFiles, results, currentFileIndex, progress }) {
+function RenderingScreen({ preset, selectedFiles, results, currentFileIndex, progress, onCancel }) {
   const [frame, setFrame] = useState(0);
   const intervalRef = useRef(null);
 
@@ -356,6 +365,12 @@ function RenderingScreen({ preset, selectedFiles, results, currentFileIndex, pro
     }, 80);
     return () => clearInterval(intervalRef.current);
   }, []);
+
+  useInput((input, key) => {
+    if (input === 'q' || key.escape) {
+      onCancel();
+    }
+  });
 
   const spinner = React.createElement(
     Text,
@@ -400,7 +415,13 @@ function RenderingScreen({ preset, selectedFiles, results, currentFileIndex, pro
     header,
     currentFile,
     prog,
-    ...doneLines
+    ...doneLines,
+    React.createElement(
+      Box,
+      { marginTop: 1 },
+      React.createElement(Text, { color: TUI_ACCENT }, 'q'),
+      React.createElement(Text, { dimColor: true }, ' quit')
+    )
   );
 }
 
@@ -695,6 +716,7 @@ function TuiApp({ presets, inputFile }) {
         results,
         currentFileIndex,
         progress,
+        onCancel: () => process.exit(0),
       });
     case 'result':
       return React.createElement(BatchResultScreen, {

@@ -14,6 +14,8 @@
 | B6 | Mermaid timelines should have differentiating colors between eras | Open |
 | B7 | TUI: session settings should persist across renders within a session (reset on exit) | Open |
 | B8 | Single page files should not have page numbering | Done |
+| B9 | Audit 'e' command across all TUI screens (planning needed) | Done |
+| B10 | Exit command present at all times in every TUI screen | Done |
 
 ### Roadmap (priority order)
 
@@ -124,6 +126,23 @@ When the user changes a setting (e.g. orientation to landscape) and renders, the
 - [x] Single-page files have no page number in the footer
 - [x] Multi-page files still show page numbers
 - [x] Tests pass (157 tests)
+
+### B9 — Audit 'e' command across TUI screens
+
+The 'e' key is only used in the SettingsScreen to edit text fields (cover title, author, date). It does nothing in other screens. The footer showed 'e edit' at all times even when no text field was focused.
+
+- [x] 'e edit' now only appears in the footer when a text field is focused
+- [x] Arrow keys cycle past text fields without showing 'e'
+
+### B10 — Exit command present at all times
+
+Every screen now shows a way to quit/exit.
+
+- [x] FilePicker: q/escape to quit
+- [x] PresetPicker: q/escape to quit
+- [x] SettingsScreen: q/escape to go back
+- [x] RenderingScreen: q to quit (new)
+- [x] BatchResultScreen: q/escape to quit
 
 ### Visual testing note
 
