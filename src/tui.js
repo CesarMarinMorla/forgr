@@ -404,7 +404,8 @@ function RenderingScreen({ preset, selectedFiles, results, currentFileIndex, pro
   );
 }
 
-function BatchResultScreen({ results, saveStatus, onSave, onBack, onQuit, onOpen }) {
+function BatchResultScreen({ results, saveStatus, onSave, onBack, onQuit, onOpen, onOpenFile }) {
+  const isSingle = results.filter(r => !r.error).length === 1;
   useInput((input, key) => {
     if (key.return) {
       onBack();
@@ -412,6 +413,8 @@ function BatchResultScreen({ results, saveStatus, onSave, onBack, onQuit, onOpen
       onQuit();
     } else if (input === 'o') {
       onOpen();
+    } else if (input === 'f' && isSingle) {
+      onOpenFile();
     } else if (input === 's' && !saveStatus) {
       onSave();
     }
@@ -489,7 +492,15 @@ function BatchResultScreen({ results, saveStatus, onSave, onBack, onQuit, onOpen
     React.createElement(Text, { color: TUI_ACCENT }, 's'),
     React.createElement(Text, { dimColor: true }, ' save \u00B7 '),
     React.createElement(Text, { color: TUI_ACCENT }, 'o'),
-    React.createElement(Text, { dimColor: true }, ' open folder \u00B7 '),
+    React.createElement(Text, { dimColor: true }, ' open folder'),
+    isSingle
+      ? React.createElement(Text, null,
+          React.createElement(Text, { dimColor: true }, ' \u00B7 '),
+          React.createElement(Text, { color: TUI_ACCENT }, 'f'),
+          React.createElement(Text, { dimColor: true }, ' open file'),
+        )
+      : null,
+    React.createElement(Text, { dimColor: true }, ' \u00B7 '),
     React.createElement(Text, { color: TUI_ACCENT }, 'q'),
     React.createElement(Text, { dimColor: true }, ' quit')
   );
@@ -704,6 +715,12 @@ function TuiApp({ presets, inputFile }) {
           const first = results.find(r => !r.error && r.outputPath);
           const target = first ? path.dirname(first.outputPath) : process.cwd();
           execFile(cmd, [target], () => {});
+        },
+        onOpenFile: () => {
+          const cmd = process.platform === 'darwin' ? 'open' : process.platform === 'linux' ? 'xdg-open' : '';
+          if (!cmd) return;
+          const first = results.find(r => !r.error && r.outputPath);
+          if (first) execFile(cmd, [first.outputPath], () => {});
         },
       });
     default:

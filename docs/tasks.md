@@ -6,12 +6,13 @@
 
 | # | Scope | State |
 |---|---|---|
-| B1 | TUI result screen: show both options (show folder + open file when a single file was rendered) | Open |
+| B1 | TUI result screen: show both options (show folder + open file when a single file was rendered) | Done |
 | B2 | TUI: Enter on the result screen closes the TUI instead of going back to the menu | Open |
 | B3 | TUI: color-differentiate the input legends | Open |
 | B4 | Rendering: landscape layout has a massive left margin while content runs to the right edge | Done |
 | B5 | TUI options must show squares with the full palette of the currently selected preset (only one square today) | Open |
 | B6 | Mermaid timelines should have differentiating colors between eras | Open |
+| B7 | TUI: session settings should persist across renders within a session (reset on exit) | Open |
 
 ### Roadmap (priority order)
 
@@ -69,9 +70,9 @@ The milestone numbers now reflect the order the work shipped, not the original p
 
 ### B1 — TUI result screen: show both open options
 
-- [ ] Result screen shows both actions: show the output folder and open the rendered file
-- [ ] The "open rendered file" option only appears when exactly one file was rendered (batch of 1)
-- [ ] Batch renders show only "show folder"
+- [x] Result screen shows both actions: show the output folder and open the rendered file
+- [x] The "open rendered file" option only appears when exactly one file was rendered (batch of 1)
+- [x] Batch renders show only "show folder"
 
 ### B2 — TUI: Enter closes after render
 
@@ -106,6 +107,14 @@ Timeline diagrams currently use a single color for all era blocks. Each era shou
 - [ ] Implement era color cycling in the mermaid theme configs (`src/themes/`)
 - [ ] Test with a timeline fixture across all 5 presets
 - [ ] Regression: other diagram types (flowchart, sequence, pie) unaffected
+
+### B7 — TUI session settings persistence (lowest priority)
+
+When the user changes a setting (e.g. orientation to landscape) and renders, then goes back to the menu and renders again, the changed setting should still be active. Settings reset when the TUI exits.
+
+- [ ] Settings state survives the render→result→back→picker→settings loop within a session
+- [ ] Settings reset to defaults only when the TUI process starts fresh
+- [ ] Verify: change orientation to landscape, render, go back, render again — still landscape
 
 ### Visual testing note
 
