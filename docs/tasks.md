@@ -8,7 +8,7 @@
 |---|---|---|
 | B1 | TUI result screen: show both options (show folder + open file when a single file was rendered) | Done |
 | B2 | TUI: Enter on the result screen closes the TUI instead of going back to the menu | Done |
-| B3 | TUI: color-differentiate the input legends | Open |
+| B3 | TUI: color-differentiate the input legends | Done |
 | B4 | Rendering: landscape layout has a massive left margin while content runs to the right edge | Done |
 | B5 | TUI options must show squares with the full palette of the currently selected preset (only one square today) | Done |
 | B6 | Mermaid timelines should have differentiating colors between eras | Done |
@@ -16,6 +16,8 @@
 | B8 | Single page files should not have page numbering | Done |
 | B9 | Audit 'e' command across all TUI screens (planning needed) | Done |
 | B10 | Exit command present at all times in every TUI screen | Done |
+| B11 | Review all mermaid preset colors across all diagram types (flowchart, sequence, pie, class, gantt, gitGraph) | Open |
+| B12 | TUI palette squares rendering as rectangles — investigate or fix | Open |
 
 ### Roadmap (priority order)
 
@@ -84,8 +86,9 @@ The milestone numbers now reflect the order the work shipped, not the original p
 
 ### B3 — TUI input legends color differentiation
 
-- [ ] Each key hint in the footer legends gets its own color so keys stand out from their descriptions
-- [ ] Colors stay consistent across all screens (picker, settings, rendering, result)
+- [x] Each key hint in the footer legends gets its own color so keys stand out from their descriptions
+- [x] Colors stay consistent across all screens (picker, settings, rendering, result)
+- [x] Colors: nav (teal), action (yellow), exit (red), secondary (purple), edit (yellow)
 
 ### B4 — Landscape left margin
 
@@ -146,6 +149,26 @@ Every screen now shows a way to quit/exit.
 - [x] SettingsScreen: q/escape to go back
 - [x] RenderingScreen: q to quit (new)
 - [x] BatchResultScreen: q/escape to quit
+
+### B11 — Review all mermaid preset colors
+
+Like B6 did for timelines, review and fix colors for all other diagram types across all 5 presets. No new presets — just ensure existing ones are color-correct.
+
+Diagram types to review:
+- [ ] Flowchart (primaryColor, primaryBorderColor, lineColor)
+- [ ] Sequence diagram (actorBkg, signalColor, activationBkgColor)
+- [ ] Pie chart (pie1-5 colors)
+- [ ] Class diagram (classText, attributeBackgroundColor)
+- [ ] Gantt chart (taskBkgColor, taskBorderColor, sectionBkgColor)
+- [ ] Git graph (commit colors)
+- [ ] State diagram (state colors)
+
+Per preset:
+- [ ] Terminal — graphite/teal identity
+- [ ] Minimal — grayscale identity
+- [ ] Technical — amber/orange identity
+- [ ] Academic — sage green identity
+- [ ] Newsletter — warm coral identity
 
 ### Visual testing note
 

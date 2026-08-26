@@ -12,6 +12,10 @@ import { run } from './pipeline.js';
 
 const TUI_ACCENT = '#2DD4BF';
 const TUI_TEXT_ACCENT = '#EAB308';
+const TUI_KEY_NAV = '#2DD4BF';
+const TUI_KEY_ACTION = '#EAB308';
+const TUI_KEY_EXIT = '#EF4444';
+const TUI_KEY_SECONDARY = '#A78BFA';
 const SPINNER_CHARS = '\u280B\u2839\u2879\u2878\u283C\u2834\u2826\u2827\u2807\u280F';
 
 function getMarkdownFiles(dir) {
@@ -107,13 +111,13 @@ function FilePicker({ files, onSelect, onQuit }) {
   const help = React.createElement(
     Box,
     null,
-    React.createElement(Text, { color: TUI_ACCENT }, '\u2191/\u2193'),
+    React.createElement(Text, { color: TUI_KEY_NAV }, '\u2191/\u2193'),
     React.createElement(Text, { dimColor: true }, ' navigate \u00B7 '),
-    React.createElement(Text, { color: TUI_ACCENT }, 'space'),
+    React.createElement(Text, { color: TUI_KEY_ACTION }, 'space'),
     React.createElement(Text, { dimColor: true }, ' toggle \u00B7 '),
-    React.createElement(Text, { color: TUI_ACCENT }, 'enter'),
+    React.createElement(Text, { color: TUI_KEY_ACTION }, 'enter'),
     React.createElement(Text, { dimColor: true }, ' confirm \u00B7 '),
-    React.createElement(Text, { color: TUI_ACCENT }, 'q'),
+    React.createElement(Text, { color: TUI_KEY_EXIT }, 'q'),
     React.createElement(Text, { dimColor: true }, ' quit')
   );
 
@@ -184,11 +188,11 @@ function PresetPicker({ presets, onSelect, fileLabel }) {
   const help = React.createElement(
     Box,
     null,
-    React.createElement(Text, { color: TUI_ACCENT }, '\u2191/\u2193'),
+    React.createElement(Text, { color: TUI_KEY_NAV }, '\u2191/\u2193'),
     React.createElement(Text, { dimColor: true }, ' navigate \u00B7 '),
-    React.createElement(Text, { color: TUI_ACCENT }, 'enter'),
+    React.createElement(Text, { color: TUI_KEY_ACTION }, 'enter'),
     React.createElement(Text, { dimColor: true }, ' select \u00B7 '),
-    React.createElement(Text, { color: TUI_ACCENT }, 'q'),
+    React.createElement(Text, { color: TUI_KEY_EXIT }, 'q'),
     React.createElement(Text, { dimColor: true }, ' quit')
   );
 
@@ -319,21 +323,21 @@ function SettingsScreen({ settings, onChange, preset, fileLabel, sourceNote, onR
     ? React.createElement(
         Box,
         null,
-        React.createElement(Text, { color: TUI_ACCENT }, '\u23CE'),
+        React.createElement(Text, { color: TUI_KEY_ACTION }, '\u23CE'),
         React.createElement(Text, { dimColor: true }, ' confirm \u00B7 '),
-        React.createElement(Text, { color: TUI_ACCENT }, 'Esc'),
+        React.createElement(Text, { color: TUI_KEY_EXIT }, 'Esc'),
         React.createElement(Text, { dimColor: true }, ' cancel \u00B7 '),
-        React.createElement(Text, { color: TUI_ACCENT }, '\u232B'),
+        React.createElement(Text, { color: TUI_KEY_SECONDARY }, '\u232B'),
         React.createElement(Text, { dimColor: true }, ' delete')
       )
     : React.createElement(
         Box,
         null,
-        React.createElement(Text, { color: TUI_ACCENT }, '\u2191/\u2193'),
+        React.createElement(Text, { color: TUI_KEY_NAV }, '\u2191/\u2193'),
         React.createElement(Text, { dimColor: true }, ' navigate \u00B7 '),
-        React.createElement(Text, { color: TUI_ACCENT }, '\u2190/\u2192'),
+        React.createElement(Text, { color: TUI_KEY_NAV }, '\u2190/\u2192'),
         React.createElement(Text, { dimColor: true }, ' change \u00B7 '),
-        React.createElement(Text, { color: TUI_ACCENT }, 'enter'),
+        React.createElement(Text, { color: TUI_KEY_ACTION }, 'enter'),
         React.createElement(Text, { dimColor: true }, ' render'),
         isTextFocused
           ? React.createElement(Text, null,
@@ -343,7 +347,7 @@ function SettingsScreen({ settings, onChange, preset, fileLabel, sourceNote, onR
             )
           : null,
         React.createElement(Text, { dimColor: true }, ' \u00B7 '),
-        React.createElement(Text, { color: TUI_ACCENT }, 'q'),
+        React.createElement(Text, { color: TUI_KEY_EXIT }, 'q'),
         React.createElement(Text, { dimColor: true }, ' back')
       );
 
@@ -422,7 +426,7 @@ function RenderingScreen({ preset, selectedFiles, results, currentFileIndex, pro
     React.createElement(
       Box,
       { marginTop: 1 },
-      React.createElement(Text, { color: TUI_ACCENT }, 'q'),
+      React.createElement(Text, { color: TUI_KEY_EXIT }, 'q'),
       React.createElement(Text, { dimColor: true }, ' quit')
     )
   );
@@ -511,21 +515,21 @@ function BatchResultScreen({ results, saveStatus, onSave, onBack, onQuit, onOpen
   const footer = React.createElement(
     Box,
     { marginTop: 1 },
-    React.createElement(Text, { color: TUI_ACCENT }, 'Enter'),
+    React.createElement(Text, { color: TUI_KEY_ACTION }, 'Enter'),
     React.createElement(Text, { dimColor: true }, ' back \u00B7 '),
-    React.createElement(Text, { color: TUI_ACCENT }, 's'),
+    React.createElement(Text, { color: TUI_KEY_SECONDARY }, 's'),
     React.createElement(Text, { dimColor: true }, ' save \u00B7 '),
-    React.createElement(Text, { color: TUI_ACCENT }, 'o'),
+    React.createElement(Text, { color: TUI_KEY_SECONDARY }, 'o'),
     React.createElement(Text, { dimColor: true }, ' open folder'),
     isSingle
       ? React.createElement(Text, null,
           React.createElement(Text, { dimColor: true }, ' \u00B7 '),
-          React.createElement(Text, { color: TUI_ACCENT }, 'f'),
+          React.createElement(Text, { color: TUI_KEY_SECONDARY }, 'f'),
           React.createElement(Text, { dimColor: true }, ' open file'),
         )
       : null,
     React.createElement(Text, { dimColor: true }, ' \u00B7 '),
-    React.createElement(Text, { color: TUI_ACCENT }, 'q'),
+    React.createElement(Text, { color: TUI_KEY_EXIT }, 'q'),
     React.createElement(Text, { dimColor: true }, ' quit')
   );
 
@@ -665,7 +669,7 @@ function TuiApp({ presets, inputFile }) {
           React.createElement(
             Box,
             { marginTop: 1 },
-            React.createElement(Text, { color: TUI_ACCENT }, 'q'),
+            React.createElement(Text, { color: TUI_KEY_EXIT }, 'q'),
             React.createElement(Text, { dimColor: true }, ' quit')
           )
         );
