@@ -11,7 +11,7 @@
 | B3 | TUI: color-differentiate the input legends | Open |
 | B4 | Rendering: landscape layout has a massive left margin while content runs to the right edge | Done |
 | B5 | TUI options must show squares with the full palette of the currently selected preset (only one square today) | Done |
-| B6 | Mermaid timelines should have differentiating colors between eras | Open |
+| B6 | Mermaid timelines should have differentiating colors between eras | Done |
 | B7 | TUI: session settings should persist across renders within a session (reset on exit) | Open |
 | B8 | Single page files should not have page numbering | Done |
 | B9 | Audit 'e' command across all TUI screens (planning needed) | Done |
@@ -103,14 +103,16 @@ The most obvious rendering issue right now. In landscape orientation the content
 - [x] PresetPicker uses palette squares instead of single accent color
 - [x] Tests pass
 
-### B6 — Mermaid timeline era colors (not yet implemented)
+### B6 — Mermaid timeline era colors
 
-Timeline diagrams currently use a single color for all era blocks. Each era should get a distinct color so adjacent time blocks are visually distinguishable.
+Timeline diagrams now use differentiated colors per era block. Each preset cycles through 6 distinct shades from its palette.
 
-- [ ] Design per-preset color palettes for timeline era blocks (terminal, minimal, technical, academic, newsletter)
-- [ ] Implement era color cycling in the mermaid theme configs (`src/themes/`)
-- [ ] Test with a timeline fixture across all 5 presets
-- [ ] Regression: other diagram types (flowchart, sequence, pie) unaffected
+- [x] Terminal: teal/graphite cycle (6 shades)
+- [x] Minimal: grayscale cycle (6 shades)
+- [x] Technical: amber/orange cycle (6 shades)
+- [x] Academic: sage green cycle (6 shades)
+- [x] Newsletter: warm coral cycle (6 shades)
+- [x] Tests pass
 
 ### B7 — TUI session settings persistence (lowest priority)
 
