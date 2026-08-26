@@ -46,7 +46,7 @@ const SETTINGS = [
 function Swatch({ colors }) {
   if (!colors || colors.length === 0) return null;
   return React.createElement(Text, null, ...colors.map((c, i) =>
-    React.createElement(Text, { key: i, color: c }, ' \u2588')
+    React.createElement(Text, { key: i, color: c }, '\u2588\u2588')
   ));
 }
 

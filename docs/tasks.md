@@ -17,7 +17,9 @@
 | B9 | Audit 'e' command across all TUI screens (planning needed) | Done |
 | B10 | Exit command present at all times in every TUI screen | Done |
 | B11 | Review all mermaid preset colors across all diagram types (flowchart, sequence, pie, class, gantt, gitGraph) | Open |
-| B12 | TUI palette squares rendering as rectangles — investigate or fix | Open |
+| B12 | TUI palette squares rendering as rectangles — investigate or fix | Done |
+| B13 | Review and unify CLI/TUI color palette (accent, nav, action, exit, secondary) across both interfaces | Open |
+| B14 | TUI dark colors get lost on dark terminal backgrounds — improve contrast | Open |
 
 ### Roadmap (priority order)
 
