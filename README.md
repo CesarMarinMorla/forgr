@@ -27,6 +27,15 @@ npm install -g forgr
 
 Chromium (~195MB) downloads on your first run, not during `npm install`.
 
+## Uninstall
+
+```bash
+forgr uninstall             # remove Chromium cache (~195MB)
+npm uninstall -g forgr      # remove forgr entirely
+```
+
+The next `forgr` run will re-download Chromium automatically.
+
 ## Quick start
 
 ```bash
