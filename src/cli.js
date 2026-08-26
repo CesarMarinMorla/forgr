@@ -49,7 +49,8 @@ async function startWatch(input, cliOptions) {
 program
   .name('forgr')
   .description('Convert Markdown files into polished PDFs')
-  .version(version);
+  .version(version)
+  .option('--tui', 'Launch the interactive terminal UI');
 
 program
   .command('uninstall')
@@ -70,7 +71,7 @@ program
 program
   .command('convert', { isDefault: true })
   .description('Convert a Markdown file to PDF')
-  .argument('<input>', 'Markdown file to convert')
+  .argument('[input]', 'Markdown file to convert (omit to scan current directory with --tui)')
   .option('-o, --output <path>', 'Output PDF path (default: same directory as input)')
   .option('-p, --preset <name>', 'Preset to use')
   .option('--toc', 'Force generate table of contents')
@@ -89,6 +90,23 @@ program
   .option('--watch', 'Watch the input file and re-render the PDF when it changes')
   .option('--write', 'Save CLI settings into the file\'s front-matter')
   .action(async (input, options) => {
+    const rootOpts = program.opts();
+    if (rootOpts.tui) {
+      const { launchTui } = await import('./tui.js');
+      const { listPresets } = await import('./presets.js');
+      try {
+        await launchTui(listPresets(), input);
+      } catch (err) {
+        console.error(`\u2717 Error: ${err.message}`);
+        process.exit(1);
+      }
+      return;
+    }
+
+    if (!input) {
+      handleCliError(new Error('input file is required (or use --tui)'));
+    }
+
     const cliOptions = {
       preset: options.preset,
       output: options.output,

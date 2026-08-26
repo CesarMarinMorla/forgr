@@ -17,7 +17,7 @@
 - **Images**: local images inlined as base64 data URIs automatically
 - **Table of contents**: generated for longer documents, or forced on/off
 - **Cover page**: optional cover page with title, author, and date
-- **Interactive TUI**: `forgr-tui` for preset picking, settings, and batch rendering
+- **Interactive TUI**: `forgr --tui` (or `forgr-tui`) for preset picking, settings, and batch rendering
 
 ## Install
 

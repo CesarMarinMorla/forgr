@@ -6,6 +6,12 @@
 forgr <input> [options]
 ```
 
+## Global options
+
+| Flag | Description |
+|---|---|
+| `--tui` | Launch the interactive terminal UI. Combines `forgr-tui` into the main binary. |
+
 ## Options
 
 | Flag | Description |
