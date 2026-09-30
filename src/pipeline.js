@@ -41,8 +41,6 @@ function buildConfig(cliOptions, frontMatter) {
     paperFormat: frontMatter.paperFormat ?? DEFAULTS.paperFormat,
     orientation: cliOptions.orientation ?? frontMatter.orientation ?? DEFAULTS.orientation,
     margins: frontMatter.margins ?? DEFAULTS.margins,
-    mermaidMaxWidth: frontMatter.mermaidMaxWidth ?? DEFAULTS.mermaidMaxWidth,
-    mermaidMaxHeight: frontMatter.mermaidMaxHeight ?? DEFAULTS.mermaidMaxHeight,
     outputPath: cliOptions.outputPath ?? '',
     meta: {
       title: frontMatter.title,

@@ -7,18 +7,7 @@ import { createRequire } from 'module';
 import { BROWSERS_PATH, getChromiumInstallCmd, getHeadlessShellPath, removeFfmpeg } from './browsers-path.js';
 import { PRESET_MERMAID_THEMES } from './themes/index.js';
 import { ChromiumNotFoundError } from './errors.js';
-import {
-  contentHeight,
-  contentSize,
-  toPx,
-  MAX_DIAGRAM_HEIGHT_RATIO,
-  WHOLE_PAGE_RATIO,
-  MAX_WIDTH_RATIO,
-  LEGIBILITY_SCALE_FLOOR,
-  DIAGRAM_FONT_REDUCTION,
-  MIN_DIAGRAM_FONT,
-  MIN_READABLE_TEXT,
-} from './layout.js';
+import { contentHeight } from './layout.js';
 
 const _require = createRequire(import.meta.url);
 const MERMAID_DIST = _require.resolve('mermaid/dist/mermaid.min.js');
@@ -87,7 +76,7 @@ export async function hasMermaidDiagrams(page) {
   return page.evaluate(() => document.querySelector('.mermaid') !== null);
 }
 
-export async function renderMermaid(page, preset, { maxWidth, maxHeight, wholePageHeight, allowWholePage, pageHeight } = {}) {
+export async function renderMermaid(page, preset) {
   const hasMermaidLib = await page.evaluate(() => typeof window.mermaid !== 'undefined');
   if (!hasMermaidLib) {
     await page.addScriptTag({ path: MERMAID_DIST });
@@ -98,169 +87,23 @@ export async function renderMermaid(page, preset, { maxWidth, maxHeight, wholePa
     mermaid.initialize({ startOnLoad: false, ...config });
   }, mermaidConfig);
 
-  const result = await page.evaluate(async (opts) => {
-    const { theme, maxWidth, maxHeight, wholePageHeight, allowWholePage, scaleFloor, fontReduction, minFont, minReadable, pageHeight } = opts;
-    const baseFont = theme.themeVariables?.fontSize ?? 16;
-    const contentBBox = (svg) => {
-      const vb = svg.viewBox.baseVal;
-      const srect = svg.getBoundingClientRect();
-      if (!vb || vb.width <= 0 || vb.height <= 0 || srect.width <= 0 || srect.height <= 0) {
-        return vb && vb.width > 0 && vb.height > 0
-          ? { x: vb.x, y: vb.y, width: vb.width, height: vb.height }
-          : null;
-      }
-      const scaleX = srect.width / vb.width;
-      const scaleY = srect.height / vb.height;
-      let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
-      const kids = svg.querySelectorAll(
-        'path,rect,ellipse,circle,text,polygon,polyline,line,use,image,foreignObject'
-      );
-      for (const k of kids) {
-        const r = k.getBoundingClientRect();
-        if (r.width === 0 && r.height === 0) continue;
-        const ux = (r.left - srect.left) / scaleX + vb.x;
-        const uy = (r.top - srect.top) / scaleY + vb.y;
-        const uw = r.width / scaleX;
-        const uh = r.height / scaleY;
-        x1 = Math.min(x1, ux);
-        y1 = Math.min(y1, uy);
-        x2 = Math.max(x2, ux + uw);
-        y2 = Math.max(y2, uy + uh);
-      }
-      if (!isFinite(x1)) {
-        return { x: vb.x, y: vb.y, width: vb.width, height: vb.height };
-      }
-      x1 = Math.max(x1, vb.x);
-      y1 = Math.max(y1, vb.y);
-      x2 = Math.min(x2, vb.x + vb.width);
-      y2 = Math.min(y2, vb.y + vb.height);
-      const pad = Math.max(2, (x2 - x1) * 0.01);
-      return { x: x1 - pad, y: y1 - pad, width: x2 - x1 + pad * 2, height: y2 - y1 + pad * 2 };
-    };
-    const applySizing = (svg, dims, mw, mh) => {
-      const scale = dims
-        ? Math.min(1, mw / dims.width, mh / dims.height)
-        : 1;
-      if (dims) {
-        svg.setAttribute('viewBox', `${dims.x} ${dims.y} ${dims.width} ${dims.height}`);
-      }
-      svg.style.width = `${Math.round(dims ? dims.width * scale : 0)}px`;
-      svg.style.height = `${Math.round(dims ? dims.height * scale : 0)}px`;
-      return scale;
-    };
-    const diagramSizing = (w, h) => {
-      if (!w || !h) return { target: 'content', scale: 1, mode: 'natural' };
-      const boxScale = Math.min(1, maxWidth / w, maxHeight / h);
-      if (boxScale >= 1) return { target: 'content', scale: 1, mode: 'natural' };
-      const heightScale = maxHeight / h;
-      if (heightScale >= scaleFloor) return { target: 'content', scale: boxScale, mode: 'fit' };
-      const pageScale = Math.min(1, maxWidth / w, wholePageHeight / h);
-      return {
-        target: 'page',
-        scale: pageScale,
-        mode: pageScale >= scaleFloor ? 'whole-page' : 'xl',
-      };
-    };
+  const errors = await page.evaluate(async () => {
     const errorMessages = [];
-    const warningMessages = [];
-    const els = document.querySelectorAll('.mermaid');
-    const firstEl = els.length > 0 ? els[0] : null;
-    for (const el of els) {
+    for (const el of document.querySelectorAll('.mermaid')) {
       const source = el.textContent.trim();
       if (!source) continue;
-      const isFirst = el === firstEl;
-      const renderId = () => 'mermaid_' + Math.random().toString(36).slice(2, 8);
       try {
-        let result = await mermaid.render(renderId(), source);
-        el.innerHTML = result.svg;
-        let svg = el.querySelector('svg');
-        let dims = svg ? contentBBox(svg) : null;
-        const sizing = dims
-          ? diagramSizing(dims.width, dims.height)
-          : { target: 'content', scale: 1, mode: 'natural' };
-        let scale = 1;
-
-        if (sizing.target === 'page' && allowWholePage) {
-          let font = baseFont;
-          while (true) {
-            mermaid.initialize({
-              ...theme,
-              startOnLoad: false,
-              themeVariables: { ...(theme.themeVariables || {}), fontSize: font },
-            });
-            result = await mermaid.render(renderId(), source);
-            el.innerHTML = result.svg;
-            svg = el.querySelector('svg');
-            dims = svg ? contentBBox(svg) : null;
-            if (!dims) break;
-            const ps = Math.min(1, maxWidth / dims.width, wholePageHeight / dims.height);
-            if (ps >= 1) break;
-            const next = Math.max(minFont, Math.round(font * fontReduction));
-            if (next >= font) break;
-            font = next;
-          }
-          if (svg && dims) {
-            scale = applySizing(svg, dims, maxWidth, wholePageHeight);
-            el.classList.add('mermaid--whole-page');
-            if (scale < scaleFloor) {
-              const displayed = font * scale;
-              if (displayed < minReadable) {
-                warningMessages.push(
-                  `mermaid: diagram text at ${Math.round(displayed)}px below readability threshold; consider splitting in source`
-                );
-              }
-            }
-          }
-          mermaid.initialize(theme);
-        } else if (sizing.mode === 'fit' && sizing.scale < scaleFloor) {
-          const fontSize = Math.max(minFont, Math.round(baseFont * fontReduction));
-          mermaid.initialize({
-            ...theme,
-            startOnLoad: false,
-            themeVariables: { ...(theme.themeVariables || {}), fontSize },
-          });
-          result = await mermaid.render(renderId(), source);
-          el.innerHTML = result.svg;
-          svg = el.querySelector('svg');
-          dims = svg ? contentBBox(svg) : null;
-          if (svg && dims) scale = applySizing(svg, dims, maxWidth, maxHeight);
-          mermaid.initialize(theme);
-        } else {
-          if (svg && dims) scale = applySizing(svg, dims, maxWidth, maxHeight);
-        }
-
-        if (isFirst && svg && dims && pageHeight && !el.classList.contains('mermaid--whole-page')) {
-          const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
-          const top = el.getBoundingClientRect().top + scrollTop;
-          const marginBottom = parseFloat(getComputedStyle(el).marginBottom) || 0;
-          const available = pageHeight - top - marginBottom;
-          if (available < maxHeight && available / dims.height >= scaleFloor) {
-            scale = applySizing(svg, dims, maxWidth, available);
-          }
-        }
+        const { svg } = await mermaid.render('mermaid_' + Math.random().toString(36).slice(2, 8), source);
+        el.innerHTML = svg;
       } catch (e) {
         errorMessages.push(e.message || String(e));
       }
     }
-    return { errors: errorMessages, warnings: warningMessages };
-  }, {
-    theme: mermaidConfig,
-    maxWidth,
-    maxHeight,
-    wholePageHeight,
-    allowWholePage,
-    scaleFloor: LEGIBILITY_SCALE_FLOOR,
-    fontReduction: DIAGRAM_FONT_REDUCTION,
-    minFont: MIN_DIAGRAM_FONT,
-    minReadable: MIN_READABLE_TEXT,
-    pageHeight,
+    return errorMessages;
   });
 
-  for (const w of result.warnings) {
-    console.warn(`  ⚠ ${w}`);
-  }
-  if (result.errors.length > 0) {
-    throw new Error(`mermaid: ${result.errors.length} diagram(s) failed to render: ${result.errors.join('; ')}`);
+  if (errors.length > 0) {
+    throw new Error(`mermaid: ${errors.length} diagram(s) failed to render: ${errors.join('; ')}`);
   }
 }
 
@@ -306,21 +149,10 @@ export function generatePdfOptions(paperFormat, orientation, margins, render) {
 export async function generatePdf(html, outputPath, opts = {}) {
   const {
     captureHeadings, preset, paperFormat, orientation, margins, footer, onProgress,
-    mermaidMaxWidth, mermaidMaxHeight,
   } = opts;
 
   assertWritableDir(path.dirname(outputPath));
   await ensureChromium({ onProgress });
-
-  const { widthPx: contentWidth, heightPx: pageHeight } = contentSize(paperFormat, margins, orientation);
-  const diagramMaxWidth = mermaidMaxWidth != null
-    ? toPx(mermaidMaxWidth)
-    : Math.round(contentWidth * MAX_WIDTH_RATIO);
-  const diagramMaxHeight = mermaidMaxHeight != null
-    ? toPx(mermaidMaxHeight)
-    : Math.round(pageHeight * MAX_DIAGRAM_HEIGHT_RATIO);
-  const wholePageHeight = Math.round(pageHeight * WHOLE_PAGE_RATIO);
-  const allowWholePage = mermaidMaxHeight == null;
 
   let browser;
   try {
@@ -338,13 +170,7 @@ export async function generatePdf(html, outputPath, opts = {}) {
     const hasMermaid = await hasMermaidDiagrams(page);
     if (hasMermaid) {
       if (onProgress) onProgress('Rendering mermaid diagrams...');
-      await renderMermaid(page, preset, {
-        maxWidth: diagramMaxWidth,
-        maxHeight: diagramMaxHeight,
-        wholePageHeight,
-        allowWholePage,
-        pageHeight,
-      });
+      await renderMermaid(page, preset);
     }
 
     if (onProgress) onProgress('Waiting for fonts...');

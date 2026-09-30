@@ -17,7 +17,5 @@ export const DEFAULTS = {
   paperFormat: 'A4',
   orientation: 'portrait',
   margins: { top: '2cm', bottom: '2cm', left: '2cm', right: '2cm' },
-  mermaidMaxWidth: undefined,
-  mermaidMaxHeight: undefined,
   outputPath: '',
 };

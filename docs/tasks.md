@@ -48,12 +48,14 @@
 | M9 | TUI settings form (remove CLI flags, interactive options) | Done |
 | M10 | File picker & batch rendering (multi-file, optional file argument, save) | Done |
 | M11 | TUI & CLI polish | Done |
-| M12 | Mermaid sizing & placement (scale to fit, font re-render, page-break intelligence) | Done |
-| M13 | Content-aware mermaid sizing (phantom viewBox trim, 0.98 right-edge margin) | Done |
-| M14 | Big diagram management (whole-page treatment, XL scale + readability warning) | Done |
-| M15 | Mermaid placement & phantom spacing (native fragmentation, container height, page-1 cap) | Done |
+| M12 | Mermaid sizing & placement (scale to fit, font re-render, page-break intelligence) | Shelved |
+| M13 | Content-aware mermaid sizing (phantom viewBox trim, 0.98 right-edge margin) | Shelved |
+| M14 | Big diagram management (whole-page treatment, XL scale + readability warning) | Shelved |
+| M15 | Mermaid placement & phantom spacing (native fragmentation, container height, page-1 cap) | Partially kept |
 | M16 | Custom data foundation (front-matter threading, body variables, TUI pre-fill) | Done |
 | M17 | Watch mode & user-preset rendering | Done |
+
+M12 to M14 are **shelved**: the scale-to-fit sizing system kept producing new edge cases, so it was taken out of main and lives on the `smart-spacing` branch. Main renders diagrams at natural mermaid size, capped by CSS `max-width`. From M15 only the `display: block` container fix and the native CSS fragmentation rules stayed; the page-1 cap went with the sizing system.
 
 ### Renumbering
 
@@ -469,7 +471,7 @@ All five presets complete with distinct design identities. M2.5 in the old numbe
 - [x] Test modularization — all mermaid tests + fixtures moved to `test/mermaid/`
 - [ ] **Mermaid sizing & layout** — diagrams are currently rendered at default mermaid size, leading to inconsistent proportions. *(resolved in M12)*
 
-### M12 — Mermaid sizing & placement
+### M12 — Mermaid sizing & placement (reverted from main, see `smart-spacing` branch)
 
 - [x] `src/layout.js` — shared layout math (`contentSize`, `pageOf`, `diagramScale`, `toPx`, viewBox parsing), replaces the hardcoded `contentHeight` formula in `pdf.js`
 - [x] `renderMermaid()` scales each diagram to fit the content box: `min(1, contentWidth/W, 0.85×pageHeight/H)` via explicit px width/height (viewBox aspect ratio)
@@ -484,7 +486,7 @@ All five presets complete with distinct design identities. M2.5 in the old numbe
 - [x] `test/fixtures/sizing.md` — integration fixture with wide gantt, tall flowchart, and 8 heading+diagram sections forcing page boundaries (asserted at 3+ pages)
 - [x] 132 tests passing (103 unit + 15 integration + 14 mermaid)
 
-### M13 — Content-aware mermaid sizing
+### M13 — Content-aware mermaid sizing (reverted from main, see `smart-spacing` branch)
 
 Follow-up to M12. Reports from rendered PDFs surfaced three issues. Issues 1 and 2 are fixed; issue 3 is pending by owner decision.
 
@@ -511,7 +513,7 @@ Two reports under this banner: the 6.4 sequence diagram in `comprehensive-newsle
 
 Charts that are genuinely huge claim the whole page. Implemented in M14 below.
 
-### M14 — Big diagram management
+### M14 — Big diagram management (reverted from main, see `smart-spacing` branch)
 
 Follow-up to M13, resolving Issue 3. Diagrams too tall to fit the content box legibly (scale below the 0.65 floor) get the whole page instead of a small cramped box. Automatically applies to any diagram; no new front-matter key.
 
@@ -525,39 +527,24 @@ Follow-up to M13, resolving Issue 3. Diagrams too tall to fit the content box le
 - [x] 4 new browser tests in `test/mermaid/sizing.test.js` (60-node tall whole-page, 150-node XL with warning, wide gantt no-whole-page, whole-page disabled via override)
 - [x] `sizing.md` tall flowchart (30 nodes) now renders whole-page; integration fixture still asserts 3+ pages
 
-### M15 — Mermaid placement & phantom spacing
+### M15 — Mermaid placement & phantom spacing (partially kept)
 
-Follow-up to M14. The JS placement pass (`layoutMermaid`) and the phantom container spacing were both replaced with simpler, native behavior. Reported cases from `docs/KNOWN_ISSUES.md` issues 1 and 2 are resolved.
+Follow-up to M14. Two parts, kept and reverted:
 
-#### Phantom container spacing (P1, fixed)
+#### Kept
 
-- [x] Root cause: the rendered SVG is an inline element by default, so the descender baseline adds ~4px of space below it inside the `.mermaid` container. The container then reserved more height than the diagram drew, showing as blank gaps.
-- [x] Fix: `.mermaid svg { display: block; max-width: 100%; height: auto; margin: 0 auto; }` in `src/templates/base.html`. Container height now matches the SVG box.
-- [x] Regression test: `test/mermaid/sizing.test.js` ".mermaid container has no phantom height" asserts container height equals SVG height within 0.5px.
+- [x] Root cause of the container gap: the rendered SVG is an inline element by default, so the descender baseline adds ~4px of space below it inside the `.mermaid` container.
+- [x] Fix: `.mermaid svg { display: block; max-width: 100%; height: auto; margin: 0 auto; }` in `src/templates/base.html`. Container height matches the SVG box.
+- [x] Regression test: `test/mermaid/render.test.js` ".mermaid container has no phantom height" asserts container height equals SVG height within 0.5px.
+- [x] Placement relies on native CSS fragmentation: `h1..h6 { break-after: avoid }` keeps a heading attached to its diagram, and `.mermaid { break-inside: avoid }` keeps diagrams whole. The `layoutMermaid()` pass and the `mermaid--new-page` / `mermaid--keep-heading` classes were already removed here and stay gone.
 
-#### Placement (P2, fixed)
+#### Reverted (lives on `smart-spacing`)
 
-- [x] `layoutMermaid()` removed from `src/pdf.js` along with the `mermaid--new-page` / `mermaid--keep-heading` CSS classes. The pass measured page positions in screen space where its own `break-before: page` classes had no effect, so it could never fix the orphaned-heading case it was written for.
-- [x] Placement now relies on native CSS fragmentation already present in the templates: `h1..h6 { break-after: avoid }` keeps a heading attached to its diagram, and `.mermaid { break-inside: avoid }` keeps diagrams whole.
-- [x] First-diagram page-1 cap: when the first diagram plus its heading chain is taller than the first page, `renderMermaid` caps the diagram to the space left below the chain (`pageHeight - top - marginBottom`), as long as the resulting scale stays above the 0.65 legibility floor. This keeps title + heading + diagram on page 1 instead of pushing the whole block to page 2 and leaving page 1 blank. Whole-page diagrams are exempt.
-- [x] `renderMermaid` accepts a `pageHeight` option (the content-box height) used by the page-1 cap.
-- [x] Regression test: `test/mermaid/sizing.test.js` "first diagram is clamped to the page-1 space left below its heading chain" asserts the chain fits on page 1 and the diagram is actually shrunk below the 0.85 cap.
-- [x] `docs/KNOWN_ISSUES.md` issues 1 and 2 marked fixed.
+- First-diagram page-1 cap in `renderMermaid` (`pageHeight - top - marginBottom` with the 0.65 legibility floor)
+- The `pageHeight` option on `renderMermaid`
+- Whole-page treatment (`mermaid--whole-page`) and the content-box sizing pass from M12 to M14
 
-#### Fixture results (A4, 2cm margins)
-
-Page counts before (old) and after (new) the work:
-
-| Fixture | Old | New |
-|---|---|---|
-| `test/mermaid/fixtures/academic.md` | 9 | 7 |
-| `test/mermaid/fixtures/technical.md` | 8 | 6 |
-| `test/fixtures/comprehensive.md` | 9 | 8 |
-| `test/fixtures/sizing.md` | 6 | 4 |
-
-No fixture has an empty or near-empty page after the work. `test/fixtures/*.pdf` and `test/mermaid/fixtures/*.pdf` are the visual references; they are gitignored and regenerated by the tests or a manual render.
-
-- [x] Full suite passes: 146 tests.
+`docs/KNOWN_ISSUES.md` issue 1 stays fixed. Issue 2 is open again as polish, and issue 3 covers the missing size cap.
 
 ---
 
