@@ -46,7 +46,7 @@ Status: **open**. Not a defect to fix mechanically; each case is a judgment call
 
 Diagrams render at the size mermaid produces, constrained only by CSS: `.mermaid { max-width: 100% }` and `.mermaid svg { max-width: 100%; height: auto }`. A diagram wider than the content box scales down to it. Nothing caps diagram height, so a tall diagram can push its section onto the next page or run past the page box.
 
-The scale-to-fit sizing system (content extent measurement, legibility floor, whole-page treatment, page-1 cap, `forgr.mermaidMaxWidth` / `forgr.mermaidMaxHeight`) was removed from main because it kept producing new edge cases. It lives on the `smart-spacing` branch.
+The scale-to-fit sizing system (content extent measurement, legibility floor, whole-page treatment, page-1 cap, `forgr.mermaidMaxWidth` / `forgr.mermaidMaxHeight`) was removed from this branch because it kept producing new edge cases. `main` and the `smart-spacing` branch still carry it.
 
 Status: **open**. The fixture PDFs in `test/fixtures/` are the visual reference; re-render and inspect them after any change to diagram layout.
 
